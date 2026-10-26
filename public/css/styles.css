@@ -1,0 +1,290 @@
+/* vietnamese */
+@font-face {
+  font-family: 'Fraunces';
+  font-style: italic;
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/fraunces/v38/6NUs8FyLNQOQZAnv9ZwNjucMHVn85Ni7emAe9lKqZTnbB-gzTK0K1ChJdt9hFwpX9W37lm1_mvIiQvTm.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Fraunces';
+  font-style: italic;
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/fraunces/v38/6NUs8FyLNQOQZAnv9ZwNjucMHVn85Ni7emAe9lKqZTnbB-gzTK0K1ChJdt9hFwpX9W37lm1_mvMiQvTm.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Fraunces';
+  font-style: italic;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/assets/fonts/fraunces-italic.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/fraunces/v38/6NU78FyLNQOQZAnv9bYEvDiIdE9Ea92uemAk_WBq8U_9v0c2Wa0KxCBTeO-U.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/fraunces/v38/6NU78FyLNQOQZAnv9bYEvDiIdE9Ea92uemAk_WBq8U_9v0c2Wa0KxCFTeO-U.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/assets/fonts/fraunces.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/fraunces/v38/6NU78FyLNQOQZAnv9bYEvDiIdE9Ea92uemAk_WBq8U_9v0c2Wa0KxCBTeO-U.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/fraunces/v38/6NU78FyLNQOQZAnv9bYEvDiIdE9Ea92uemAk_WBq8U_9v0c2Wa0KxCFTeO-U.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/assets/fonts/fraunces.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/plusjakartasans/v12/LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko70yyygA.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/plusjakartasans/v12/LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko50yyygA.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/plusjakartasans/v12/LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko40yyygA.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/assets/fonts/plus-jakarta-sans.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/plusjakartasans/v12/LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko70yyygA.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/plusjakartasans/v12/LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko50yyygA.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/plusjakartasans/v12/LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko40yyygA.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/assets/fonts/plus-jakarta-sans.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/plusjakartasans/v12/LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko70yyygA.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/plusjakartasans/v12/LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko50yyygA.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/plusjakartasans/v12/LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko40yyygA.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/assets/fonts/plus-jakarta-sans.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+
+body{margin:0;background:#0E1B3D}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+a{color:inherit}
+.disp{font-family:'Fraunces',Georgia,serif;font-weight:700;letter-spacing:-0.02em}
+.sans{font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+@property --n{syntax:'<integer>';inherits:false;initial-value:0}
+@keyframes rise{from{opacity:0;translate:0 38px}to{opacity:1;translate:0 0}}
+@keyframes spin{to{transform:translateX(-50%) rotate(360deg)}}
+@keyframes floaty{0%,100%{transform:translateY(0);opacity:.25}50%{transform:translateY(-34px);opacity:.9}}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes pop{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:scale(1)}}
+@keyframes marq{to{transform:translateX(-50%)}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(240,181,68,.55)}100%{box-shadow:0 0 0 22px rgba(240,181,68,0)}}
+@keyframes count{to{--n:var(--to)}}
+@keyframes swap{from{opacity:0;transform:translateX(26px)}to{opacity:1;transform:none}}
+.hv{animation:rise 1s cubic-bezier(.2,.7,.2,1) both}
+.rays{animation:spin 140s linear infinite}
+.dot{animation:floaty 7s ease-in-out infinite}
+.path{stroke-dasharray:1400;stroke-dashoffset:1400;animation:draw 3.2s .5s ease-out forwards}
+.mile{animation:pop .6s ease-out both}
+.marq{animation:marq 38s linear infinite;display:flex;width:max-content}
+.cta{animation:pulse 2.4s ease-out infinite}
+.swap{animation:swap .5s cubic-bezier(.2,.7,.2,1) both}
+@keyframes flipin{from{opacity:0;transform:perspective(1000px) rotateY(-85deg) scale(.6)}to{opacity:1;transform:perspective(1000px) rotateY(0) scale(1)}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.flipin{animation:flipin .75s cubic-bezier(.2,.7,.2,1) both}
+.fadein{animation:fade .35s ease both}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+@keyframes halo{0%,100%{opacity:.6;transform:scale(1)}50%{opacity:1;transform:scale(1.05)}}
+.bob{animation:bob 6s ease-in-out infinite}
+.halo{transform-box:fill-box;transform-origin:center;animation:halo 4s ease-in-out infinite}
+.zp{transition:fill-opacity .3s,stroke .3s,stroke-width .3s,filter .3s}
+.zp:hover{fill:#fff!important;fill-opacity:.34!important}
+.tl{--rw:88px;--dot:56px;position:relative}
+.tl-rail{position:absolute;left:0;top:0;bottom:0;width:var(--rw);clip-path:inset(0 -40px 0 -40px);z-index:1}
+.tl-rail-top{z-index:4}
+.tl-line{position:absolute;left:calc(var(--rw)/2 - 2px);top:calc(var(--dot)/2);bottom:0;width:4px;background:rgba(242,245,251,.18);border-radius:4px}
+.tl-sticky{position:sticky;top:42vh;height:0;margin-top:calc(var(--dot)/2)}
+.tl-fill{position:absolute;left:calc(var(--rw)/2 - 2px);bottom:0;width:4px;height:6000px;background:linear-gradient(to top,#FFE9A8,var(--gold));border-radius:4px}
+.tl-dove{position:absolute;left:calc(var(--rw)/2);top:0;transform:translate(-50%,-52%);z-index:3;filter:drop-shadow(0 0 14px rgba(255,233,168,.95))}
+.tl-dove img{display:block;animation:bob 3.2s ease-in-out infinite,tilt 2.2s ease-in-out infinite}
+@keyframes tilt{0%,100%{rotate:-5deg}50%{rotate:5deg}}
+.wing{transform-box:view-box;transform-origin:150px 132px;animation:flap .7s ease-in-out infinite alternate}
+.wing-b{animation-delay:-.25s}
+@keyframes flap{from{transform:rotate(6deg)}to{transform:rotate(-10deg)}}
+@keyframes dotOn{from{background:#0E1B3D;color:#F0B544;transform:scale(1);box-shadow:0 0 0 0 rgba(240,181,68,0)}to{background:#F0B544;color:#0E1B3D;transform:scale(1.14);box-shadow:0 0 0 10px rgba(240,181,68,.22),0 0 40px rgba(240,181,68,.6)}}
+.tl-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:64px}
+.tl-stop{display:grid;grid-template-columns:var(--rw) minmax(0,1fr);gap:0 28px;position:relative}
+.tl-dot{justify-self:center;width:var(--dot);height:var(--dot);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:24px;border:3px solid #F0B544;background:#F0B544;color:#0E1B3D;position:relative;z-index:2}
+.tl-card{background:rgba(242,245,251,.06);border:1px solid rgba(242,245,251,.18);border-radius:26px;padding:clamp(22px,3.4vw,40px);min-width:0}
+@supports (animation-timeline: view()){
+.tl-dot{animation:dotOn linear both;animation-timeline:view();animation-range:cover 54% cover 59%}
+.tl-card{animation:rise linear both;animation-timeline:view();animation-range:entry 0% entry 35%}
+}
+@media (max-width:860px){
+.hdr{padding:14px 16px!important;gap:10px!important}
+.brand{gap:10px!important}
+.logo-com{width:66px!important;height:66px!important}
+.logo-arq{padding:6px 10px!important;border-radius:10px!important}
+.logo-arq img{height:32px!important}
+.nav{width:100%;overflow-x:auto;flex-wrap:nowrap!important;white-space:nowrap;gap:4px 20px!important;padding-bottom:6px}
+.hero{padding-top:210px!important;padding-bottom:70px!important;min-height:0!important}
+.hero-art{max-width:320px;margin:0 auto}
+section:not(.hero){padding-top:72px!important;padding-bottom:72px!important}
+section.jx{padding:0 0 64px!important;min-height:0!important;flex-direction:column;align-items:stretch!important}
+.jx-img{position:relative!important;inset:auto!important;height:360px!important;object-position:20% center!important}
+.jx-shade{display:none!important}
+.jx-in{margin-top:-80px}
+.hito-cap{position:relative!important;padding:20px 22px!important;background:#091330!important}
+}
+@media (max-width:700px){
+.tl{--rw:58px;--dot:46px}
+.tl-stop{gap:0 12px}
+.tl-dot{font-size:20px}
+.tl-dove img{width:62px!important}
+.tl-list{gap:36px}
+}
+.card{transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s,border-color .35s}
+.card:hover{transform:translateY(-8px);box-shadow:0 26px 50px -22px rgba(14,27,61,.45)}
+.grow{position:relative}
+.grow:hover,.grow:focus-visible{transform:translateY(-12px) scale(1.07);z-index:3;box-shadow:0 34px 60px -24px rgba(14,27,61,.55);border-color:#7F5600}
+.btn{transition:transform .25s,background .25s,color .25s}
+.btn:hover{transform:translateY(-3px)}
+.btn:focus-visible,.card:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #F0B544;outline-offset:3px}
+.num{font-variant-numeric:tabular-nums}
+@supports (animation-timeline: view()){
+.rv{animation:rise linear both;animation-timeline:view();animation-range:entry 0% entry 40%}
+.cnt{animation:count linear both;animation-timeline:view();animation-range:entry 10% cover 40%;counter-reset:n var(--n)}
+.cnt .num{display:none}
+.cnt::after{content:counter(n)}
+}
+@media (prefers-reduced-motion:reduce){
+.hv,.rays,.dot,.path,.mile,.marq,.cta,.swap,.rv,.cnt,.flipin,.fadein,.bob,.halo,.wing,.tl-dove img,.tl-dot,.tl-card{animation:none!important}
+.path{stroke-dashoffset:0}
+}
+
+
+.prototype-notice{position:relative;z-index:100;background:#f0b544;color:#0e1b3d;text-align:center;font:600 13px/1.5 system-ui,sans-serif;padding:9px 16px}.prototype-form-note{color:#44506b;font-size:14px;line-height:1.6}html{scroll-behavior:smooth}body{margin:0}

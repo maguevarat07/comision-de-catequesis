@@ -1,0 +1,11 @@
+{
+  "name": "comision-de-catequesis",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Comisión de Catequesis · Prototipo de presentación",
+  "scripts": {
+    "dev": "node scripts/serve.cjs",
+    "build": "node scripts/build.cjs"
+  },
+  "engines": { "node": ">=20" }
+}

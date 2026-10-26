@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="utf-8">
+<title>Comisión de Catequesis</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Prototipo de la Comisión de Catequesis de la Arquidiócesis de Panamá.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="/css/styles.css">
+<script src="/assets/vendor/react-18.3.1.js"></script>
+<script src="/assets/vendor/react-dom-18.3.1.js"></script>
+<script src="/js/app.js"></script>
+<script src="/assets/vendor/dc-runtime.js"></script>
+</head>
+<body>
+<x-dc>
+<div class="prototype-notice" role="note">Prototipo de presentación · Contenido y funciones en desarrollo</div>
+
+<div class="sans" style="--gold:{{accent}};background:#0E1B3D;color:#F2F5FB;overflow-x:clip;line-height:1.6" data-canvas-width="1360" data-canvas-height="8000" data-document-role="page" data-label="Página de Catequesis">
+
+<!-- NAV -->
+<header class="hdr" style="position:absolute;top:0;left:0;right:0;z-index:5;display:flex;flex-wrap:wrap;gap:16px 32px;align-items:center;justify-content:space-between;padding:22px clamp(20px,5vw,56px)">
+<a href="#inicio" class="brand" style="display:flex;gap:18px;align-items:center;text-decoration:none">
+<img class="logo-com" src="/assets/images/catequesis-logo.png" alt="Logo de la Sección de Catequesis de la Arquidiócesis de Panamá" style="width:98px;height:98px;display:block;flex:none;border-radius:50%;box-shadow:0 0 0 3px #F0B544,0 12px 32px rgba(0,0,0,.5)">
+<span class="logo-arq" style="display:block"><img src="/assets/images/arquidiocesis.png" alt="Arquidiócesis de Panamá, 100 años" style="height:52px;width:auto;display:block;max-width:100%"></span>
+</a>
+<nav class="nav" aria-label="Secciones" style="display:flex;flex-wrap:wrap;gap:6px 26px;font-size:15px;font-weight:500">
+<a href="#mision" style="text-decoration:none;padding:10px 0">Misión</a>
+<a href="#camino" style="text-decoration:none;padding:10px 0">El camino</a>
+<a href="#servicios" style="text-decoration:none;padding:10px 0">Servicios</a>
+<a href="#agenda" style="text-decoration:none;padding:10px 0">Agenda</a>
+<a href="#unete" class="btn" style="text-decoration:none;padding:10px 20px;border-radius:99px;background:var(--gold);color:#0E1B3D;font-weight:700">Quiero ser catequista</a>
+</nav>
+</header>
+
+<!-- HERO -->
+<section id="inicio" class="hero" style="position:relative;min-height:840px;display:flex;align-items:center;padding:210px clamp(20px,5vw,56px) 100px;background:radial-gradient(ellipse at 70% 60%,#1D3677 0%,#0E1B3D 62%)">
+<div class="rays" aria-hidden="true" style="position:absolute;left:68%;bottom:-900px;width:1800px;height:1800px;transform:translateX(-50%);background:repeating-conic-gradient(from 0deg at 50% 50%,rgba(240,181,68,.16) 0 3deg,transparent 3deg 11deg);-webkit-mask-image:radial-gradient(circle,#000 0%,transparent 62%);mask-image:radial-gradient(circle,#000 0%,transparent 62%)"></div>
+<sc-for list="{{dots}}" as="d" hint-placeholder-count="14">
+<span class="dot" aria-hidden="true" style="{{d.style}}"></span>
+</sc-for>
+<div style="position:relative;max-width:1200px;width:100%;margin:0 auto;display:flex;flex-wrap:wrap;gap:48px;align-items:center;justify-content:space-between">
+<div style="flex:1 1 520px;min-width:0;max-width:720px">
+<p class="hv" style="margin:0 0 22px;font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)">Comisión Arquidiocesana de Catequesis · Panamá</p>
+<h1 class="disp" style="margin:0;font-size:clamp(42px,6.6vw,92px);line-height:1.02">
+<span class="hv" style="display:block;animation-delay:.15s">Alguien tiene que</span>
+<span class="hv" style="display:block;animation-delay:.3s">caminar con ellos.</span>
+<span class="hv" style="display:block;animation-delay:.5s;color:var(--gold);font-style:italic;font-weight:500">¿Y si eres tú?</span>
+</h1>
+<p class="hv" style="margin: 30px 0 0; font-size: 20px; max-width: 560px; color: #C9D3E8; animation-delay: .75s; text-align: start">Acompañamos, formamos y enviamos a quienes quieren anunciar el Evangelio en las parroquias de Panamá. <br>Tu iniciativa es el comienzo.</p>
+<div class="hv" style="margin-top:38px;display:flex;flex-wrap:wrap;gap:16px;animation-delay:.95s">
+<a href="#unete" class="btn cta" style="text-decoration:none;padding:16px 30px;border-radius:99px;background:var(--gold);color:#0E1B3D;font-weight:700;font-size:17px">Quiero dar el paso</a>
+<a href="#camino" class="btn" style="text-decoration:none;padding:16px 30px;border-radius:99px;border:2px solid rgba(242,245,251,.5);font-weight:700;font-size:17px">Conoce el camino</a>
+</div>
+</div>
+</div>
+</section>
+
+<!-- MARQUEE -->
+<div aria-hidden="true" style="background:var(--gold);color:#0E1B3D;overflow:hidden;padding:18px 0">
+<div class="marq disp" style="font-size:30px;white-space:nowrap">
+<sc-for list="{{words}}" as="w" hint-placeholder-count="6"><span style="padding:0 28px">{{w}} <span style="opacity:.5">✦</span></span></sc-for>
+<sc-for list="{{words}}" as="w" hint-placeholder-count="6"><span style="padding:0 28px">{{w}} <span style="opacity:.5">✦</span></span></sc-for>
+</div>
+</div>
+
+<!-- MISIÓN -->
+<section id="mision" style="background:#EEF2F9;color:#0E1B3D;padding:120px 0">
+<div style="max-width:1200px;margin:0 auto;padding:0 clamp(20px,5vw,56px)">
+<p class="rv" style="margin:0 0 20px;font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#7F5600">Nuestra misión</p>
+<h2 class="disp rv" style="margin:0;font-size:clamp(30px,4.4vw,56px);line-height:1.12;max-width:980px">Acompañar a niños, jóvenes, adultos y familias para que cada persona <em style="color:#7F5600;font-weight:500">descubra y profundice su fe</em>, desde un anuncio renovado del Evangelio.</h2>
+<div style="margin-top:64px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:24px">
+<div class="card grow rv" tabindex="0" style="background:#fff;border-radius:22px;padding:34px;border:1px solid #D6DDEC">
+<p class="disp" style="margin:0;font-size:64px;line-height:1;color:#7F5600">01</p>
+<h3 class="disp" style="margin:14px 0 10px;font-size:26px">Más que sacramentos</h3>
+<p style="margin:0;color:#44506B">La catequesis es un camino de crecimiento y maduración en la fe. Integra la Palabra de Dios, la liturgia, la vida comunitaria, la oración y el compromiso cristiano.</p>
+</div>
+<div class="card grow rv" tabindex="0" style="background:#fff;border-radius:22px;padding:34px;border:1px solid #D6DDEC">
+<p class="disp" style="margin:0;font-size:64px;line-height:1;color:#7F5600">02</p>
+<h3 class="disp" style="margin:14px 0 10px;font-size:26px">La familia primero</h3>
+<p style="margin:0;color:#44506B">La familia es la primera escuela de fe. El catequista no reemplaza a los padres: camina con ellos y fortalece lo que ya se vive en casa.</p>
+</div>
+<div class="card grow rv" tabindex="0" style="background:#fff;border-radius:22px;padding:34px;border:1px solid #D6DDEC">
+<p class="disp" style="margin:0;font-size:64px;line-height:1;color:#7F5600">03</p>
+<h3 class="disp" style="margin:14px 0 10px;font-size:26px">Palabra, fe y vida</h3>
+<p style="margin:0;color:#44506B">Cada encuentro parte de la Palabra viva de Dios y desemboca en celebración, comunidad y testimonio en las parroquias de Panamá.</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- CAMINO -->
+<section id="camino" style="background:#0E1B3D;padding:120px 0 110px">
+<div style="max-width:1100px;margin:0 auto;padding:0 clamp(20px,5vw,56px)">
+<p class="rv" style="margin:0 0 20px;font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)">El camino del catequista</p>
+<h2 class="disp rv" style="margin:0;font-size:clamp(32px,4.6vw,60px);line-height:1.08;max-width:820px">Cuatro pasos para pasar de la inquietud a la misión.</h2>
+<p class="rv" style="margin:18px 0 0;color:#B9C4DC;font-size:18px;max-width:640px">Baja con calma: el Espíritu Santo te acompaña de un paso al siguiente.</p>
+
+<div class="tl" style="margin-top:64px">
+<div class="tl-rail" aria-hidden="true">
+<div class="tl-line"></div>
+<div class="tl-sticky">
+<div class="tl-fill"></div>
+</div>
+</div>
+<div class="tl-rail tl-rail-top" aria-hidden="true">
+<div class="tl-sticky">
+<div class="tl-dove">
+<img src="/assets/images/encuentro.png" alt="" style="width:86px;height:auto;display:block">
+</div>
+</div>
+</div>
+<ol class="tl-list">
+<sc-for list="{{steps}}" as="s" hint-placeholder-count="4">
+<li class="tl-stop">
+<span class="tl-dot" aria-hidden="true">{{s.n}}</span>
+<div class="tl-card">
+<p style="margin:0 0 8px;font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#B9C4DC">Paso {{s.n}} de 4</p>
+<h3 class="disp" style="margin:0;font-size:clamp(28px,3.6vw,44px);color:var(--gold);line-height:1.1">{{s.title}}</h3>
+<p style="margin:16px 0 0;font-size:19px;color:#DCE3F2">{{s.body}}</p>
+<div style="margin-top:22px;background:rgba(14,27,61,.7);border-radius:18px;padding:20px 22px">
+<p style="margin:0 0 8px;font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#B9C4DC">Qué encontrarás</p>
+<p style="margin:0;font-size:18px;font-weight:500">{{s.offer}}</p>
+</div>
+<a href="#unete" class="btn" style="display:inline-block;margin-top:22px;text-decoration:none;padding:13px 26px;border-radius:99px;background:var(--gold);color:#0E1B3D;font-weight:700">{{s.cta}}</a>
+</div>
+</li>
+</sc-for>
+</ol>
+</div>
+</div>
+</section>
+
+<!-- SERVICIOS -->
+<section id="servicios" style="background:#EEF2F9;color:#0E1B3D;padding:120px 0">
+<div style="max-width:1200px;margin:0 auto;padding:0 clamp(20px,5vw,56px)">
+<p class="rv" style="margin:0 0 20px;font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#7F5600">Servicios de la Comisión</p>
+<h2 class="disp rv" style="margin:0;font-size:clamp(32px,4.6vw,60px);line-height:1.08;max-width:820px">Nadie catequiza solo.</h2>
+<div style="margin-top:56px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr));gap:22px">
+<sc-for list="{{services}}" as="v" hint-placeholder-count="6">
+<div class="card rv" style="{{v.style}}">
+<svg width="44" height="44" sc-camel-view-box="0 0 24 24" fill="none" stroke="#7F5600" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{v.icon}}"></path></svg>
+<h3 class="disp" style="margin:18px 0 10px;font-size:26px">{{v.title}}</h3>
+<p style="margin:0;color:#44506B">{{v.text}}</p>
+</div>
+</sc-for>
+</div>
+
+<div class="rv" style="margin-top:36px;background:#0E1B3D;color:#F2F5FB;border-radius:28px;padding:clamp(24px,4vw,48px)">
+<p class="disp" style="margin:0;font-size:30px">Catequesis para cada etapa de la vida</p>
+<div style="margin-top:22px;display:flex;flex-wrap:wrap;gap:12px" role="group" aria-label="Tipos de catequesis">
+<sc-for list="{{subs}}" as="b" hint-placeholder-count="4">
+<button type="button" sc-camel-on-click="{{b.pick}}" aria-pressed="{{b.active}}" style="{{b.style}}">{{b.label}}</button>
+</sc-for>
+</div>
+<div style="margin-top:30px;display:flex;flex-wrap:wrap;gap:36px;align-items:center">
+<div style="flex:1 1 300px;min-width:0">
+<p class="disp" style="margin:0;font-size:clamp(28px,3.4vw,40px);line-height:1.1;color:var(--gold)">{{subTitle}}</p>
+<p style="margin:16px 0 0;font-size:19px;color:#DCE3F2">{{subText}}</p>
+</div>
+<div style="flex:1 1 380px;min-width:0;position:relative;aspect-ratio:16/10;border-radius:22px;overflow:hidden;border:3px solid var(--gold);background:#17306D">
+<img src="/assets/images/mision.png" alt="Catequistas y familias de la comunidad reunidas, con una dama vestida de pollera" style="{{subImg0}}">
+<img src="/assets/images/mapa-pastoral.png" alt="Catequistas con carteles que dicen Ven, caminemos juntos" style="{{subImg1}}">
+<img src="/assets/images/formacion.png" alt="Adultos participando en una catequesis" style="{{subImg2}}">
+<img src="/assets/images/familias.png" alt="Jóvenes y catequistas en un encuentro" style="{{subImg3}}">
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- TERRITORIO -->
+<section id="territorio" style="background:linear-gradient(135deg,#17306D,#0E1B3D);padding:110px 0">
+<div style="max-width:1200px;margin:0 auto;padding:0 clamp(20px,5vw,56px)">
+<p class="rv" style="margin:0 0 14px;font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)">La Arquidiócesis de Panamá</p>
+<h2 class="disp rv" style="margin:0;font-size:clamp(30px,4.4vw,56px);max-width:900px;line-height:1.1">Un territorio entero esperando catequistas con iniciativa.</h2>
+<p class="rv" style="margin:16px 0 0;font-size:18px;color:#C9D3E8">4 zonas pastorales · 13 vicarías · 102 parroquias. Toca una zona del mapa para conocer sus vicarías.</p>
+<div style="margin-top:44px;display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start">
+<div class="rv" style="flex:1 1 560px;min-width:0;background:#fff;border-radius:28px;padding:14px;box-shadow:0 30px 70px -30px rgba(0,0,0,.7)">
+<svg sc-camel-view-box="160 140 850 460" role="img" aria-label="Mapa de las zonas pastorales de la Arquidiócesis de Panamá. Usa la lista para elegir una zona." style="width:100%;height:auto;display:block;font-family:'Plus Jakarta Sans',system-ui,sans-serif">
+<image href="/assets/images/catequesis.png" x="0" y="0" width="1024" height="786"></image>
+<path class="zp" d="M475 189 L472 192 L471 202 L472 339 L530 335 L546 341 L562 339 L567 343 L582 342 L590 344 L604 353 L618 354 L630 362 L662 372 L674 382 L681 404 L688 411 L694 413 L698 410 L703 410 L707 420 L721 417 L727 421 L727 429 L733 434 L753 439 L759 453 L762 453 L766 448 L772 448 L772 457 L777 465 L789 464 L793 467 L797 467 L800 475 L808 475 L814 481 L820 503 L813 504 L812 507 L813 511 L820 517 L823 525 L824 548 L832 555 L838 555 L840 557 L840 563 L845 574 L853 578 L852 560 L848 549 L845 529 L833 510 L835 487 L823 466 L822 445 L831 422 L842 413 L844 409 L844 397 L846 395 L864 401 L883 401 L907 409 L908 399 L916 389 L922 385 L936 383 L942 372 L960 361 L975 358 L976 353 L970 345 L970 339 L986 317 L991 304 L990 299 L968 291 L950 275 L937 270 L914 266 L908 254 L887 253 L881 251 L878 246 L867 244 L861 240 L856 240 L850 245 L833 242 L824 222 L818 216 L811 214 L801 216 L794 220 L772 218 L762 209 L750 208 L730 200 L710 197 L694 202 L663 218 L646 217 L634 229 L626 233 L615 230 L597 231 L591 222 L583 222 L576 218 L554 218 L530 227 L525 227 L521 221 L524 203 L505 179 L495 178 Z" sc-camel-on-click="{{z3.pick}}" style="{{z3.style}}"></path>
+<path class="zp" d="M356 309 L335 307 L332 310 L313 312 L311 307 L305 303 L292 302 L291 304 L287 304 L282 286 L276 290 L272 290 L268 287 L265 290 L265 296 L269 303 L268 313 L261 314 L261 319 L255 320 L259 338 L249 352 L240 359 L212 358 L203 351 L199 351 L186 362 L190 375 L186 378 L185 384 L178 391 L178 409 L182 426 L195 438 L200 454 L200 463 L196 470 L200 482 L198 503 L200 513 L208 527 L206 544 L212 552 L219 568 L229 565 L252 549 L256 543 L256 537 L269 526 L282 524 L286 516 L293 515 L302 509 L314 508 L337 495 L348 483 L351 476 L344 478 L331 487 L310 488 L301 484 L301 478 L303 476 L314 475 L318 467 L327 464 L330 457 L335 455 L336 449 L326 435 L325 427 L327 418 L341 405 L344 399 L350 399 L352 395 L367 397 L370 391 L378 392 L381 389 L400 387 L404 384 L402 365 L399 362 L398 352 L379 339 Z" sc-camel-on-click="{{z0.pick}}" style="{{z0.style}}"></path>
+<path class="zp" d="M461 158 L445 162 L435 168 L419 166 L417 173 L417 190 L411 197 L408 206 L409 211 L415 214 L415 219 L408 232 L407 250 L416 260 L416 264 L411 267 L408 274 L402 274 L399 270 L388 272 L391 297 L393 299 L405 298 L413 305 L421 308 L427 315 L427 319 L433 329 L433 347 L446 346 L457 341 L470 339 L470 194 L461 193 L466 175 L466 164 Z" sc-camel-on-click="{{z2.pick}}" style="{{z2.style}}"></path>
+<path class="zp" d="M381 273 L376 277 L373 287 L364 302 L364 313 L382 335 L403 349 L410 369 L416 371 L417 366 L426 359 L429 354 L429 330 L420 312 L412 309 L403 302 L392 303 L388 299 L384 273 Z" sc-camel-on-click="{{z1.pick}}" style="{{z1.style}}"></path>
+<g style="pointer-events:none;font-size:22px;font-weight:700;text-anchor:middle">
+<circle cx="276" cy="416" r="19" fill="#0E1B3D" stroke="#fff" stroke-width="3"></circle><text x="276" y="424" fill="#fff">1</text>
+<circle cx="398" cy="323" r="15" fill="#0E1B3D" stroke="#fff" stroke-width="3"></circle><text x="398" y="331" fill="#fff" style="font-size:19px">2</text>
+<circle cx="439" cy="253" r="17" fill="#0E1B3D" stroke="#fff" stroke-width="3"></circle><text x="439" y="261" fill="#fff" style="font-size:20px">3</text>
+<circle cx="729" cy="315" r="19" fill="#0E1B3D" stroke="#fff" stroke-width="3"></circle><text x="729" y="323" fill="#fff">4</text>
+</g>
+</svg>
+</div>
+<div style="flex:1 1 360px;min-width:0">
+<div style="display:flex;flex-direction:column;gap:10px" role="group" aria-label="Zonas pastorales">
+<sc-for list="{{zoneBtns}}" as="b" hint-placeholder-count="4">
+<button type="button" sc-camel-on-click="{{b.pick}}" aria-pressed="{{b.active}}" style="{{b.style}}">
+<span style="{{b.numStyle}}">{{b.n}}</span>
+<span style="display:flex;flex-direction:column;align-items:flex-start;text-align:left"><span style="font-weight:700;font-size:17px">{{b.name}}</span><span style="font-size:14px;opacity:.85">{{b.count}}</span></span>
+</button>
+</sc-for>
+</div>
+<div class="swap" style="margin-top:18px;background:#F2F5FB;color:#0E1B3D;border-radius:22px;padding:26px 28px;border-top:8px solid {{zc.color}}">
+<p style="margin:0 0 6px;font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#7F5600">{{zc.eyebrow}}</p>
+<h3 class="disp" style="margin:0 0 8px;font-size:30px;line-height:1.1">{{zc.name}}</h3>
+<p style="margin:0;font-weight:700">{{zc.vicario}}</p>
+<p style="margin:2px 0 0;color:#44506B">{{zc.sede}}</p>
+<div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:8px">
+<sc-for list="{{zc.vicarias}}" as="v" hint-placeholder-count="3"><span style="padding:8px 14px;border-radius:99px;background:#0E1B3D;color:#F2F5FB;font-size:15px;font-weight:500">{{v.name}}</span></sc-for>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- AGENDA -->
+<section id="agenda" style="background:#EEF2F9;color:#0E1B3D;padding:120px 0">
+<div style="max-width:1000px;margin:0 auto;padding:0 clamp(20px,5vw,56px)">
+<p class="rv" style="margin:0 0 20px;font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#7F5600">Agenda</p>
+<h2 class="disp rv" style="margin:0;font-size:clamp(32px,4.6vw,60px);line-height:1.08">Próximos encuentros</h2>
+<p class="rv" style="margin:16px 0 0;color:#44506B;font-size:18px">Toca un encuentro para ver el detalle. Las fechas se publicarán cuando la Comisión las confirme.</p>
+<div style="margin-top:44px;display:flex;flex-direction:column;gap:14px">
+<sc-for list="{{agenda}}" as="a" hint-placeholder-count="5">
+<div class="rv" style="background:#fff;border:1px solid #D6DDEC;border-radius:20px;overflow:hidden">
+<button type="button" sc-camel-on-click="{{a.toggle}}" aria-expanded="{{a.open}}" style="width:100%;display:flex;flex-wrap:wrap;gap:8px 24px;align-items:center;justify-content:space-between;padding:22px 28px;background:none;border:0;cursor:pointer;color:#0E1B3D;font:inherit;text-align:left;min-height:44px">
+<span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#7F5600">{{a.type}}</span><span class="disp" style="font-size:24px">{{a.title}}</span></span>
+<span style="display:flex;align-items:center;gap:16px"><span style="font-weight:700;color:#44506B">{{a.date}}</span><span style="{{a.plusStyle}}" aria-hidden="true">+</span></span>
+</button>
+<div style="{{a.detailStyle}}"><p style="margin:0;padding:0 28px 26px;color:#44506B;font-size:17px">{{a.detail}} <strong style="color:#0E1B3D">Lugar: {{a.place}}</strong></p></div>
+</div>
+</sc-for>
+</div>
+</div>
+</section>
+
+<!-- HITOS -->
+<section id="hitos" style="background:#0E1B3D;padding:120px 0">
+<div style="max-width:1200px;margin:0 auto;padding:0 clamp(20px,5vw,56px)">
+<p class="rv" style="margin:0 0 20px;font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)">Hitos y memoria</p>
+<h2 class="disp rv" style="margin:0;font-size:clamp(32px,4.6vw,60px);line-height:1.08;max-width:820px">Momentos que marcan el camino.</h2>
+<div style="margin-top:48px;display:flex;flex-wrap:wrap;gap:28px;align-items:stretch">
+<div class="rv" style="flex:1 1 560px;min-width:0;position:relative;border-radius:28px;overflow:hidden;background:#17306D;border:3px solid var(--gold)">
+<div style="position:relative;aspect-ratio:4/3">
+<img src="/assets/images/mapa-pastoral.png" alt="Monseñor José Domingo Ulloa junto a catequistas de la Comisión, con carteles que dicen Ven, caminemos juntos" style="{{hi0}}">
+<img src="/assets/images/formacion.png" alt="Catequistas reunidos en una jornada de formación" style="{{hi1}}">
+<img src="/assets/images/familias.png" alt="Encuentro de jóvenes y catequistas" style="{{hi2}}">
+<img src="/assets/images/mision.png" alt="Catequistas y familias compartiendo en comunidad" style="{{hi3}}">
+</div>
+<div class="hito-cap" style="position:absolute;left:0;right:0;bottom:0;padding:90px 28px 26px;background:linear-gradient(to top,rgba(9,19,48,.95),rgba(9,19,48,0))">
+<p style="margin:0 0 6px;font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)">{{ht.tag}}</p>
+<p class="disp" style="margin:0;font-size:clamp(24px,3vw,34px);line-height:1.15">{{ht.title}}</p>
+<p style="margin:8px 0 0;color:#DCE3F2;font-size:17px">{{ht.text}}</p>
+</div>
+</div>
+<div style="flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:12px;justify-content:center" role="group" aria-label="Hitos">
+<sc-for list="{{hitoBtns}}" as="h" hint-placeholder-count="4">
+<button type="button" sc-camel-on-click="{{h.pick}}" aria-pressed="{{h.active}}" style="{{h.style}}"><span style="font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.85">{{h.tag}}</span><span class="disp" style="font-size:22px;line-height:1.15">{{h.title}}</span></button>
+</sc-for>
+</div>
+</div>
+</div>
+</section>
+
+<!-- RECURSOS -->
+<section style="background:#EEF2F9;color:#0E1B3D;padding:110px 0">
+<div style="max-width:1200px;margin:0 auto;padding:0 clamp(20px,5vw,56px)">
+<p class="rv" style="margin:0 0 20px;font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#7F5600">Recursos para catequistas</p>
+<div style="margin-top:32px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:22px">
+<a href="#" class="card rv" style="display:block;text-decoration:none;background:#fff;border:1px solid #D6DDEC;border-radius:22px;padding:32px"><h3 class="disp" style="margin:0 0 10px;font-size:26px">Materiales y guías</h3><p style="margin:0 0 18px;color:#44506B">Documentos y apoyos para trabajar la catequesis en tu parroquia. [ENLACE POR DEFINIR]</p><span style="font-weight:700;color:#7F5600">Acceder →</span></a></div>
+</div>
+</section>
+
+<!-- ACOGIDA -->
+<section id="acogida" class="jx" style="position:relative;overflow:hidden;min-height:800px;display:flex;align-items:center;background:#0E1B3D;padding:110px 0">
+<img class="jx-img" src="/assets/images/comunidad.jpg" alt="Jesucristo con los brazos abiertos frente a un amanecer dorado, sobre un paisaje de montañas, un lago y una ciudad" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:18% center">
+<div class="jx-shade" aria-hidden="true" style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(9,19,48,0) 30%,rgba(9,19,48,.5) 56%,rgba(9,19,48,.86) 100%)"></div>
+<div class="halo" aria-hidden="true" style="position:absolute;left:24%;top:-10%;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(255,226,150,.5),rgba(255,226,150,0) 65%);pointer-events:none"></div>
+<div class="jx-in" style="position:relative;width:100%;max-width:1240px;margin:0 auto;padding:0 clamp(20px,5vw,56px);display:flex">
+<div class="jx-text" style="margin-left:auto;width:min(580px,100%);background:rgba(9,19,48,.76);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(240,181,68,.5);border-radius:30px;padding:clamp(26px,4vw,48px);box-shadow:0 30px 80px -30px rgba(0,0,0,.8)">
+<p class="rv" style="margin:0 0 16px;font-size:14px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)">Él te espera</p>
+<h2 class="disp rv" style="margin:0;font-size:clamp(38px,5vw,68px);line-height:1.02">Con los brazos <em style="color:var(--gold);font-weight:500">abiertos.</em></h2>
+<p class="rv" style="margin:20px 0 0;font-size:20px;color:#E4EAF7">Jesús está listo para recibirte tal como eres. Da el primer paso: Él ya viene a tu encuentro.</p>
+<div class="rv" style="margin-top:28px;padding-top:24px;border-top:1px solid rgba(240,181,68,.45)">
+<p class="disp" style="margin:0;font-size:clamp(20px,2.2vw,26px);font-style:italic;font-weight:500;line-height:1.3">“Vengan a mí todos los que están cansados y agobiados, y yo les daré descanso.”</p>
+<p style="margin:10px 0 0;color:var(--gold);font-size:14px;font-weight:700;letter-spacing:.12em;text-transform:uppercase">Mateo 11, 28</p>
+</div>
+<a href="#unete" class="btn rv" style="display:inline-block;margin-top:30px;text-decoration:none;padding:16px 32px;border-radius:99px;background:var(--gold);color:#0E1B3D;font-weight:700;font-size:17px">Quiero responder a su llamado</a>
+</div>
+</div>
+</section>
+
+<!-- ÚNETE -->
+<section id="unete" style="position:relative;background:radial-gradient(ellipse at 20% 0%,#1D3677 0%,#0E1B3D 60%);padding:120px 0">
+<div style="max-width:1200px;margin:0 auto;padding:0 clamp(20px,5vw,56px);display:flex;flex-wrap:wrap;gap:56px;align-items:flex-start">
+<div style="flex:1 1 380px;min-width:0">
+<p class="rv" style="margin:0 0 20px;font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)">Da el paso</p>
+<h2 class="disp rv" style="margin:0;font-size:clamp(34px,5vw,64px);line-height:1.06">Tu parroquia necesita <em style="color:var(--gold);font-weight:500">tu</em> iniciativa.</h2>
+<p class="rv" style="margin:22px 0 0;font-size:19px;color:#C9D3E8">Cuéntanos quién eres y desde dónde sirves. La Comisión te contactará para orientarte en la formación, los materiales y los procesos catequéticos de tu comunidad.</p>
+<figure class="rv" style="margin:40px 0 0;padding:28px 30px;border-radius:24px;background:rgba(242,245,251,.07);border:1px solid rgba(240,181,68,.4)">
+<p class="disp" style="margin:0;font-size:56px;line-height:.5;color:var(--gold)" aria-hidden="true">“</p>
+<blockquote style="margin:6px 0 0"><p class="disp" style="margin:0;font-size:clamp(20px,2.3vw,27px);font-style:italic;font-weight:500;line-height:1.3">El fin definitivo de la catequesis es poner a uno <span style="color:var(--gold)">no sólo en contacto sino en comunión, en intimidad con Jesucristo</span>.</p></blockquote>
+<figcaption style="margin-top:16px;font-size:14px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#B9C4DC">San Juan Pablo II · Catechesi Tradendae, n. 5</figcaption>
+</figure>
+</div>
+<div style="flex:1 1 420px;min-width:0;background:#F2F5FB;color:#0E1B3D;border-radius:28px;padding:clamp(24px,4vw,44px)">
+<sc-if value="{{notSent}}" hint-placeholder-val="{{ true }}">
+<p class="prototype-form-note">Formulario de demostración: no envía ni guarda datos.</p>
+<form sc-camel-on-submit="{{submit}}" style="display:flex;flex-direction:column;gap:18px">
+<fieldset style="border:0;margin:0;padding:0"><legend style="font-weight:700;margin-bottom:10px">Me identifico como…</legend>
+<div style="display:flex;flex-wrap:wrap;gap:10px">
+<sc-for list="{{intereses}}" as="i" hint-placeholder-count="3"><button type="button" sc-camel-on-click="{{i.pick}}" aria-pressed="{{i.active}}" style="{{i.style}}">{{i.label}}</button></sc-for>
+</div></fieldset>
+<div style="display:flex;flex-direction:column;gap:6px"><label for="f-nombre" style="font-weight:700">Nombre completo</label><input id="f-nombre" type="text" required="" value="{{nombre}}" sc-camel-on-input="{{setNombre}}" style="padding:14px 16px;border-radius:12px;border:1.5px solid #9AA6BF;font:inherit;min-height:48px"></div>
+<div style="display:flex;flex-direction:column;gap:6px"><label for="f-par" style="font-weight:700">Parroquia y vicaría</label><input id="f-par" type="text" required="" value="{{parroquia}}" sc-camel-on-input="{{setParroquia}}" style="padding:14px 16px;border-radius:12px;border:1.5px solid #9AA6BF;font:inherit;min-height:48px"></div>
+<div style="display:flex;flex-direction:column;gap:6px"><label for="f-con" style="font-weight:700">Correo o WhatsApp</label><input id="f-con" type="text" required="" value="{{contacto}}" sc-camel-on-input="{{setContacto}}" style="padding:14px 16px;border-radius:12px;border:1.5px solid #9AA6BF;font:inherit;min-height:48px"></div>
+<div style="display:flex;flex-direction:column;gap:6px"><label for="f-msg" style="font-weight:700">¿Qué te gustaría hacer? (opcional)</label><textarea id="f-msg" rows="3" value="{{mensaje}}" sc-camel-on-input="{{setMensaje}}" style="padding:14px 16px;border-radius:12px;border:1.5px solid #9AA6BF;font:inherit;resize:vertical"></textarea></div>
+<button type="submit" class="btn" style="padding:16px 28px;border-radius:99px;border:0;background:#0E1B3D;color:#F2F5FB;font:inherit;font-weight:700;font-size:17px;cursor:pointer;min-height:52px">Quiero ser catequista</button>
+</form>
+</sc-if>
+<sc-if value="{{sent}}" hint-placeholder-val="{{ false }}">
+<div class="swap" style="text-align:center;padding:30px 0">
+<svg width="72" height="72" sc-camel-view-box="0 0 72 72" fill="none" aria-hidden="true"><circle cx="36" cy="36" r="33" stroke="#7F5600" stroke-width="3"></circle><path class="path" d="M21 37l10 10 20-22" stroke="#7F5600" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" style="stroke-dasharray:60;stroke-dashoffset:60;animation:draw 1s .2s ease-out forwards"></path></svg>
+<p class="disp" style="margin:20px 0 10px;font-size:34px">¡Gracias, {{nombre}}!</p>
+<p style="margin:0;color:#44506B;font-size:18px">Esta es una demostración del formulario. Tus datos no se han enviado ni guardado.</p>
+<button type="button" sc-camel-on-click="{{reset}}" style="margin-top:22px;padding:12px 22px;border-radius:99px;border:2px solid #0E1B3D;background:none;color:#0E1B3D;font:inherit;font-weight:700;cursor:pointer;min-height:44px">Enviar otro</button>
+</div>
+</sc-if>
+</div>
+</div>
+</section>
+
+<!-- FOOTER -->
+<footer style="background:#091330;padding:70px 0 40px;color:#C9D3E8">
+<div style="max-width:1200px;margin:0 auto;padding:0 clamp(20px,5vw,56px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:36px">
+<div>
+<div style="display:flex;flex-wrap:wrap;gap:18px 14px;align-items:center;margin-bottom:18px">
+<img src="/assets/images/catequesis-logo.png" alt="Logo de la Sección de Catequesis de la Arquidiócesis de Panamá" style="width:88px;height:88px;display:block;flex:none;border-radius:50%">
+<img src="/assets/images/arquidiocesis.png" alt="Arquidiócesis de Panamá, 100 años" style="width:min(340px,100%);height:auto;display:block">
+</div>
+<p class="disp" style="margin:0 0 10px;font-size:24px;color:#F2F5FB">Comisión Arquidiocesana de Catequesis</p><p style="margin:0">Arquidiócesis de Panamá</p></div>
+<div><p style="margin:0 0 10px;font-weight:700;color:#F2F5FB">Contacto de la Comisión</p><p style="margin:0">Correo: Por confirmar<br>Teléfono / WhatsApp: Por confirmar<br>Oficina: Por confirmar</p></div>
+<div><p style="margin:0 0 10px;font-weight:700;color:#F2F5FB">Síguenos</p><p style="margin:0"><a href="https://www.instagram.com/catequesispanama/" style="color:var(--gold);font-weight:700">@catequesispanama</a><br><a href="https://arquidiocesisdepanama.org/" style="color:#C9D3E8">arquidiocesisdepanama.org</a><br>Arquidiócesis: +507 282-6500</p></div>
+</div>
+<div aria-hidden="true" style="max-width:1200px;margin:48px auto 0;display:flex;height:6px;border-radius:6px;overflow:hidden"><span style="flex:1;background:#2D5BD6"></span><span style="flex:1;background:#F2F5FB"></span><span style="flex:1;background:#D3283B"></span></div>
+</footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script="" data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#F0B544&quot;,&quot;options&quot;:[&quot;#F0B544&quot;,&quot;#FF9F6B&quot;,&quot;#8FD3C8&quot;,&quot;#F2F5FB&quot;]},&quot;$preview&quot;:{&quot;width&quot;:1360,&quot;height&quot;:9600}}">
+class Component extends (window.createCatequesisComponent(DCLogic)) {}
+</script>
+
+
+</body></html>
