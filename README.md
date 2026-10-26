@@ -31,7 +31,7 @@ El motor original utiliza React 18.3.1 y una plantilla declarativa. La pequeña 
 
 ## Alcance de la muestra
 
-El formulario **no envía ni guarda datos**. La agenda y los datos de contacto están pendientes de confirmación. El aviso de prototipo y la directiva `noindex` identifican esta etapa; `noindex` no restringe el acceso a quien tenga el enlace. El código puede estar en un repositorio privado mientras el sitio de presentación es público.
+El formulario **no envía ni guarda datos**. La agenda y los datos de contacto están pendientes de confirmación. La directiva `noindex` evita solicitar la indexación de esta etapa; no restringe el acceso a quien tenga el enlace. El código puede estar en un repositorio privado mientras el sitio de presentación es público.
 
 ## Ampliación posterior
 
