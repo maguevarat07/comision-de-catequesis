@@ -16,7 +16,7 @@ class Component extends DCLogic {
     const steps = stepsData.map((d, i) => {
       const active = s.step === i; const done = s.step >= i;
       return {
-        n: i + 1, title: d.title, body: d.body, offer: d.offer, cta: d.cta, href: ['#unete', '#cenafca', '#servicios', '#agenda'][i], active,
+        n: i + 1, title: d.title, body: d.body, offer: d.offer, cta: d.cta, href: ['#unete', '/cenafca/', '#servicios', '#agenda'][i], active,
         pick: () => this.setState({ step: i }),
         btnStyle: 'background:none;border:0;cursor:pointer;color:#F2F5FB;font:inherit;display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:0 4px 0 0;min-height:44px;opacity:' + (active ? 1 : 0.72),
         dotStyle: 'width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:22px;font-family:Fraunces,Georgia,serif;transition:all .4s;border:3px solid ' + gold + ';background:' + (done ? gold : '#0E1B3D') + ';color:' + (done ? '#0E1B3D' : gold) + ';transform:scale(' + (active ? 1.12 : 1) + ')'

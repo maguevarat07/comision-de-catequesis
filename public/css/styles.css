@@ -352,14 +352,16 @@ section.jx{padding:0 0 64px!important;min-height:0!important;flex-direction:colu
   .marquee-strip .marq{font-size:24px!important}
 }
 
-/* Each chapter settles into a clear first view on large screens. */
+/* Keep generous chapters without forcing the browser to lock onto each one. */
 @media (min-width: 861px){
-  html{scroll-snap-type:y proximity;scroll-padding-top:12px}
-  .screen-section{min-height:100svh;box-sizing:border-box;scroll-snap-align:start;scroll-snap-stop:normal}
+  .screen-section{min-height:100svh;box-sizing:border-box}
   .screen-section:not(.hero){padding-top:clamp(48px,6svh,78px)!important;padding-bottom:clamp(48px,6svh,78px)!important}
-  #mision,#cenafca,#cenafca-formacion,#territorio,#equipo,#hitos,#acogida{display:flex;align-items:center}
+  #mision,#cenafca,#territorio,#equipo,#hitos,#acogida{display:flex;align-items:center}
   #mision>div,#equipo>div,#hitos>div,#territorio>div{width:100%}
 }
+section.resources-section{padding:clamp(36px,5svh,58px) 0!important;min-height:0!important}
+.resources-section>div>div{margin-top:18px!important}
+.resources-section .card{padding:clamp(24px,3vw,32px)!important}
 
 /* CENAFCA: preserve the complete mark while its color fades into the copy. */
 .cenafca-logo-card{position:relative;isolation:isolate;min-height:clamp(290px,31vw,470px);display:flex;align-items:center;justify-content:center;padding:clamp(12px,2vw,28px);background:radial-gradient(ellipse at 38% 50%,rgba(43,124,161,.21),rgba(255,255,255,0) 72%);box-shadow:none;overflow:visible}
@@ -473,4 +475,76 @@ section.jx{padding:0 0 64px!important;min-height:0!important;flex-direction:colu
 }
 @media(max-width:860px){.cenafca-layout{grid-template-columns:1fr}.cenafca-logo-card{max-width:none;min-height:0}.cenafca-logo-card img{max-height:360px}.territory-section__layout{grid-template-columns:1fr}.territory-section__zones{width:100%}.team-roster ul{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.cenafca-detail__grid{grid-template-columns:1fr}.cenafca-detail__action{align-items:flex-start;flex-direction:column}.team-roster ul{grid-template-columns:1fr}.site-footer__grid{grid-template-columns:1fr 1fr}.site-footer__about{grid-column:1/-1}.site-footer__bottom{display:block}.site-footer__bottom p+p{margin-top:12px}.floating-whatsapp>span:first-child{display:none}.floating-whatsapp{right:13px;bottom:13px}.floating-whatsapp__circle{width:51px;height:51px;border-width:6px}}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto;scroll-snap-type:none}.team-roster__content{animation:none}.floating-whatsapp__circle,.site-footer__social a{transition:none}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.team-roster__content{animation:none}.floating-whatsapp__circle,.site-footer__social a{transition:none}}
+
+/* CENAFCA lives at its own route and scrolls naturally. */
+.cenafca-page{margin:0;background:#f7f4ed;color:#0e1b3d;line-height:1.6}
+.cenafca-page *{box-sizing:border-box}
+.cenafca-page a:focus-visible{outline:3px solid #f0b544;outline-offset:4px}
+.skip-link{position:absolute;z-index:100;top:-80px;left:16px;padding:10px 16px;background:#fff;color:#0e1b3d;border-radius:8px}
+.skip-link:focus{top:12px}
+.cenafca-page__container{max-width:1380px;margin:0 auto;padding:0 clamp(20px,5vw,64px)}
+.cenafca-page section[id]{scroll-margin-top:85px}
+.cenafca-page__header{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:12px clamp(20px,5vw,64px);background:#0e1b3d;color:#fff}
+.cenafca-page__brand{display:flex;align-items:center;gap:14px;color:#fff;text-decoration:none;font-size:15px;line-height:1.35}
+.cenafca-page__brand img{width:62px;height:62px;object-fit:contain;border-radius:50%;box-shadow:0 0 0 2px #f0b544}
+.cenafca-page__brand strong{font-size:18px}
+.cenafca-page__header nav{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px clamp(12px,2vw,32px)}
+.cenafca-page__header nav a{color:#fff;text-decoration:none;font-weight:700;font-size:14px}
+.cenafca-page__header nav a:hover,.cenafca-page__header nav a[aria-current]{color:#f0b544}
+.cenafca-page__header nav .cenafca-page__nav-cta{color:#0e1b3d;background:#f0b544;border-radius:40px;padding:11px 18px}
+.cenafca-page__header nav .cenafca-page__nav-cta:hover{color:#0e1b3d;background:#ffd06d}
+.cenafca-page__hero{background:radial-gradient(ellipse at 82% 70%,#254782 0%,#152a56 44%,#0e1b3d 82%);color:#f5f7fc;overflow:hidden}
+.cenafca-page__hero-inner{max-width:1380px;min-height:min(690px,calc(100svh - 86px));margin:auto;padding:clamp(76px,9svh,120px) clamp(20px,5vw,64px);display:grid;grid-template-columns:minmax(0,1.15fr) minmax(280px,.85fr);align-items:center;gap:clamp(28px,5vw,80px)}
+.cenafca-page__breadcrumb{font-size:13px;color:#c8d3e8;margin:0 0 52px}
+.cenafca-page__breadcrumb a{color:inherit;text-underline-offset:3px}
+.cenafca-page__eyebrow{margin:0 0 14px;text-transform:uppercase;letter-spacing:.16em;font-size:13px;font-weight:800;color:#f0b544}
+.cenafca-page__hero h1{font-size:clamp(58px,9vw,130px);line-height:.96;margin:0 0 24px;color:#fff}
+.cenafca-page__lead{font-size:clamp(19px,2vw,25px);line-height:1.48;max-width:660px;color:#d1dbed;margin:0 0 28px}
+.cenafca-page__hero-link{display:inline-flex;gap:12px;align-items:center;padding:13px 23px;border-radius:999px;background:#f0b544;color:#0e1b3d;text-decoration:none;font-weight:800;transition:transform .2s,background .2s}
+.cenafca-page__hero-link:hover{transform:translateY(-3px);background:#ffd06d}
+.cenafca-page__hero-mark{background:#eaf0f8;padding:clamp(18px,3vw,36px);border-radius:30px;box-shadow:0 25px 65px rgba(0,0,0,.25);transform:rotate(2deg)}
+.cenafca-page__hero-mark img{display:block;width:100%;height:auto;border-radius:15px}
+.cenafca-page__intro,.cenafca-page__formation,.cenafca-page__purpose,.cenafca-page__nature,.cenafca-page__invitation{padding:clamp(64px,8vw,110px) 0}
+.cenafca-page__intro,.cenafca-page__nature{background:#fff}
+.cenafca-page__formation{background:#eef2f9}
+.cenafca-page__purpose{background:#142957;color:#f4f6fb}
+.cenafca-page__invitation{background:#f6efe2}
+.cenafca-page__split{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:clamp(36px,6vw,95px)}
+.cenafca-page h2.disp{max-width:950px;margin:0 0 22px;font-size:clamp(34px,4.2vw,61px);line-height:1.08}
+.cenafca-page h2 em{color:#946300;font-weight:500}
+.cenafca-page__purpose h2 em{color:#f0b544}
+.cenafca-page section p:not(.section-eyebrow):not(.cenafca-page__breadcrumb):not(.cenafca-page__eyebrow):not(.cenafca-page__lead){font-size:clamp(16px,1.3vw,18px)}
+.cenafca-page__intro p,.cenafca-page__invitation p{max-width:690px;color:#44506b}
+.cenafca-page__photo{margin:0;border-radius:28px;overflow:hidden;background:#e8e8e8;box-shadow:0 22px 45px -30px rgba(14,27,61,.55)}
+.cenafca-page__photo img{width:100%;height:clamp(310px,35vw,480px);object-fit:cover;display:block}
+.cenafca-page__photo figcaption{padding:12px 20px;font-size:13px;color:#44506b}
+.cenafca-page__section-lead{max-width:880px;color:#44506b;margin:0 0 30px}
+.cenafca-page__pillars{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px}
+.cenafca-page__pillars article,.cenafca-page__purpose-grid article,.cenafca-page__nature-grid article{border-radius:21px;padding:clamp(22px,2.5vw,32px)}
+.cenafca-page__pillars article{background:#fff;border:1px solid #d9e1ef}
+.cenafca-page__pillars article>span{color:#a06c08;font-weight:800;letter-spacing:.15em}
+.cenafca-page__pillars h3{font-size:clamp(21px,1.85vw,28px);line-height:1.2;margin:14px 0 9px}
+.cenafca-page__pillars p,.cenafca-page__purpose-grid p,.cenafca-page__nature-grid p{margin:0;line-height:1.6}
+.cenafca-page__pillars p{color:#44506b}
+.cenafca-page__disciplines{display:flex;flex-wrap:wrap;gap:10px;margin-top:25px}
+.cenafca-page__disciplines span{border-radius:999px;background:#0e1b3d;color:#fff;padding:8px 15px;font-size:14px;font-weight:800}
+.cenafca-page__purpose .section-eyebrow{color:#f0b544}
+.cenafca-page__purpose-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin-top:35px}
+.cenafca-page__purpose-grid article{background:#1d376d;border:1px solid #3f5a92}
+.cenafca-page__purpose-grid h3{font:700 clamp(25px,2.4vw,35px)/1.15 'Fraunces',Georgia,serif;margin:0 0 14px;color:#f0b544}
+.cenafca-page__purpose-grid p{color:#d9e1ef}
+.cenafca-page__nature-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:32px}
+.cenafca-page__nature-grid article{background:#f2f5fa;border:1px solid #dce3ec}
+.cenafca-page__nature-grid article>span{color:#b17b1d;font-size:28px}
+.cenafca-page__nature-grid h3{font-size:clamp(25px,2.4vw,36px);margin:4px 0 8px}
+.cenafca-page__nature-grid p,.cenafca-page__nature-note{color:#44506b}
+.cenafca-page__nature-note{margin:24px 0 0}
+.cenafca-page__enroll{background:#fff;border-radius:28px;padding:clamp(28px,4vw,54px);box-shadow:0 22px 50px -35px rgba(14,27,61,.45)}
+.cenafca-page__enroll-icon{color:#b37e18;font-size:36px}
+.cenafca-page__enroll h3{font-size:clamp(28px,3vw,44px);line-height:1.1;margin:8px 0 14px}
+.cenafca-page__enroll p{color:#44506b;margin-bottom:20px}
+.cenafca-page__enroll .cenafca-link{margin:0 0 16px}
+.cenafca-page__email{display:block;color:#795207;text-underline-offset:4px;font-weight:800}
+@media(max-width:850px){.cenafca-page__hero-inner{grid-template-columns:1fr;min-height:0}.cenafca-page__hero-mark{max-width:550px;transform:none}.cenafca-page__split{grid-template-columns:1fr}.cenafca-page__pillars{grid-template-columns:repeat(2,minmax(0,1fr))}.cenafca-page__purpose-grid{grid-template-columns:1fr}.cenafca-page__header{align-items:flex-start}.cenafca-page__header nav{max-width:390px}}
+@media(max-width:600px){.cenafca-page__header{flex-direction:column;gap:14px}.cenafca-page__header nav{width:100%;justify-content:flex-start}.cenafca-page__header nav a{font-size:13px}.cenafca-page__header nav .cenafca-page__nav-cta{padding:8px 13px}.cenafca-page__hero-inner{padding-top:50px;padding-bottom:60px}.cenafca-page__breadcrumb{margin-bottom:36px}.cenafca-page__pillars,.cenafca-page__nature-grid{grid-template-columns:1fr}.cenafca-page__intro,.cenafca-page__formation,.cenafca-page__purpose,.cenafca-page__nature,.cenafca-page__invitation{padding:60px 0}}
