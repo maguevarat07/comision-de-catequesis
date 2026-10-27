@@ -298,13 +298,22 @@ section.jx{padding:0 0 64px!important;min-height:0!important;flex-direction:colu
 .marquee-strip{padding:12px 0!important}
 .marquee-strip .marq{font-size:28px!important}
 .site-credit{max-width:1200px;margin:18px auto 0;padding:0 clamp(20px,5vw,56px);font-size:13px;line-height:1.55;text-align:center;color:#C9D3E8}
-.catechesis-types{min-width:0;margin:0;padding:16px;border:1px solid #D6DDEC;border-radius:16px}
+.catechesis-types{min-width:0;margin:0;padding:16px;border:1px solid #D6DDEC;border-radius:16px;transform-origin:top center;animation:catechesis-reveal .42s cubic-bezier(.2,.8,.2,1) both}
 .catechesis-types legend{padding:0 5px;font-weight:700}
 .catechesis-types__hint{margin:0 0 12px;color:#44506B;font-size:14px;line-height:1.5}
 .catechesis-types__options{display:flex;flex-wrap:wrap;gap:8px}
-.catechesis-type{min-height:44px;padding:9px 15px;border:2px solid #0E1B3D;border-radius:99px;background:transparent;color:#0E1B3D;font:inherit;font-size:15px;font-weight:700;cursor:pointer}
+.catechesis-type{min-height:44px;padding:9px 15px;border:2px solid #0E1B3D;border-radius:99px;background:transparent;color:#0E1B3D;font:inherit;font-size:15px;font-weight:700;cursor:pointer;animation:catechesis-chip .35s cubic-bezier(.2,.8,.2,1) both}
+.catechesis-type:nth-child(2){animation-delay:45ms}
+.catechesis-type:nth-child(3){animation-delay:90ms}
+.catechesis-type:nth-child(4){animation-delay:135ms}
+.catechesis-type:nth-child(5){animation-delay:180ms}
+.catechesis-type:nth-child(6){animation-delay:225ms}
+.catechesis-type:nth-child(7){animation-delay:270ms}
 .catechesis-type[aria-pressed="true"]{background:#0E1B3D;color:#F2F5FB}
 .catechesis-type:focus-visible{outline:3px solid #B77B00;outline-offset:3px}
+@keyframes catechesis-reveal{from{opacity:0;transform:translateY(-10px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes catechesis-chip{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.catechesis-types,.catechesis-type{animation:none!important}}
 @media(max-width:860px){
   .hero{min-height:calc(100svh - 63px)!important;padding-top:clamp(146px,20svh,180px)!important;padding-bottom:24px!important}
   .hero h1{font-size:clamp(38px,min(10.5vw,6.4svh),62px)!important}
