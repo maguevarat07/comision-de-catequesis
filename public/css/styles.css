@@ -351,3 +351,126 @@ section.jx{padding:0 0 64px!important;min-height:0!important;flex-direction:colu
   .marquee-strip{padding:10px 0!important}
   .marquee-strip .marq{font-size:24px!important}
 }
+
+/* Each chapter settles into a clear first view on large screens. */
+@media (min-width: 861px){
+  html{scroll-snap-type:y proximity;scroll-padding-top:12px}
+  .screen-section{min-height:100svh;box-sizing:border-box;scroll-snap-align:start;scroll-snap-stop:normal}
+  .screen-section:not(.hero){padding-top:clamp(48px,6svh,78px)!important;padding-bottom:clamp(48px,6svh,78px)!important}
+  #mision,#cenafca,#cenafca-formacion,#territorio,#equipo,#hitos,#acogida{display:flex;align-items:center}
+  #mision>div,#equipo>div,#hitos>div,#territorio>div{width:100%}
+}
+
+/* CENAFCA: preserve the complete mark while its color fades into the copy. */
+.cenafca-logo-card{position:relative;isolation:isolate;min-height:clamp(290px,31vw,470px);display:flex;align-items:center;justify-content:center;padding:clamp(12px,2vw,28px);background:radial-gradient(ellipse at 38% 50%,rgba(43,124,161,.21),rgba(255,255,255,0) 72%);box-shadow:none;overflow:visible}
+.cenafca-logo-card::after{content:"";position:absolute;z-index:-1;inset:8% -10% 8% 45%;background:linear-gradient(90deg,rgba(45,132,164,.12),rgba(255,255,255,0));filter:blur(28px);pointer-events:none}
+.cenafca-logo-card img{width:min(100%,610px);max-height:430px;object-fit:contain;box-shadow:0 18px 55px -38px rgba(14,27,61,.48);mask-image:linear-gradient(90deg,#000 0 91%,rgba(0,0,0,.72) 97%,transparent 100%)}
+.cenafca-section{padding:clamp(56px,7svh,94px) 0}
+.cenafca-layout{max-width:1440px;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(25px,3.5vw,58px)}
+.cenafca-layout h2{font-size:clamp(32px,3.8vw,58px)}
+.cenafca-layout p:not(.section-eyebrow){font-size:clamp(16px,1.3vw,18px);line-height:1.56}
+.cenafca-link{transition:transform .25s,box-shadow .25s;background:#F0B544;color:#0E1B3D}
+.cenafca-link:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(176,113,0,.22)}
+.cenafca-detail{background:linear-gradient(140deg,#f6f2e9,#eaf0f8 75%);color:#0E1B3D;padding:72px 0}
+.cenafca-detail__inner{width:100%;max-width:1400px;margin:auto;padding:0 clamp(20px,5vw,56px);box-sizing:border-box}
+.cenafca-detail__intro{max-width:970px;margin-bottom:26px}
+.cenafca-detail__intro h2{font-size:clamp(34px,4vw,58px);line-height:1.07;margin:0 0 15px}
+.cenafca-detail__intro h2 em{font-weight:500;color:#865900}
+.cenafca-detail__intro p:last-child{max-width:900px;color:#44506B;font-size:17px;line-height:1.6;margin:0}
+.cenafca-detail__grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.cenafca-detail__card{background:#fff;border:1px solid #d8dfeb;border-radius:20px;padding:clamp(19px,2vw,28px);box-shadow:0 16px 34px -28px rgba(14,27,61,.45)}
+.cenafca-detail__number{color:#9a6907;font-size:13px;font-weight:800;letter-spacing:.15em}
+.cenafca-detail__card h3{font-size:clamp(20px,1.6vw,26px);line-height:1.17;margin:12px 0}
+.cenafca-detail__card p{color:#44506B;font-size:15px;line-height:1.55;margin:0}
+.cenafca-detail__action{display:flex;align-items:center;justify-content:space-between;gap:22px;margin-top:22px;padding:20px 26px;border-radius:20px;background:#0E1B3D;color:#f2f5fb}
+.cenafca-detail__action p{max-width:620px;margin:0;line-height:1.5}
+.cenafca-detail__action>div{display:flex;align-items:center;flex-wrap:wrap;gap:16px}
+.cenafca-detail__action .cenafca-link{margin:0;white-space:nowrap}
+.cenafca-detail__secondary{color:#fff;text-underline-offset:4px;font-weight:700}
+
+/* The whole map and its selected-zone explanation share the first view. */
+.territory-section>div{max-width:1450px!important}
+.territory-section h2{font-size:clamp(34px,3.5vw,54px)!important;max-width:1100px!important}
+.territory-section__layout{display:grid!important;grid-template-columns:minmax(0,1.2fr) minmax(330px,.8fr);gap:clamp(18px,2vw,28px)!important;align-items:center!important;margin-top:clamp(18px,3svh,30px)!important}
+.territory-section__map{padding:10px!important}
+.territory-section__zones button{padding:8px 14px!important;min-height:52px!important}
+.territory-section__zones .swap{margin-top:12px!important;padding:17px 20px!important}
+.territory-section__zones .swap h3{font-size:25px!important}
+.territory-section__zones .swap p{font-size:14px}
+
+/* Roster cards follow the reference and expand without a hard jump. */
+.team-section{padding:70px 0}
+.team-intro{margin:18px 0;font-size:17px;line-height:1.55}
+.team-director{margin:20px 0;padding:17px 24px}
+.team-roster{background:transparent;border-color:#cfd9e7;padding:0 18px;overflow:hidden}
+.team-roster summary{display:flex;justify-content:space-between;align-items:center;gap:14px;list-style:none;padding:18px 4px}
+.team-roster summary::-webkit-details-marker{display:none}
+.team-roster__chevron{display:inline-block;font-size:25px;line-height:1;transition:transform .35s}
+.team-roster[open] .team-roster__chevron{transform:rotate(180deg)}
+.team-roster ul{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding-bottom:18px}
+.team-roster li{position:relative;min-height:76px;display:grid;grid-template-columns:48px minmax(0,1fr);column-gap:12px;align-content:center;padding:12px 15px 12px 72px;background:#fff;border:1px solid #e0e5ee;border-radius:17px;box-sizing:border-box}
+.team-roster li::before{content:attr(data-initials);position:absolute;left:14px;top:50%;transform:translateY(-50%);width:43px;height:43px;border-radius:50%;display:grid;place-items:center;background:#246657;color:white;font-weight:800;font-size:15px}
+.team-roster li:nth-child(4n+2)::before{background:#d13a31}
+.team-roster li:nth-child(4n+3)::before{background:#be893a}
+.team-roster li:nth-child(4n+4)::before{background:#317f6d}
+.team-roster li strong,.team-roster li span{grid-column:1/-1}
+.team-roster li strong{font-size:16px;line-height:1.3}
+.team-roster li span{font-size:13px;line-height:1.35;color:#65636b}
+.team-roster__content{transform-origin:top;animation:roster-open .4s cubic-bezier(.2,.75,.25,1) both}
+@keyframes roster-open{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+
+/* Contact affordance and footer. */
+.floating-whatsapp{position:fixed;right:22px;bottom:22px;z-index:50;display:flex;align-items:center;gap:10px;text-decoration:none;filter:drop-shadow(0 10px 16px rgba(0,0,0,.24))}
+.floating-whatsapp>span:first-child{background:#fff;color:#1d1b1b;border-radius:999px;padding:12px 17px;font-weight:800;font-size:14px}
+.floating-whatsapp__circle{width:62px;height:62px;border:9px solid #175c3b;border-radius:50%;background:#1dca67;color:#fff;display:grid;place-items:center;box-sizing:content-box;transition:transform .3s}
+.floating-whatsapp svg{width:32px;height:32px}
+.floating-whatsapp:hover .floating-whatsapp__circle{transform:scale(1.08)}
+.floating-whatsapp:focus-visible,.site-footer a:focus-visible{outline:3px solid #f0b544;outline-offset:4px}
+.site-footer{background:#1d1919;color:#d8d0c8;padding:66px clamp(20px,5vw,56px) 104px}
+.site-footer__grid{max-width:1440px;margin:auto;display:grid;grid-template-columns:1.45fr .85fr .85fr 1.1fr;gap:clamp(24px,4vw,74px)}
+.site-footer__logos{display:flex;gap:12px;align-items:center;margin-bottom:18px}
+.site-footer__logos img{width:74px;height:74px;object-fit:contain;border-radius:50%}
+.site-footer__about strong{display:block;color:#fff;font-size:16px}
+.site-footer__about p{max-width:335px;margin:6px 0 20px;line-height:1.6}
+.site-footer h2{font:800 16px/1.3 'Plus Jakarta Sans',sans-serif;letter-spacing:.07em;color:#fff;margin:5px 0 18px}
+.site-footer nav{display:flex;flex-direction:column;gap:10px}
+.site-footer a{color:#ead5b8;text-decoration:none}
+.site-footer a:hover{text-decoration:underline;text-underline-offset:4px}
+.site-footer address{font-style:normal;line-height:1.7}
+.site-footer address a{display:inline-block;margin-top:8px}
+.site-footer__social{display:flex;gap:9px}
+.site-footer__social a{width:42px;height:42px;display:grid;place-items:center;border-radius:50%;background:#302c2c;color:#fff;transition:background .25s,transform .25s}
+.site-footer__social a:hover{background:#285d4a;transform:translateY(-3px)}
+.site-footer__social svg{width:21px;height:21px}
+.site-footer__bottom{max-width:1440px;margin:34px auto 0;padding-top:20px;border-top:1px solid #403b3b;display:flex;flex-direction:column;align-items:flex-start;gap:10px;color:#a9a29d;font-size:13px}
+.site-footer__bottom p{margin:0}
+.site-footer__bottom .site-credit{max-width:min(800px,82%);padding:0;text-align:left;margin:0;font-size:13px;color:#d8d0c8}
+.site-footer__bottom .site-credit strong{display:inline;color:#fff;text-decoration:underline;text-decoration-color:#21a16a;text-decoration-thickness:3px;text-underline-offset:4px}
+@media(max-width:1100px){.cenafca-detail__grid{grid-template-columns:repeat(2,minmax(0,1fr))}.team-roster ul{grid-template-columns:repeat(3,minmax(0,1fr))}.site-footer__grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(min-width:861px) and (max-width:1400px){
+  .hdr{padding:14px 30px!important;gap:10px!important;flex-wrap:nowrap!important}
+  .brand{gap:12px!important}
+  .logo-com{width:76px!important;height:76px!important}
+  .logo-arq img{height:40px!important}
+  .nav{gap:8px 14px!important;font-size:13px!important;flex-wrap:nowrap!important;white-space:nowrap}
+  .nav .btn{padding:9px 15px!important}
+}
+@media(min-width:861px) and (max-height:800px){
+  section.cenafca-detail.screen-section{padding-top:28px!important;padding-bottom:28px!important}
+  .cenafca-detail__intro{margin-bottom:16px}
+  .cenafca-detail__intro h2{font-size:clamp(32px,3.3vw,46px);margin-bottom:8px}
+  .cenafca-detail__intro p:last-child{font-size:15px;line-height:1.45}
+  .cenafca-detail__card{padding:15px 17px}
+  .cenafca-detail__card h3{font-size:20px;margin:6px 0}
+  .cenafca-detail__card p{font-size:13px;line-height:1.43}
+  .cenafca-detail__action{padding:12px 18px;margin-top:14px;font-size:14px}
+  .cenafca-detail__action .cenafca-link{padding:10px 17px}
+  section.territory-section.screen-section{padding-top:28px!important;padding-bottom:28px!important}
+  .territory-section h2{font-size:clamp(31px,3.1vw,44px)!important}
+  .territory-section__layout{margin-top:14px!important}
+  .territory-section__zones button{min-height:47px!important;padding:6px 12px!important}
+  .territory-section__zones .swap{padding:10px 17px!important;margin-top:9px!important}
+}
+@media(max-width:860px){.cenafca-layout{grid-template-columns:1fr}.cenafca-logo-card{max-width:none;min-height:0}.cenafca-logo-card img{max-height:360px}.territory-section__layout{grid-template-columns:1fr}.territory-section__zones{width:100%}.team-roster ul{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.cenafca-detail__grid{grid-template-columns:1fr}.cenafca-detail__action{align-items:flex-start;flex-direction:column}.team-roster ul{grid-template-columns:1fr}.site-footer__grid{grid-template-columns:1fr 1fr}.site-footer__about{grid-column:1/-1}.site-footer__bottom{display:block}.site-footer__bottom p+p{margin-top:12px}.floating-whatsapp>span:first-child{display:none}.floating-whatsapp{right:13px;bottom:13px}.floating-whatsapp__circle{width:51px;height:51px;border-width:6px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto;scroll-snap-type:none}.team-roster__content{animation:none}.floating-whatsapp__circle,.site-footer__social a{transition:none}}

@@ -9,6 +9,7 @@
 <script src="/assets/vendor/react-18.3.1.js"></script>
 <script src="/assets/vendor/react-dom-18.3.1.js"></script>
 <script src="/js/app.js"></script>
+<script src="/js/site-interactions.js" defer></script>
 <script src="/assets/vendor/dc-runtime.js"></script>
 </head>
 <body>
@@ -63,7 +64,7 @@
 </div>
 
 <!-- MISIÓN -->
-<section id="mision" style="background:#EEF2F9;color:#0E1B3D;padding:120px 0">
+<section id="mision" class="screen-section" style="background:#EEF2F9;color:#0E1B3D;padding:120px 0">
 <div style="max-width:1200px;margin:0 auto;padding:0 clamp(20px,5vw,56px)">
 <p class="rv" style="margin:0 0 20px;font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#7F5600">Quiénes somos</p>
 <h2 class="disp rv" style="margin:0;font-size:clamp(30px,4.4vw,56px);line-height:1.12;max-width:980px">Una Comisión al servicio de la <em style="color:#7F5600;font-weight:500">catequesis de toda la Arquidiócesis.</em></h2>
@@ -89,7 +90,7 @@
 </section>
 
 <!-- CAMINO -->
-<section id="camino" style="background:#0E1B3D;padding:120px 0 110px">
+<section id="camino" class="screen-section" style="background:#0E1B3D;padding:120px 0 110px">
 <div style="max-width:1100px;margin:0 auto;padding:0 clamp(20px,5vw,56px)">
 <p class="rv" style="margin:0 0 20px;font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)">El camino del catequista</p>
 <h2 class="disp rv" style="margin:0;font-size:clamp(32px,4.6vw,60px);line-height:1.08;max-width:820px">Cuatro pasos para pasar de la inquietud a la misión.</h2>
@@ -131,7 +132,7 @@
 </section>
 
 <!-- SERVICIOS -->
-<section id="servicios" style="background:#EEF2F9;color:#0E1B3D;padding:120px 0">
+<section id="servicios" class="screen-section" style="background:#EEF2F9;color:#0E1B3D;padding:120px 0">
 <div style="max-width:1200px;margin:0 auto;padding:0 clamp(20px,5vw,56px)">
 <p class="rv" style="margin:0 0 20px;font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#7F5600">Servicios de la Comisión</p>
 <h2 class="disp rv" style="margin:0;font-size:clamp(32px,4.6vw,60px);line-height:1.08;max-width:820px">Nadie catequiza solo.</h2>
@@ -169,7 +170,7 @@
 </section>
 
 <!-- CENAFCA -->
-<section id="cenafca" class="cenafca-section">
+<section id="cenafca" class="cenafca-section screen-section">
 <div class="cenafca-layout">
 <div class="cenafca-logo-card rv"><img src="/assets/images/cenafca-logo.png" alt="Logo oficial de CENAFCA, Centro Arquidiocesano para la Formación de Catequistas de Panamá"></div>
 <div>
@@ -178,19 +179,37 @@
 <p class="rv">El Centro Arquidiocesano para la Formación de Catequistas ofrece una formación integral y continua. Es una escuela semipresencial de estudio y trabajo individual y en grupo, al servicio de catequistas de las parroquias.</p>
 <div class="cenafca-topics rv"><span>Bíblica</span><span>Teológica</span><span>Catequética</span><span>Pedagógica</span><span>Pastoral</span></div>
 <p class="rv">La formación busca fortalecer las dimensiones humana, espiritual, doctrinal, pedagógica y metodológica del catequista para anunciar a Jesucristo a niños, jóvenes y adultos.</p>
-<a class="cenafca-link rv" href="mailto:catequesispanama15@gmail.com?subject=Informaci%C3%B3n%20sobre%20CENAFCA">Consultar formación en CENAFCA</a>
+<a class="cenafca-link rv" href="#cenafca-formacion">Consultar formación CENAFCA <span aria-hidden="true">↓</span></a>
 </div>
 </div>
 </section>
 
+<!-- FORMACIÓN CENAFCA -->
+<section id="cenafca-formacion" class="cenafca-detail screen-section">
+<div class="cenafca-detail__inner">
+<div class="cenafca-detail__intro rv">
+<p class="section-eyebrow">Centro Arquidiocesano para la Formación de Catequistas</p>
+<h2 class="disp">Formación para servir con <em>fe y preparación.</em></h2>
+<p>Ser catequista hoy requiere una vida de oración y comunidad, una formación sólida en la fe y herramientas para comunicarla a personas de distintas edades y contextos. CENAFCA acompaña ese aprendizaje como un proceso continuo.</p>
+</div>
+<div class="cenafca-detail__grid">
+<article class="cenafca-detail__card rv"><span class="cenafca-detail__number">01</span><h3 class="disp">Una escuela cercana a las parroquias</h3><p>Es una escuela semipresencial de ámbito interparroquial y diocesano, con estudio y trabajo individual y en grupo. Ofrece una formación catequística orgánica y sistemática.</p></article>
+<article class="cenafca-detail__card rv"><span class="cenafca-detail__number">02</span><h3 class="disp">Formación integral</h3><p>Integra las dimensiones humana, espiritual, doctrinal, pedagógica y metodológica. Sus talleres abarcan la Biblia, la teología, la catequética, la pedagogía y la pastoral.</p></article>
+<article class="cenafca-detail__card rv"><span class="cenafca-detail__number">03</span><h3 class="disp">Sistemática y sinodal</h3><p>Profundiza en la Palabra de Dios, la doctrina, la oración y la vida comunitaria. Se vive en comunión y participación, orientadas a la misión evangelizadora.</p></article>
+<article class="cenafca-detail__card rv"><span class="cenafca-detail__number">04</span><h3 class="disp">Experiencia al servicio de la fe</h3><p>Participan sacerdotes, catequetas, catequistas, psicólogos y docentes. La formación ayuda a acompañar a niños, jóvenes y adultos en sus comunidades.</p></article>
+</div>
+<div class="cenafca-detail__action rv"><p><strong>¿Te interesa formarte?</strong> Acércate a tu parroquia o consulta a la Comisión para conocer las próximas oportunidades.</p><div><a class="cenafca-link" href="https://docs.google.com/forms/d/e/1FAIpQLSc54SlEPxwY4hybVhRzNI7Q-vUcTC0RyfRC6Lc0uLsme3G46Q/viewform" target="_blank" rel="noopener noreferrer">Aplicar a un curso ↗</a><a class="cenafca-detail__secondary" href="mailto:catequesispanama15@gmail.com?subject=Informaci%C3%B3n%20sobre%20CENAFCA">Solicitar información</a></div></div>
+</div>
+</section>
+
 <!-- TERRITORIO -->
-<section id="territorio" style="background:linear-gradient(135deg,#17306D,#0E1B3D);padding:110px 0">
+<section id="territorio" class="territory-section screen-section" style="background:linear-gradient(135deg,#17306D,#0E1B3D);padding:110px 0">
 <div style="max-width:1200px;margin:0 auto;padding:0 clamp(20px,5vw,56px)">
 <p class="rv" style="margin:0 0 14px;font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)">La Arquidiócesis de Panamá</p>
 <h2 class="disp rv" style="margin:0;font-size:clamp(30px,4.4vw,56px);max-width:900px;line-height:1.1">Un territorio entero esperando catequistas con iniciativa.</h2>
 <p class="rv" style="margin:16px 0 0;font-size:18px;color:#C9D3E8">La Comisión acompaña a las zonas pastorales y a sus representantes. Explora las cuatro zonas en este mapa referencial.</p>
-<div style="margin-top:44px;display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start">
-<div class="rv" style="flex:1 1 560px;min-width:0;background:#fff;border-radius:28px;padding:14px;box-shadow:0 30px 70px -30px rgba(0,0,0,.7)">
+<div class="territory-section__layout" style="margin-top:44px;display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start">
+<div class="territory-section__map rv" style="flex:1 1 560px;min-width:0;background:#fff;border-radius:28px;padding:14px;box-shadow:0 30px 70px -30px rgba(0,0,0,.7)">
 <svg sc-camel-view-box="160 140 850 460" role="img" aria-label="Mapa referencial de cuatro zonas pastorales de la Arquidiócesis de Panamá. Usa la lista para elegir una zona." style="width:100%;height:auto;display:block;font-family:'Plus Jakarta Sans',system-ui,sans-serif">
 <image href="/assets/images/catequesis.png" x="0" y="0" width="1024" height="786"></image>
 <path class="zp" d="M475 189 L472 192 L471 202 L472 339 L530 335 L546 341 L562 339 L567 343 L582 342 L590 344 L604 353 L618 354 L630 362 L662 372 L674 382 L681 404 L688 411 L694 413 L698 410 L703 410 L707 420 L721 417 L727 421 L727 429 L733 434 L753 439 L759 453 L762 453 L766 448 L772 448 L772 457 L777 465 L789 464 L793 467 L797 467 L800 475 L808 475 L814 481 L820 503 L813 504 L812 507 L813 511 L820 517 L823 525 L824 548 L832 555 L838 555 L840 557 L840 563 L845 574 L853 578 L852 560 L848 549 L845 529 L833 510 L835 487 L823 466 L822 445 L831 422 L842 413 L844 409 L844 397 L846 395 L864 401 L883 401 L907 409 L908 399 L916 389 L922 385 L936 383 L942 372 L960 361 L975 358 L976 353 L970 345 L970 339 L986 317 L991 304 L990 299 L968 291 L950 275 L937 270 L914 266 L908 254 L887 253 L881 251 L878 246 L867 244 L861 240 L856 240 L850 245 L833 242 L824 222 L818 216 L811 214 L801 216 L794 220 L772 218 L762 209 L750 208 L730 200 L710 197 L694 202 L663 218 L646 217 L634 229 L626 233 L615 230 L597 231 L591 222 L583 222 L576 218 L554 218 L530 227 L525 227 L521 221 L524 203 L505 179 L495 178 Z" sc-camel-on-click="{{z3.pick}}" style="{{z3.style}}"></path>
@@ -205,7 +224,7 @@
 </g>
 </svg>
 </div>
-<div style="flex:1 1 360px;min-width:0">
+<div class="territory-section__zones" style="flex:1 1 360px;min-width:0">
 <div style="display:flex;flex-direction:column;gap:10px" role="group" aria-label="Zonas pastorales">
 <sc-for list="{{zoneBtns}}" as="b" hint-placeholder-count="4">
 <button type="button" sc-camel-on-click="{{b.pick}}" aria-pressed="{{b.active}}" style="{{b.style}}">
@@ -226,7 +245,7 @@
 </section>
 
 <!-- AGENDA -->
-<section id="agenda" style="background:#EEF2F9;color:#0E1B3D;padding:120px 0">
+<section id="agenda" class="screen-section" style="background:#EEF2F9;color:#0E1B3D;padding:120px 0">
 <div style="max-width:1000px;margin:0 auto;padding:0 clamp(20px,5vw,56px)">
 <p class="rv" style="margin:0 0 20px;font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#7F5600">Agenda</p>
 <h2 class="disp rv" style="margin:0;font-size:clamp(32px,4.6vw,60px);line-height:1.08">Actividades de la Comisión</h2>
@@ -246,45 +265,45 @@
 </section>
 
 <!-- EQUIPO -->
-<section id="equipo" class="team-section">
+<section id="equipo" class="team-section screen-section">
 <div class="team-wrap">
 <p class="rv section-eyebrow">Nuestro equipo</p>
 <h2 class="disp rv">Personas al servicio de la <em>misión catequética.</em></h2>
 <p class="rv team-intro">La Comisión está conformada por un equipo pastoral que orienta criterios, acompaña a las zonas pastorales, brinda formación permanente y prepara materiales para las parroquias. Su trabajo busca unir fidelidad al Magisterio, creatividad pastoral y cercanía a cada comunidad.</p>
 <div class="team-director rv"><span>Director</span><strong class="disp">Padre Israel Ramos Varcasía</strong></div>
-<details class="team-roster rv"><summary>Conocer al equipo de la Comisión</summary>
-<ul>
-<li><strong>Roxanna de Samudio</strong><span>Parroquia San Juan Apóstol</span></li>
-<li><strong>Mitzi Castillo</strong><span>Parroquia Cristo Redentor</span></li>
-<li><strong>Pamela Rodríguez</strong><span>Parroquia San Judas Tadeo</span></li>
-<li><strong>Ariadne Abrego</strong><span>Parroquia San Judas Tadeo</span></li>
-<li><strong>Dalet González</strong><span>Parroquia San Judas Tadeo</span></li>
-<li><strong>Omaraida Medina</strong><span>Parroquia Santísima Trinidad</span></li>
-<li><strong>Anayansi Rodríguez</strong><span>Parroquia Santísima Trinidad</span></li>
-<li><strong>Silvia de Greco</strong><span>Parroquia de la Candelaria (Juan Díaz)</span></li>
-<li><strong>Rosalba Chiu</strong><span>Parroquia María Madre de Dios</span></li>
-<li><strong>Jaime Bernal</strong><span>Parroquia San Francisco de Paula (La Chorrera)</span></li>
-<li><strong>Eyra García de Sabán</strong><span>Parroquia San Antonio de Padua (Miraflores)</span></li>
-<li><strong>Abigail Palacios</strong><span>Parroquia San Juan María Vianney</span></li>
-<li><strong>Angela Rodriguez</strong><span>Santuario Nacional del Corazón de María</span></li>
-<li><strong>Jenny Jiménez</strong><span>Parroquia San Antonio de Padua (Ciudad Jardín)</span></li>
-<li><strong>Katia Velarde</strong><span>Parroquia Santa Marta</span></li>
-<li><strong>Carmen Polanco</strong><span>Parroquia Inmaculada Concepción (Juan Díaz)</span></li>
-<li><strong>Rodrigo Gil</strong><span>Parroquia San Jerónimo</span></li>
-<li><strong>Diana López</strong><span>Parroquia Nuestra Señora del Carmen (Pasadena)</span></li>
-<li><strong>Alina Cardoze</strong></li>
-<li><strong>Grace Rodríguez</strong><span>Parroquia La Natividad de María</span></li>
-<li><strong>Rolando Degracia</strong><span>Parroquia San Mateo</span></li>
-<li><strong>Velia Villeros</strong><span>Parroquia San Mateo</span></li>
-<li><strong>Dilcia Bermúdez</strong><span>Parroquia San Juan Bosco (Pedregal)</span></li>
-<li><strong>Noris López</strong></li>
-<li><strong>Andreina González</strong></li>
-</ul></details>
+<details class="team-roster rv"><summary>Conocer al equipo de la Comisión <span aria-hidden="true" class="team-roster__chevron">⌄</span></summary>
+<div class="team-roster__content"><ul>
+<li data-initials="RS"><strong>Roxanna de Samudio</strong><span>Parroquia San Juan Apóstol</span></li>
+<li data-initials="MC"><strong>Mitzi Castillo</strong><span>Parroquia Cristo Redentor</span></li>
+<li data-initials="PR"><strong>Pamela Rodríguez</strong><span>Parroquia San Judas Tadeo</span></li>
+<li data-initials="AA"><strong>Ariadne Abrego</strong><span>Parroquia San Judas Tadeo</span></li>
+<li data-initials="DG"><strong>Dalet González</strong><span>Parroquia San Judas Tadeo</span></li>
+<li data-initials="OM"><strong>Omaraida Medina</strong><span>Parroquia Santísima Trinidad</span></li>
+<li data-initials="AR"><strong>Anayansi Rodríguez</strong><span>Parroquia Santísima Trinidad</span></li>
+<li data-initials="SG"><strong>Silvia de Greco</strong><span>Parroquia de la Candelaria (Juan Díaz)</span></li>
+<li data-initials="RC"><strong>Rosalba Chiu</strong><span>Parroquia María Madre de Dios</span></li>
+<li data-initials="JB"><strong>Jaime Bernal</strong><span>Parroquia San Francisco de Paula (La Chorrera)</span></li>
+<li data-initials="EG"><strong>Eyra García de Sabán</strong><span>Parroquia San Antonio de Padua (Miraflores)</span></li>
+<li data-initials="AP"><strong>Abigail Palacios</strong><span>Parroquia San Juan María Vianney</span></li>
+<li data-initials="AR"><strong>Angela Rodriguez</strong><span>Santuario Nacional del Corazón de María</span></li>
+<li data-initials="JJ"><strong>Jenny Jiménez</strong><span>Parroquia San Antonio de Padua (Ciudad Jardín)</span></li>
+<li data-initials="KV"><strong>Katia Velarde</strong><span>Parroquia Santa Marta</span></li>
+<li data-initials="CP"><strong>Carmen Polanco</strong><span>Parroquia Inmaculada Concepción (Juan Díaz)</span></li>
+<li data-initials="RG"><strong>Rodrigo Gil</strong><span>Parroquia San Jerónimo</span></li>
+<li data-initials="DL"><strong>Diana López</strong><span>Parroquia Nuestra Señora del Carmen (Pasadena)</span></li>
+<li data-initials="AC"><strong>Alina Cardoze</strong><span>Equipo arquidiocesano</span></li>
+<li data-initials="GR"><strong>Grace Rodríguez</strong><span>Parroquia La Natividad de María</span></li>
+<li data-initials="RD"><strong>Rolando Degracia</strong><span>Parroquia San Mateo</span></li>
+<li data-initials="VV"><strong>Velia Villeros</strong><span>Parroquia San Mateo</span></li>
+<li data-initials="DB"><strong>Dilcia Bermúdez</strong><span>Parroquia San Juan Bosco (Pedregal)</span></li>
+<li data-initials="NL"><strong>Noris López</strong><span>Equipo arquidiocesano</span></li>
+<li data-initials="AG"><strong>Andreina González</strong><span>Instituto Técnico Don Bosco</span></li>
+</ul></div></details>
 </div>
 </section>
 
 <!-- HITOS -->
-<section id="hitos" style="background:#0E1B3D;padding:120px 0">
+<section id="hitos" class="screen-section" style="background:#0E1B3D;padding:120px 0">
 <div style="max-width:1200px;margin:0 auto;padding:0 clamp(20px,5vw,56px)">
 <p class="rv" style="margin:0 0 20px;font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)">Vida en comunidad</p>
 <h2 class="disp rv" style="margin:0;font-size:clamp(32px,4.6vw,60px);line-height:1.08;max-width:820px">La catequesis se construye juntos.</h2>
@@ -312,16 +331,16 @@
 </section>
 
 <!-- RECURSOS -->
-<section style="background:#EEF2F9;color:#0E1B3D;padding:110px 0">
+<section id="recursos" class="screen-section" style="background:#EEF2F9;color:#0E1B3D;padding:110px 0">
 <div style="max-width:1200px;margin:0 auto;padding:0 clamp(20px,5vw,56px)">
 <p class="rv" style="margin:0 0 20px;font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#7F5600">Recursos para catequistas</p>
 <div style="margin-top:32px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:22px">
-<div class="card rv" style="display:block;text-decoration:none;background:#fff;border:1px solid #D6DDEC;border-radius:22px;padding:32px"><h3 class="disp" style="margin:0 0 10px;font-size:26px">Lineamientos y materiales</h3><p style="margin:0 0 18px;color:#44506B">La Comisión elabora y difunde orientaciones, programas y subsidios para apoyar la catequesis en las parroquias.</p><a href="mailto:catequesispanama15@gmail.com?subject=Consulta%20sobre%20materiales%20de%20catequesis" style="font-weight:700;color:#7F5600">Consultar materiales disponibles →</a></div></div>
+<div class="card rv" style="display:block;text-decoration:none;background:#fff;border:1px solid #D6DDEC;border-radius:22px;padding:32px"><h3 class="disp" style="margin:0 0 10px;font-size:26px">Lineamientos y materiales</h3><p style="margin:0 0 18px;color:#44506B">La Comisión elabora y difunde orientaciones, programas y subsidios para apoyar la catequesis en las parroquias.</p><a href="https://docs.google.com/forms/d/e/1FAIpQLSc54SlEPxwY4hybVhRzNI7Q-vUcTC0RyfRC6Lc0uLsme3G46Q/viewform" target="_blank" rel="noopener noreferrer" style="font-weight:700;color:#7F5600">Formaciones →</a></div></div>
 </div>
 </section>
 
 <!-- ACOGIDA -->
-<section id="acogida" class="jx" style="position:relative;overflow:hidden;min-height:800px;display:flex;align-items:center;background:#0E1B3D;padding:110px 0">
+<section id="acogida" class="jx screen-section" style="position:relative;overflow:hidden;min-height:800px;display:flex;align-items:center;background:#0E1B3D;padding:110px 0">
 <img class="jx-img" src="/assets/images/comunidad.jpg" alt="Jesucristo con los brazos abiertos frente a un amanecer dorado, sobre un paisaje de montañas, un lago y una ciudad" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:18% center">
 <div class="jx-shade" aria-hidden="true" style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(9,19,48,0) 30%,rgba(9,19,48,.5) 56%,rgba(9,19,48,.86) 100%)"></div>
 <div class="halo" aria-hidden="true" style="position:absolute;left:24%;top:-10%;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(255,226,150,.5),rgba(255,226,150,0) 65%);pointer-events:none"></div>
@@ -340,13 +359,12 @@
 </section>
 
 <!-- ÚNETE -->
-<section id="unete" style="position:relative;background:radial-gradient(ellipse at 20% 0%,#1D3677 0%,#0E1B3D 60%);padding:120px 0">
+<section id="unete" class="screen-section" style="position:relative;background:radial-gradient(ellipse at 20% 0%,#1D3677 0%,#0E1B3D 60%);padding:120px 0">
 <div style="max-width:1200px;margin:0 auto;padding:0 clamp(20px,5vw,56px);display:flex;flex-wrap:wrap;gap:56px;align-items:flex-start">
 <div style="flex:1 1 380px;min-width:0">
 <p class="rv" style="margin:0 0 20px;font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)">Da el paso</p>
 <h2 class="disp rv" style="margin:0;font-size:clamp(34px,5vw,64px);line-height:1.06">Tu parroquia necesita <em style="color:var(--gold);font-weight:500">tu</em> iniciativa.</h2>
 <p class="rv" style="margin:22px 0 0;font-size:19px;color:#C9D3E8">¿Quieres conocer las actividades, los materiales o la formación de CENAFCA? Puedes comunicarte con la Comisión. El formulario de esta página sigue siendo una demostración.</p>
-<div class="contact-actions rv"><a href="https://wa.me/50767004543">Escribir por WhatsApp</a><a href="mailto:catequesispanama15@gmail.com">Enviar un correo</a></div>
 <figure class="rv" style="margin:40px 0 0;padding:28px 30px;border-radius:24px;background:rgba(242,245,251,.07);border:1px solid rgba(240,181,68,.4)">
 <p class="disp" style="margin:0;font-size:56px;line-height:.5;color:var(--gold)" aria-hidden="true">“</p>
 <blockquote style="margin:6px 0 0"><p class="disp" style="margin:0;font-size:clamp(20px,2.3vw,27px);font-style:italic;font-weight:500;line-height:1.3">El fin definitivo de la catequesis es poner a uno <span style="color:var(--gold)">no sólo en contacto sino en comunión, en intimidad con Jesucristo</span>.</p></blockquote>
@@ -388,20 +406,25 @@
 </section>
 
 <!-- FOOTER -->
-<footer style="background:#091330;padding:70px 0 40px;color:#C9D3E8">
-<div style="max-width:1200px;margin:0 auto;padding:0 clamp(20px,5vw,56px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:36px">
-<div>
-<div style="display:flex;flex-wrap:wrap;gap:18px 14px;align-items:center;margin-bottom:18px">
-<img src="/assets/images/seccion-catequesis-oficial.png" alt="Logo de la Sección de Catequesis de la Arquidiócesis de Panamá" style="width:88px;height:88px;display:block;flex:none;border-radius:50%">
-<img src="/assets/images/arquidiocesis.png" alt="Arquidiócesis de Panamá, 100 años" style="width:min(340px,100%);height:auto;display:block">
+<footer id="pie" class="site-footer">
+<div class="site-footer__grid">
+<div class="site-footer__about">
+<div class="site-footer__logos"><img src="/assets/images/seccion-catequesis-oficial.png" alt="Logo de la Sección de Catequesis"><img src="/assets/images/catequistas-un-solo-corazon.png" alt="Logo Catequistas con un solo corazón"></div>
+<strong>Comisión Arquidiocesana de Catequesis</strong>
+<p>Organismo eclesial que coordina, anima y acompaña la acción catequética en la Arquidiócesis de Panamá.</p>
+<div class="site-footer__social" aria-label="Redes sociales y contacto">
+<a href="https://www.instagram.com/catequesispanama/" aria-label="Instagram de Catequesis Panamá" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
+<a href="https://www.facebook.com/catequesispanama" aria-label="Facebook de Catequesis Panamá" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14.2 21v-8h2.7l.4-3.1h-3.1V8c0-.9.3-1.5 1.6-1.5h1.7V3.7a23 23 0 0 0-2.5-.1c-2.5 0-4.2 1.5-4.2 4.3v2H8V13h2.8v8z"/></svg></a>
+<a href="https://wa.me/50767004543" aria-label="WhatsApp de Catequesis Panamá" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4.2 19.8 5.4 16A8.5 8.5 0 1 1 8 18.6z"/><path d="M9 8.2c-.3-.7-.6-.7-.9-.7-.4 0-.8.2-1.1.6-.3.4-.7 1-.5 2 .2 1 1.1 2.5 2.5 3.8s3 2.1 4 2.3c1 .2 1.6-.2 2-.7.3-.4.5-1 .3-1.2-.1-.2-.5-.3-.9-.5l-1.2-.6c-.3-.1-.5 0-.7.2l-.6.7c-.2.2-.5.2-.8 0a9 9 0 0 1-3-3c-.2-.3-.1-.5.1-.7l.5-.6c.2-.3.2-.5.1-.8z"/></svg></a>
 </div>
-<p class="disp" style="margin:0 0 10px;font-size:24px;color:#F2F5FB">Comisión Arquidiocesana de Catequesis</p><p style="margin:0">Arquidiócesis de Panamá</p></div>
-<div><p style="margin:0 0 10px;font-weight:700;color:#F2F5FB">Contacto de la Comisión</p><p style="margin:0"><a href="mailto:catequesispanama15@gmail.com" style="color:var(--gold)">catequesispanama15@gmail.com</a><br><a href="https://wa.me/50767004543" style="color:#C9D3E8">WhatsApp: +507 6700-4543</a><br>Edificio San Pablo, junto al Arzobispado de Panamá, Av. 1 A Sur, Ciudad de Panamá</p></div>
-<div><p style="margin:0 0 10px;font-weight:700;color:#F2F5FB">Síguenos</p><p style="margin:0"><a href="https://www.instagram.com/catequesispanama/" style="color:var(--gold);font-weight:700">Instagram: @catequesispanama</a><br><a href="https://www.facebook.com/catequesispanama" style="color:#C9D3E8">Facebook: Catequesis Panamá</a></p><img src="/assets/images/catequistas-un-solo-corazon.png" alt="Logo Catequistas con un solo corazón, al encuentro con Jesús" class="footer-heart-logo"></div>
 </div>
-<div aria-hidden="true" style="max-width:1200px;margin:48px auto 0;display:flex;height:6px;border-radius:6px;overflow:hidden"><span style="flex:1;background:#2D5BD6"></span><span style="flex:1;background:#F2F5FB"></span><span style="flex:1;background:#D3283B"></span></div>
-<p class="site-credit">Página web creada por Miguel Guevara · Estudiante de Ing. en Sistemas en la Universidad Tecnológica de Panamá</p>
+<div><h2>EXPLORA</h2><nav aria-label="Enlaces del pie de página"><a href="#inicio">Inicio</a><a href="#mision">Quiénes somos</a><a href="#cenafca">CENAFCA</a><a href="#servicios">Servicios</a><a href="#equipo">Equipo</a><a href="#agenda">Agenda</a><a href="#unete">Contacto</a></nav></div>
+<div><h2>CENAFCA</h2><nav aria-label="Formación CENAFCA"><a href="#cenafca-formacion">Formación</a><a href="https://docs.google.com/forms/d/e/1FAIpQLSc54SlEPxwY4hybVhRzNI7Q-vUcTC0RyfRC6Lc0uLsme3G46Q/viewform" target="_blank" rel="noopener noreferrer">Aplicar a un curso</a><a href="#agenda">Calendario</a></nav></div>
+<div><h2>CONTACTO</h2><address>Edificio San Pablo, contiguo al Arzobispado de Panamá, Av. 1 A Sur, Ciudad de Panamá<br><a href="https://wa.me/50767004543">+507 6700-4543</a><br><a href="mailto:catequesispanama15@gmail.com">catequesispanama15@gmail.com</a></address></div>
+</div>
+<div class="site-footer__bottom"><p>© 2026 Comisión Arquidiocesana de Catequesis · Arquidiócesis de Panamá.</p><p class="site-credit">Página web creada por <strong>Miguel Guevara</strong> · Estudiante de Ingeniería en Sistemas y Computación de la UTP</p></div>
 </footer>
+<a class="floating-whatsapp" href="https://wa.me/50767004543" target="_blank" rel="noopener noreferrer" aria-label="Escríbenos por WhatsApp"><span>Escríbenos</span><span class="floating-whatsapp__circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4.2 19.8 5.4 16A8.5 8.5 0 1 1 8 18.6z"/><path d="M9 8.2c-.3-.7-.6-.7-.9-.7-.4 0-.8.2-1.1.6-.3.4-.7 1-.5 2 .2 1 1.1 2.5 2.5 3.8s3 2.1 4 2.3c1 .2 1.6-.2 2-.7.3-.4.5-1 .3-1.2-.1-.2-.5-.3-.9-.5l-1.2-.6c-.3-.1-.5 0-.7.2l-.6.7c-.2.2-.5.2-.8 0a9 9 0 0 1-3-3c-.2-.3-.1-.5.1-.7l.5-.6c.2-.3.2-.5.1-.8z"/></svg></span></a>
 
 </div>
 </x-dc>
