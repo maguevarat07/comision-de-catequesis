@@ -308,6 +308,13 @@
 <div style="display:flex;flex-wrap:wrap;gap:10px">
 <sc-for list="{{intereses}}" as="i" hint-placeholder-count="3"><button type="button" sc-camel-on-click="{{i.pick}}" aria-pressed="{{i.active}}" style="{{i.style}}">{{i.label}}</button></sc-for>
 </div></fieldset>
+<sc-if value="{{isCatequista}}" hint-placeholder-val="{{ false }}">
+<fieldset class="catechesis-types"><legend>¿En qué áreas de catequesis sirves?</legend>
+<p class="catechesis-types__hint">Puedes seleccionar más de una opción.</p>
+<div class="catechesis-types__options">
+<sc-for list="{{tiposCatequesis}}" as="tipo" hint-placeholder-count="7"><button type="button" class="catechesis-type" sc-camel-on-click="{{tipo.toggle}}" aria-pressed="{{tipo.active}}">{{tipo.label}}</button></sc-for>
+</div></fieldset>
+</sc-if>
 <div style="display:flex;flex-direction:column;gap:6px"><label for="f-nombre" style="font-weight:700">Nombre completo</label><input id="f-nombre" type="text" required="" value="{{nombre}}" sc-camel-on-input="{{setNombre}}" style="padding:14px 16px;border-radius:12px;border:1.5px solid #9AA6BF;font:inherit;min-height:48px"></div>
 <div style="display:flex;flex-direction:column;gap:6px"><label for="f-par" style="font-weight:700">Parroquia y vicaría</label><input id="f-par" type="text" required="" value="{{parroquia}}" sc-camel-on-input="{{setParroquia}}" style="padding:14px 16px;border-radius:12px;border:1.5px solid #9AA6BF;font:inherit;min-height:48px"></div>
 <div style="display:flex;flex-direction:column;gap:6px"><label for="f-con" style="font-weight:700">Correo o WhatsApp</label><input id="f-con" type="text" required="" value="{{contacto}}" sc-camel-on-input="{{setContacto}}" style="padding:14px 16px;border-radius:12px;border:1.5px solid #9AA6BF;font:inherit;min-height:48px"></div>

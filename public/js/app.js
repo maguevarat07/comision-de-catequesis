@@ -1,7 +1,7 @@
 /* Interacciones del prototipo. No se envían ni guardan datos. */
 window.createCatequesisComponent = function (DCLogic) {
 class Component extends DCLogic {
-  state = { zone: -1, hito: 0, rev: 0, open: -1, step: 0, sub: 0, ag: -1, interes: 0, nombre: '', parroquia: '', contacto: '', mensaje: '', sent: false };
+  state = { zone: -1, hito: 0, rev: 0, open: -1, step: 0, sub: 0, ag: -1, interes: 0, categorias: [], nombre: '', parroquia: '', contacto: '', mensaje: '', sent: false };
 
   renderVals() {
     const s = this.state;
@@ -66,8 +66,14 @@ class Component extends DCLogic {
     const intData = ['Quiero empezar como catequista', 'Ya soy catequista', 'Coordino la catequesis de mi parroquia'];
     const intereses = intData.map((l, i) => ({
       label: l, active: s.interes === i,
-      pick: () => this.setState({ interes: i }),
+      pick: () => this.setState({ interes: i, categorias: i === 1 ? this.state.categorias : [] }),
       style: 'padding:10px 16px;border-radius:99px;font:inherit;font-size:15px;font-weight:700;cursor:pointer;min-height:44px;border:2px solid #0E1B3D;background:' + (s.interes === i ? '#0E1B3D' : 'transparent') + ';color:' + (s.interes === i ? '#F2F5FB' : '#0E1B3D')
+    }));
+    const tiposCatequesis = ['Niños', 'Jóvenes', 'Adultos', 'Prebautismal', 'Especial', 'Familiar', 'Otra área'].map(label => ({
+      label, active: s.categorias.includes(label),
+      toggle: () => this.setState({ categorias: this.state.categorias.includes(label)
+        ? this.state.categorias.filter(value => value !== label)
+        : [...this.state.categorias, label] })
     }));
 
     const cardData = [
@@ -145,7 +151,7 @@ class Component extends DCLogic {
       stop: (e) => e.stopPropagation(),
       accent: gold, dots, steps, progress, cur: stepsData[s.step],
       words: ['Anunciar', 'Celebrar', 'Acompañar', 'Formar', 'Enviar', 'Servir'],
-      services, subs, subText: subData[s.sub][1], agenda, intereses,
+      services, subs, subText: subData[s.sub][1], agenda, intereses, isCatequista: s.interes === 1, tiposCatequesis,
       subTitle: 'Catequesis ' + subData[s.sub][0].toLowerCase(),
       subImg0: imgStyle(s.sub === 0), subImg1: imgStyle(s.sub === 1), subImg2: imgStyle(s.sub === 2), subImg3: imgStyle(s.sub === 3),
       z0: zs[0], z1: zs[1], z2: zs[2], z3: zs[3], zoneBtns, zc,
@@ -157,7 +163,7 @@ class Component extends DCLogic {
       setMensaje: (e) => this.setState({ mensaje: e.target.value }),
       sent: s.sent, notSent: !s.sent,
       submit: (e) => { e.preventDefault(); this.setState({ sent: true }); },
-      reset: () => this.setState({ sent: false, nombre: '', parroquia: '', contacto: '', mensaje: '' })
+      reset: () => this.setState({ sent: false, interes: 0, categorias: [], nombre: '', parroquia: '', contacto: '', mensaje: '' })
     };
   }
 }
