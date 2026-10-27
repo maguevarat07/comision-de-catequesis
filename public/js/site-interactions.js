@@ -1,5 +1,16 @@
 (() => {
   const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let initialHashHandled = false;
+
+  function alignInitialHash() {
+    if (initialHashHandled || !window.location.hash) return;
+    const target = document.getElementById(decodeURIComponent(window.location.hash.slice(1)));
+    if (!target || !document.querySelector('details.team-roster')) return;
+    initialHashHandled = true;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      target.scrollIntoView({ behavior: 'instant', block: 'start' });
+    }));
+  }
 
   function enhanceRoster(details) {
     if (details.dataset.enhanced) return;
@@ -40,6 +51,7 @@
 
   function findRoster() {
     document.querySelectorAll('details.team-roster').forEach(enhanceRoster);
+    alignInitialHash();
   }
 
   if (document.readyState === 'loading') {
@@ -48,4 +60,5 @@
     findRoster();
   }
   new MutationObserver(findRoster).observe(document.documentElement, { childList: true, subtree: true });
+  window.addEventListener('load', alignInitialHash, { once: true });
 })();
