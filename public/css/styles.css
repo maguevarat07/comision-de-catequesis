@@ -314,6 +314,35 @@ section.jx{padding:0 0 64px!important;min-height:0!important;flex-direction:colu
 @keyframes catechesis-reveal{from{opacity:0;transform:translateY(-10px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes catechesis-chip{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){.catechesis-types,.catechesis-type{animation:none!important}}
+.section-eyebrow{margin:0 0 18px;color:#7F5600;font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
+.cenafca-section{background:#fff;color:#0E1B3D;padding:110px 0}
+.cenafca-layout{max-width:1200px;margin:auto;padding:0 clamp(20px,5vw,56px);display:grid;grid-template-columns:minmax(260px,.9fr) minmax(0,1.1fr);align-items:center;gap:clamp(28px,5vw,72px)}
+.cenafca-logo-card{padding:clamp(18px,3vw,38px);border-radius:28px;background:#EEF2F9;box-shadow:0 24px 65px -35px rgba(14,27,61,.45)}
+.cenafca-logo-card img{width:100%;height:auto;display:block;border-radius:16px}
+.cenafca-layout h2,.team-wrap h2{margin:0;font-size:clamp(34px,4.5vw,58px);line-height:1.08}
+.cenafca-layout h2 em,.team-wrap h2 em{color:#7F5600;font-weight:500}
+.cenafca-layout p:not(.section-eyebrow){font-size:18px;line-height:1.7;color:#44506B}
+.cenafca-topics{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0}
+.cenafca-topics span{padding:8px 13px;border-radius:99px;background:#0E1B3D;color:#fff;font-size:14px;font-weight:700}
+.cenafca-link{display:inline-block;margin-top:10px;padding:14px 24px;border-radius:99px;background:#F0B544;color:#0E1B3D;font-weight:700;text-decoration:none}
+.team-section{background:#EEF2F9;color:#0E1B3D;padding:110px 0}
+.team-wrap{max-width:1200px;margin:auto;padding:0 clamp(20px,5vw,56px)}
+.team-intro{max-width:850px;color:#44506B;font-size:19px;line-height:1.7}
+.team-director{display:flex;flex-wrap:wrap;gap:8px 24px;align-items:center;margin:32px 0;padding:24px 30px;border-left:6px solid #F0B544;border-radius:0 20px 20px 0;background:#fff}
+.team-director span{color:#7F5600;font-size:14px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.team-director strong{font-size:clamp(24px,3vw,34px)}
+.team-roster{background:#fff;border:1px solid #D6DDEC;border-radius:20px;padding:0 24px}
+.team-roster summary{padding:22px 4px;font-weight:700;cursor:pointer}
+.team-roster summary:focus-visible,.cenafca-link:focus-visible,.contact-actions a:focus-visible{outline:3px solid #B77B00;outline-offset:3px}
+.team-roster ul{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(230px,100%),1fr));gap:12px;list-style:none;margin:0;padding:0 0 24px}
+.team-roster li{display:flex;flex-direction:column;gap:4px;padding:14px;border-radius:12px;background:#F2F5FB;line-height:1.4}
+.team-roster li span{color:#44506B;font-size:14px}
+.contact-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:24px}
+.contact-actions a{padding:12px 18px;border:1px solid #F0B544;border-radius:99px;color:#F0B544;font-weight:700;text-decoration:none}
+.contact-actions a:first-child{background:#F0B544;color:#0E1B3D}
+.footer-heart-logo{display:block;width:94px;height:94px;object-fit:contain;margin-top:16px;border-radius:50%}
+@media(max-width:860px){.nav{scrollbar-width:none}.nav::-webkit-scrollbar{display:none}}
+@media(max-width:860px){.cenafca-layout{grid-template-columns:1fr}.cenafca-logo-card{max-width:520px}}
 @media(max-width:860px){
   .hero{min-height:calc(100svh - 63px)!important;padding-top:clamp(146px,20svh,180px)!important;padding-bottom:24px!important}
   .hero h1{font-size:clamp(38px,min(10.5vw,6.4svh),62px)!important}

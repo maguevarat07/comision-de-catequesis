@@ -8,15 +8,15 @@ class Component extends DCLogic {
     const gold = this.props.accent ?? '#F0B544';
 
     const stepsData = [
-      { title: 'Escucha el llamado', body: 'Todo catequista empieza con una inquietud: ¿quién acompaña a los niños, jóvenes y familias de mi comunidad? Si esa pregunta te ronda, ya diste el primer paso. Habla con tu párroco y acércate a la Comisión.', offer: 'Orientación para discernir cómo servir en tu parroquia.', cta: 'Pedir orientación' },
-      { title: 'Fórmate', body: 'La Comisión ofrece formación para catequistas: metodología, diseño de proyectos y aplicación práctica, además de espacios permanentes de actualización pedagógica y espiritual.', offer: 'Talleres, materiales y formación permanente para catequistas.', cta: 'Quiero formarme' },
-      { title: 'Sé enviado', body: 'Al inicio del año pastoral, la comunidad celebra la Eucaristía de envío: los catequistas son enviados como misioneros a sus parroquias, con el respaldo de toda la Arquidiócesis.', offer: 'Una celebración de envío y el acompañamiento de tu vicaría.', cta: 'Quiero ser enviado' },
-      { title: 'Acompaña y celebra', body: 'Los catequistas no caminan solos: se reúnen con la Comisión y las vicarías para coordinar, compartir experiencias y celebrar su vocación en el Día del Catequista.', offer: 'Reuniones de coordinación, reconocimiento y comunidad.', cta: 'Quiero sumarme' }
+      { title: 'Acércate a tu parroquia', body: 'El primer paso para servir como catequista es conversar con tu comunidad parroquial. Allí podrás conocer sus necesidades y recibir orientación para comenzar.', offer: 'La Comisión acompaña a los equipos parroquiales y a las zonas pastorales.', cta: 'Pedir orientación' },
+      { title: 'Fórmate', body: 'CENAFCA ofrece formación bíblica, teológica, catequética, pedagógica y pastoral. La preparación del catequista es un proceso continuo, unido a la oración y la vida comunitaria.', offer: 'Formación humana, espiritual, doctrinal, pedagógica y metodológica.', cta: 'Conocer CENAFCA' },
+      { title: 'Comparte la fe', body: 'La catequesis ayuda a niños, jóvenes y adultos a conocer a Jesucristo y a vivir el Evangelio. Cada comunidad adapta su acompañamiento a las personas y a su realidad.', offer: 'Lineamientos, materiales y apoyo para la labor catequética.', cta: 'Conocer los servicios' },
+      { title: 'Camina en comunidad', body: 'La Comisión promueve encuentros, retiros y espacios de coordinación para fortalecer la vocación del catequista y la comunión entre parroquias.', offer: 'Encuentros zonales, Semana de Catequesis y Día del Catequista.', cta: 'Ver actividades' }
     ];
     const steps = stepsData.map((d, i) => {
       const active = s.step === i; const done = s.step >= i;
       return {
-        n: i + 1, title: d.title, body: d.body, offer: d.offer, cta: d.cta, active,
+        n: i + 1, title: d.title, body: d.body, offer: d.offer, cta: d.cta, href: ['#unete', '#cenafca', '#servicios', '#agenda'][i], active,
         pick: () => this.setState({ step: i }),
         btnStyle: 'background:none;border:0;cursor:pointer;color:#F2F5FB;font:inherit;display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:0 4px 0 0;min-height:44px;opacity:' + (active ? 1 : 0.72),
         dotStyle: 'width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:22px;font-family:Fraunces,Georgia,serif;transition:all .4s;border:3px solid ' + gold + ';background:' + (done ? gold : '#0E1B3D') + ';color:' + (done ? '#0E1B3D' : gold) + ';transform:scale(' + (active ? 1.12 : 1) + ')'
@@ -25,20 +25,20 @@ class Component extends DCLogic {
     const progress = 'calc((100% - 56px) * ' + (s.step / 3) + ')';
 
     const svcData = [
-      ['Formación de catequistas', 'Metodología, diseño de proyectos y aplicación práctica para renovar la forma de catequizar en cada parroquia.', 'M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 19V5'],
-      ['Catequesis específicas', 'Propuestas para familias, personas con necesidades especiales, adultos y jóvenes.', 'M16 20v-1a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1M9.5 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM21 20v-1a4 4 0 0 0-3-3.9M16 4.2a3.5 3.5 0 0 1 0 6.6'],
-      ['Encuentro y comunión', 'Reuniones mensuales de coordinación con las vicarías para caminar en una misma dirección.', 'M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1'],
-      ['Envío misionero', 'Eucaristía de envío al inicio del año pastoral para los catequistas de toda la Arquidiócesis.', 'M22 2 11 13M22 2l-7 20-4-9-9-4z'],
-      ['Celebración y reconocimiento', 'Día del Catequista y reconocimiento a quienes llevan años sirviendo a sus comunidades.', 'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z'],
-      ['Cuidado de la casa común', 'Iniciativas que unen fe y creación, como un concurso de nacimientos con materiales reciclables.', 'M11 20A7 7 0 0 1 4 13c0-6 6-10 16-10 0 10-4 17-9 17zM4 21c3-6 6-9 11-12']
+      ['Orientación pastoral', 'Unificamos criterios y ofrecemos lineamientos para los procesos catequéticos en las parroquias.', 'M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 19V5'],
+      ['Formación permanente', 'Fortalecemos la preparación doctrinal, pedagógica, humana y espiritual de los catequistas.', 'M16 20v-1a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1M9.5 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM21 20v-1a4 4 0 0 0-3-3.9M16 4.2a3.5 3.5 0 0 1 0 6.6'],
+      ['Acompañamiento', 'Escuchamos y apoyamos a las zonas pastorales, sus representantes y los equipos parroquiales.', 'M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1'],
+      ['Materiales y recursos', 'Diseñamos subsidios y recursos para apoyar la educación en la fe y la vida pastoral.', 'M22 2 11 13M22 2l-7 20-4-9-9-4z'],
+      ['Encuentros y jornadas', 'Coordinamos eventos, semanas catequéticas y espacios de encuentro entre comunidades.', 'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z'],
+      ['Catequesis para todos', 'Promovemos procesos de fe para diversas edades y para personas con necesidades especiales.', 'M11 20A7 7 0 0 1 4 13c0-6 6-10 16-10 0 10-4 17-9 17zM4 21c3-6 6-9 11-12']
     ];
     const services = svcData.map(d => ({ title: d[0], text: d[1], icon: d[2], style: 'background:#fff;border:1px solid #D6DDEC;border-radius:22px;padding:32px' }));
 
     const subData = [
-      ['Familiar', 'Acompaña a las familias como primera escuela de fe: padres y madres redescubren su papel en la transmisión de la fe en casa.'],
-      ['Especial', 'Una catequesis que se adapta a cada persona, para que nadie quede fuera del encuentro con Jesús y con la comunidad.'],
-      ['De adultos', 'Un camino para quienes quieren retomar, profundizar o iniciar su vida de fe en la madurez.'],
-      ['De jóvenes', 'Espacios de encuentro, Palabra y misión pensados para que los jóvenes vivan y compartan su fe.']
+      ['Familiar', 'La Comisión promueve procesos que integran a la familia, la comunidad y la liturgia en la iniciación cristiana.'],
+      ['Especial', 'La educación en la fe incluye la catequesis para personas con necesidades especiales, atendiendo a sus realidades.'],
+      ['De adultos', 'La formación en la fe acompaña también a quienes profundizan su vida cristiana en la edad adulta.'],
+      ['De jóvenes', 'La catequesis acompaña a los jóvenes en el conocimiento de Cristo y la vivencia de su Evangelio.']
     ];
     const subs = subData.map((d, i) => ({
       label: d[0], active: s.sub === i,
@@ -47,16 +47,16 @@ class Component extends DCLogic {
     }));
 
     const agData = [
-      ['Formación', 'Taller de formación para catequistas', 'Metodología, diseño de proyectos y práctica para renovar la catequesis en las parroquias.'],
-      ['Celebración', 'Eucaristía de envío', 'Celebración al inicio del año pastoral en la que los catequistas son enviados a sus comunidades.'],
-      ['Coordinación', 'Reunión mensual con las vicarías', 'Espacio de encuentro y comunión para coordinar y compartir experiencias.'],
-      ['Celebración', 'Día del Catequista', 'Una fiesta para agradecer y reconocer la vocación de quienes catequizan.'],
-      ['Casa común', 'Concurso de nacimientos', 'Nacimientos elaborados con materiales reciclables, para cuidar la creación en Navidad.']
+      ['Cuaresma', 'Retiro Cuaresmal', 'Un espacio de oración y renovación de la vocación catequística.', 'Fecha por anunciar'],
+      ['Formación', 'Semana de Catequesis', 'Jornadas de formación, celebración y encuentro para catequistas de la Arquidiócesis.', 'Fecha por anunciar'],
+      ['Celebración', 'Día del Catequista', 'La Comisión celebra y agradece el servicio de los catequistas el tercer domingo de septiembre.', 'Tercer domingo de septiembre'],
+      ['Por zonas', 'Encuentros zonales', 'Espacios de coordinación y acompañamiento entre zonas pastorales.', 'Fecha por anunciar'],
+      ['En parroquias', 'Formaciones en parroquias', 'Talleres y charlas que acercan la formación a las comunidades.', 'Durante el año']
     ];
     const agenda = agData.map((d, i) => {
       const open = s.ag === i;
       return {
-        type: d[0], title: d[1], detail: d[2], date: 'Por confirmar', place: 'Por confirmar', open,
+        type: d[0], title: d[1], detail: d[2], date: d[3], open,
         toggle: () => this.setState({ ag: open ? -1 : i }),
         plusStyle: 'display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:#0E1B3D;color:#F2F5FB;font-size:22px;transition:transform .35s;transform:rotate(' + (open ? 135 : 0) + 'deg)',
         detailStyle: 'overflow:hidden;transition:max-height .45s ease,opacity .45s;max-height:' + (open ? '220px' : '0') + ';opacity:' + (open ? 1 : 0)
@@ -100,10 +100,10 @@ class Component extends DCLogic {
     const imgStyle = (on) => 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .7s ease,transform 1.1s ease;opacity:' + (on ? 1 : 0) + ';transform:scale(' + (on ? 1 : 1.08) + ')';
 
     const zoneData = [
-      { short: 'San Francisco de Paula', color: '#4A8AC4', ink: '#0E1B3D', vicarias: ['Vicaría San Francisco de Paula', 'Vicaría San José-Chame'], vicario: 'Vicario Episcopal Territorial: Pbro. Rafael Ochomogo', sede: 'Panamá Oeste · Parroquia San Francisco de Paula, La Chorrera' },
-      { short: 'Santa María La Antigua', color: '#55B167', ink: '#0E1B3D', vicarias: ['Vicaría Cristo Rey', 'Vicaría La Merced', 'Vicaría La Asunción', 'Vicaría Santa Eduvigis'], vicario: 'Vicario Episcopal Territorial: Pbro. Alejandro Goulbourne', sede: 'Panamá Centro · Parroquia Nuestra Señora de Lourdes, Carrasquilla (Arzobispado)' },
-      { short: 'Cristo Redentor', color: '#E13355', ink: '#FFFFFF', vicarias: ['Vicaría Cristo Redentor', 'Vicaría Cristo Servidor', 'Vicaría Santa Cruz'], vicario: 'Vicario Episcopal Territorial: Pbro. Juan Sandoval', sede: 'San Miguelito' },
-      { short: 'El Carmen', color: '#F5AF3E', ink: '#0E1B3D', vicarias: ['Vicaría Don Bosco', 'Vicaría El Carmen', 'Vicaría San Cristóbal', 'Vicaría Inmaculada Concepción'], vicario: 'Vicario Episcopal Territorial: Pbro. William Sánchez', sede: 'Panamá Este · Parroquia María Madre de Dios, Don Bosco' }
+      { short: 'San Francisco de Paula', color: '#4A8AC4', ink: '#0E1B3D', area: 'Panamá Oeste' },
+      { short: 'Santa María la Antigua', color: '#55B167', ink: '#0E1B3D', area: 'Panamá Centro' },
+      { short: 'Cristo Redentor', color: '#E13355', ink: '#FFFFFF', area: 'San Miguelito' },
+      { short: 'Nuestra Señora del Carmen', color: '#F5AF3E', ink: '#0E1B3D', area: 'Panamá Este' }
     ];
     const zs = zoneData.map((d, i) => ({
       pick: () => this.setState({ zone: i }),
@@ -112,7 +112,7 @@ class Component extends DCLogic {
     const zoneBtns = zoneData.map((d, i) => {
       const on = s.zone === i;
       return {
-        n: i + 1, name: d.short, count: d.vicarias.length + ' vicarías', active: on,
+        n: i + 1, name: d.short, area: d.area, active: on,
         pick: () => this.setState({ zone: i }),
         style: 'display:flex;align-items:center;gap:14px;width:100%;padding:12px 16px;border-radius:16px;font:inherit;cursor:pointer;min-height:56px;transition:all .3s;border:2px solid ' + d.color + ';background:' + (on ? d.color : 'transparent') + ';color:' + (on ? d.ink : '#F2F5FB'),
         numStyle: 'width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex:none;background:' + (on ? '#0E1B3D' : '#F2F5FB') + ';color:' + (on ? '#F2F5FB' : '#0E1B3D')
@@ -120,14 +120,14 @@ class Component extends DCLogic {
     });
     const zsel = s.zone >= 0 ? zoneData[s.zone] : null;
     const zc = zsel
-      ? { eyebrow: 'Zona pastoral · ' + zsel.vicarias.length + ' vicarías', name: zsel.short, color: zsel.color, vicario: zsel.vicario, sede: zsel.sede, vicarias: zsel.vicarias.map(n => ({ name: n })) }
-      : { eyebrow: 'Zonas pastorales', name: 'Elige una zona', color: '#F0B544', vicario: 'Toca una zona del mapa o de la lista para conocer sus vicarías y a su vicario episcopal.', sede: '', vicarias: [] };
+      ? { eyebrow: 'Zona pastoral', name: zsel.short, color: zsel.color, area: zsel.area, description: 'La Comisión acompaña la labor catequética de las comunidades de esta zona en coordinación con las parroquias.' }
+      : { eyebrow: 'Zonas pastorales', name: 'Elige una zona', color: '#F0B544', area: '', description: 'Toca una zona del mapa o de la lista para explorar esta referencia territorial.' };
 
     const hitoData = [
-      ['Cita Eucarística 2025 · Jubileo de la Familia', 'Con el primer catequista de la diócesis', 'Monseñor José Domingo Ulloa visitó el stand de la Comisión Arquidiocesana de Catequesis. Gracias por su visita.'],
-      ['Formación', 'Catequistas en formación', 'Una jornada de encuentro y aprendizaje con catequistas de la Arquidiócesis.'],
-      ['Encuentro', 'Jóvenes y catequistas, juntos', 'Un encuentro que reúne a catequistas y jóvenes de las comunidades.'],
-      ['Comunidad', 'Catequistas en misión', 'Catequistas y familias compartiendo la fe en comunidad.']
+      ['Comunidad', 'Una misión compartida', 'La catequesis se vive en comunión con las parroquias y sus comunidades.'],
+      ['Formación', 'Aprender para acompañar', 'La formación permanente fortalece el servicio de los catequistas.'],
+      ['Encuentro', 'Caminar juntos', 'Los espacios de encuentro ayudan a compartir experiencias y renovar la vocación.'],
+      ['Servicio', 'Fe que se comparte', 'Cada catequista aporta a la transmisión viva del Evangelio.']
     ];
     const hitoBtns = hitoData.map((d, i) => {
       const on = s.hito === i;

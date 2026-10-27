@@ -31,7 +31,11 @@ El motor original utiliza React 18.3.1 y una plantilla declarativa. La pequeña 
 
 ## Alcance de la muestra
 
-El formulario **no envía ni guarda datos**. La agenda y los datos de contacto están pendientes de confirmación. La directiva `noindex` evita solicitar la indexación de esta etapa; no restringe el acceso a quien tenga el enlace. El código puede estar en un repositorio privado mientras el sitio de presentación es público.
+El formulario **no envía ni guarda datos**. La agenda presenta actividades habituales, sin anunciar fechas ni sedes concretas. El mapa de zonas es referencial. La directiva `noindex` evita solicitar la indexación de esta etapa; no restringe el acceso a quien tenga el enlace. El código puede estar en un repositorio privado mientras el sitio de presentación es público.
+
+## Fuentes del contenido
+
+La misión, visión, funciones y actividades proceden de `QUIÉNES SOMOS.docx`; la información del equipo procede de `Reseña del Equipo de la Comisión Arquidiocesana de Catequesis.docx`; y la formación de CENAFCA procede de `CENTRO ARQUIDIOCESANO PARA LA FORMACIÓN DE CATEQUISTAS.docx`, facilitados por la Comisión. Los logos de la Sección, CENAFCA y «Catequistas con un solo corazón» se prepararon a partir de la carpeta `LOGOS CATEQUESIS` facilitada. El teléfono, la dirección y el enlace de Facebook se tomaron de la página anterior `https://www.labdev.space/cacp/`; el correo figura también en el documento de CENAFCA. Conviene confirmar que esos canales siguen vigentes antes del lanzamiento definitivo.
 
 ## Ampliación posterior
 
@@ -39,4 +43,4 @@ Ver `docs/PROXIMOS-PASOS.md`. Esta base admite contenido nuevo, formularios real
 
 ## Recursos
 
-Las imágenes y el motor proceden del archivo suministrado. Las licencias de fuentes se conservan en `public/assets/FONT-LICENSES.txt`; los archivos de React mantienen sus avisos originales.
+Las demás imágenes y el motor proceden del archivo HTML original. Las licencias de fuentes se conservan en `public/assets/FONT-LICENSES.txt`; los archivos de React mantienen sus avisos originales.
