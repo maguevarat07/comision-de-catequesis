@@ -404,6 +404,9 @@ section.resources-section{padding:clamp(36px,5svh,58px) 0!important;min-height:0
 .team-section{padding:70px 0}
 .team-intro{margin:18px 0;font-size:17px;line-height:1.55}
 .team-director{margin:20px 0;padding:17px 24px}
+.team-director__photo{width:104px;height:104px;flex:none;object-fit:cover;object-position:50% 30%;border-radius:16px;border:3px solid #f0b544;box-shadow:0 8px 20px rgba(14,27,61,.12)}
+.team-director__identity{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0}
+.team-director__identity strong{line-height:1.18}
 .team-roster{background:transparent;border-color:#cfd9e7;padding:0 18px;overflow:hidden}
 .team-roster summary{display:flex;justify-content:space-between;align-items:center;gap:14px;list-style:none;padding:18px 4px}
 .team-roster summary::-webkit-details-marker{display:none}
@@ -426,6 +429,9 @@ section.resources-section{padding:clamp(36px,5svh,58px) 0!important;min-height:0
 .floating-whatsapp>span:first-child{background:#fff;color:#1d1b1b;border-radius:999px;padding:12px 17px;font-weight:800;font-size:14px}
 .floating-whatsapp__circle{width:62px;height:62px;border:9px solid #175c3b;border-radius:50%;background:#1dca67;color:#fff;display:grid;place-items:center;box-sizing:content-box;transition:transform .3s}
 .floating-whatsapp svg{width:32px;height:32px}
+.floating-whatsapp__circle{background:#fff}
+.floating-whatsapp__circle img{display:block;width:37px;height:37px;object-fit:contain}
+.site-footer__social img{display:block;width:21px;height:21px;object-fit:contain}
 .floating-whatsapp:hover .floating-whatsapp__circle{transform:scale(1.08)}
 .floating-whatsapp:focus-visible,.site-footer a:focus-visible{outline:3px solid #f0b544;outline-offset:4px}
 .site-footer{background:#1d1919;color:#d8d0c8;padding:66px clamp(20px,5vw,56px) 104px}
@@ -475,6 +481,7 @@ section.resources-section{padding:clamp(36px,5svh,58px) 0!important;min-height:0
 }
 @media(max-width:860px){.cenafca-layout{grid-template-columns:1fr}.cenafca-logo-card{max-width:none;min-height:0}.cenafca-logo-card img{max-height:360px}.territory-section__layout{grid-template-columns:1fr}.territory-section__zones{width:100%}.team-roster ul{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.cenafca-detail__grid{grid-template-columns:1fr}.cenafca-detail__action{align-items:flex-start;flex-direction:column}.team-roster ul{grid-template-columns:1fr}.site-footer__grid{grid-template-columns:1fr 1fr}.site-footer__about{grid-column:1/-1}.site-footer__bottom{display:block}.site-footer__bottom p+p{margin-top:12px}.floating-whatsapp>span:first-child{display:none}.floating-whatsapp{right:13px;bottom:13px}.floating-whatsapp__circle{width:51px;height:51px;border-width:6px}}
+@media(max-width:600px){.team-director{gap:14px;padding:14px 16px}.team-director__photo{width:72px;height:72px;border-radius:12px}.team-director__identity strong{font-size:clamp(20px,6vw,27px)}.floating-whatsapp__circle img{width:31px;height:31px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.team-roster__content{animation:none}.floating-whatsapp__circle,.site-footer__social a{transition:none}}
 
 /* CENAFCA lives at its own route and scrolls naturally. */
