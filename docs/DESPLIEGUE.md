@@ -34,6 +34,8 @@ Sin esto, el portal y el panel no pueden mostrar fotos ni PDF. Comprobación: `n
    npx @google/clasp@3.4.1 push --force
    ```
 
+Proyecto actual: https://script.google.com/d/171BRor3yHd152NCdhaPYcZEj5TYerXnNhoWARCxQEUONllJgM4McZlVX/edit (`apps-script/.clasp.json`). clasp 3.4.1 ignora `--parentId`: el script quedó vinculado a una hoja propia llamada «Escritor · Registro de catequistas». **No borres esa hoja**: el escritor se borraría con ella. Escribe en la hoja de registro gracias a la propiedad `SHEET_ID`. Para subir cambios: `npx @google/clasp@3.4.1 push --force` y luego `npx @google/clasp@3.4.1 update-deployment AKfycbxlimTxX9M-dSJgWQRqZ99DDha06eFkOCxt-uUOz6gnkhOv1U8KeAb9tPdDVt4z6BU5`.
+
 ### Opción B: a mano
 
 1. Abre la hoja → **Extensiones → Apps Script**.
