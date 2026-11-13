@@ -94,6 +94,18 @@ npm run dev:real           # http://localhost:4173 con la hoja, Drive y escritor
 
 `QR_SECRET` no debe cambiar nunca después de imprimir carnets: invalidaría todos los QR. `SESSION_SECRET` sí puede rotarse (cierra todas las sesiones).
 
+## Para quien administra Vercel
+
+Estado al 12 de noviembre de 2026: la hoja, Drive, el escritor de Apps Script y el ID de cliente OAuth ya están configurados y probados. Solo falta Vercel:
+
+1. Recibir por un canal privado el archivo `vercel-produccion.env`. **Nunca debe subirse a GitHub ni pegarse en chats públicos.**
+2. Vercel → proyecto **comision-de-catequesis** → **Settings → Environment Variables**: pegar el contenido completo del archivo en el primer campo *Key* (Vercel separa las 10 variables). Marcar **Production** (y **Preview** si se quieren probar ramas). Guardar.
+3. Fusionar la rama `feature/registro-catequistas` en `main`. Vercel despliega la producción.
+4. Comprobar https://comision-de-catequesis.vercel.app/api/salud. Debe responder `"modo":"google","configLeida":true,"escritor":true`.
+5. Comprobar que https://comision-de-catequesis.vercel.app/admin/ muestra el botón «Iniciar sesión con Google» y que entra con una cuenta de `ADMIN_EMAILS`.
+
+Las variables deben estar cargadas **antes** de fusionar. Si no, las páginas del registro cargan pero la API responde «El servicio está en configuración». El resto del sitio no se ve afectado.
+
 ## Pruebas
 
 ```sh
