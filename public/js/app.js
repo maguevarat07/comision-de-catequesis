@@ -11,12 +11,12 @@ class Component extends DCLogic {
       { title: 'Acércate a tu parroquia', body: 'El primer paso para servir como catequista es conversar con tu comunidad parroquial. Allí podrás conocer sus necesidades y recibir orientación para comenzar.', offer: 'La Comisión acompaña a los equipos parroquiales y a las zonas pastorales.', cta: 'Pedir orientación' },
       { title: 'Fórmate', body: 'CENAFCA ofrece formación bíblica, teológica, catequética, pedagógica y pastoral. La preparación del catequista es un proceso continuo, unido a la oración y la vida comunitaria.', offer: 'Formación humana, espiritual, doctrinal, pedagógica y metodológica.', cta: 'Conocer CENAFCA' },
       { title: 'Comparte la fe', body: 'La catequesis ayuda a niños, jóvenes y adultos a conocer a Jesucristo y a vivir el Evangelio. Cada comunidad adapta su acompañamiento a las personas y a su realidad.', offer: 'Lineamientos, materiales y apoyo para la labor catequética.', cta: 'Conocer los servicios' },
-      { title: 'Camina en comunidad', body: 'La Comisión promueve encuentros, retiros y espacios de coordinación para fortalecer la vocación del catequista y la comunión entre parroquias.', offer: 'Encuentros zonales, Semana de Catequesis y Día del Catequista.', cta: 'Ver actividades' }
+      { title: 'Camina en comunidad', body: 'La Comisión promueve encuentros, retiros y espacios de coordinación para fortalecer la vocación del catequista y la comunión entre parroquias.', offer: 'Encuentros zonales, Semana del Catequista y Día del Catequista.', cta: 'Semana del Catequista' }
     ];
     const steps = stepsData.map((d, i) => {
       const active = s.step === i; const done = s.step >= i;
       return {
-        n: i + 1, title: d.title, body: d.body, offer: d.offer, cta: d.cta, href: ['#unete', '/cenafca/', '#servicios', '#agenda'][i], active,
+        n: i + 1, title: d.title, body: d.body, offer: d.offer, cta: d.cta, href: ['#unete', '/cenafca/', '#servicios', '/portal/#semana'][i], active,
         pick: () => this.setState({ step: i }),
         btnStyle: 'background:none;border:0;cursor:pointer;color:#F2F5FB;font:inherit;display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:0 4px 0 0;min-height:44px;opacity:' + (active ? 1 : 0.72),
         dotStyle: 'width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:22px;font-family:Fraunces,Georgia,serif;transition:all .4s;border:3px solid ' + gold + ';background:' + (done ? gold : '#0E1B3D') + ';color:' + (done ? '#0E1B3D' : gold) + ';transform:scale(' + (active ? 1.12 : 1) + ')'

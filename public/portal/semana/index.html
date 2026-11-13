@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Semana del Catequista | Comisión de Catequesis</title>
+  <meta name="description" content="Inscripción a la Semana del Catequista para catequistas registrados.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#0E1B3D">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/modulo.css">
+</head>
+<body class="sans modulo">
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+  <header class="cenafca-page__header">
+    <a class="cenafca-page__brand" href="/" aria-label="Volver al inicio de Comisión de Catequesis">
+      <img src="/assets/images/seccion-catequesis-oficial.png" alt="Logo de la Sección de Catequesis">
+      <span>Comisión Arquidiocesana<br><strong>de Catequesis</strong></span>
+    </a>
+    <nav aria-label="Navegación principal">
+      <a href="/">Inicio</a>
+      <a href="/portal/" class="cenafca-page__nav-cta">Portal del catequista</a>
+    </nav>
+  </header>
+
+  <main id="contenido">
+    <section class="m-hero">
+      <div class="m-container">
+        <p class="cenafca-page__breadcrumb"><a href="/">Inicio</a><span aria-hidden="true"> / </span><a href="/portal/">Portal</a><span aria-hidden="true"> / </span>Semana del Catequista</p>
+        <p class="cenafca-page__eyebrow">Formación, celebración y encuentro</p>
+        <h1 class="disp" id="titulo">Semana del Catequista</h1>
+        <p class="m-lead" id="subtitulo">Inscríbete y recibe tu pase de acceso con código QR.</p>
+      </div>
+    </section>
+
+    <section class="m-section">
+      <div class="m-container">
+        <div id="estado-global" hidden></div>
+
+        <form id="form-semana" class="m-card" novalidate hidden>
+          <h2 class="disp">Inscripción</h2>
+          <dl class="m-datos" id="evento" style="margin:8px 0 22px"></dl>
+
+          <div class="m-form">
+            <fieldset style="border:0;margin:0;padding:0" class="m-form">
+              <legend class="m-label" style="font-size:18px;margin-bottom:6px">1. Confirma tus datos de contacto</legend>
+              <div class="m-grid">
+                <div class="m-field"><label for="nombre">Nombre</label><input id="nombre" readonly aria-readonly="true"></div>
+                <div class="m-field"><label for="correo">Correo</label><input id="correo" type="email" readonly aria-readonly="true"><p class="m-help">Aquí recibirás tu pase.</p></div>
+                <div class="m-field"><label for="telefono">Celular</label><input id="telefono" type="tel" inputmode="tel" autocomplete="tel-national" required></div>
+              </div>
+            </fieldset>
+
+            <fieldset style="border:0;margin:0;padding:0" class="m-form" id="grupo-extra">
+              <legend class="m-label" style="font-size:18px;margin-bottom:6px">2. Datos para el evento</legend>
+              <div class="m-field" id="campo-talla">
+                <span class="m-label" id="talla-lbl">Talla de camiseta</span>
+                <div class="m-chips" id="talla_camiseta" role="radiogroup" aria-labelledby="talla-lbl"></div>
+              </div>
+              <div class="m-field" id="campo-restricciones"><label for="restricciones_alimentarias">Restricciones alimentarias o alergias <span class="m-opt">(opcional)</span></label><textarea id="restricciones_alimentarias" maxlength="300" placeholder="Ej.: vegetariano, alergia al maní"></textarea></div>
+            </fieldset>
+
+            <fieldset style="border:0;margin:0;padding:0" class="m-form">
+              <legend class="m-label" style="font-size:18px;margin-bottom:6px">3. Pago por Yappy</legend>
+              <p class="m-sub" id="pago-instrucciones" style="margin:0"></p>
+              <div class="m-pago">
+                <div class="m-pago__datos m-card" style="box-shadow:none;background:#fbf8f1">
+                  <span class="m-label">Monto a pagar</span>
+                  <p class="m-monto" id="pago-monto">—</p>
+                  <dl><dt>Yappy</dt><dd id="pago-directorio">—</dd><dt>Celular</dt><dd id="pago-telefono">—</dd></dl>
+                </div>
+                <div class="m-form" style="gap:14px">
+                  <div class="m-field">
+                    <span class="m-label" id="comprobante-lbl">Captura del comprobante de Yappy</span>
+                    <div class="m-archivo">
+                      <img id="comprobante-vista" alt="Vista previa del comprobante" hidden>
+                      <input id="comprobante" class="m-file-input" type="file" accept="image/*" tabindex="-1" aria-hidden="true">
+                      <button type="button" class="m-btn m-btn--borde" id="btn-comprobante" aria-describedby="comprobante-lbl">Adjuntar captura</button>
+                    </div>
+                    <p class="m-error" id="comprobante-err" aria-live="polite"></p>
+                  </div>
+                  <div class="m-field"><label for="yappy_referencia">Número de referencia de Yappy</label><input id="yappy_referencia" required maxlength="40" autocapitalize="characters" autocomplete="off" placeholder="Ej.: 12AB34CD"></div>
+                </div>
+              </div>
+            </fieldset>
+
+            <div id="aviso-envio" hidden></div>
+            <div class="m-acciones m-acciones--fin">
+              <a class="m-btn m-btn--texto" href="/portal/">← Volver al portal</a>
+              <button type="submit" class="m-btn m-btn--oro" id="btn-enviar">Confirmar inscripción</button>
+            </div>
+          </div>
+        </form>
+
+        <div id="exito" class="m-card m-exito" hidden tabindex="-1">
+          <div class="m-exito__icono" aria-hidden="true">✓</div>
+          <h2 class="disp">¡Inscripción confirmada!</h2>
+          <p class="m-sub" style="margin-bottom:0">Tu número de inscripción es</p>
+          <p class="m-numero" id="exito-numero">SEM26-0000</p>
+          <div class="m-pase__qr" id="exito-qr" style="margin:0 auto 18px"></div>
+          <div id="exito-aviso" style="max-width:560px;margin:0 auto 20px"></div>
+          <a class="m-btn m-btn--primario" href="/portal/#semana">Ver mi pase en el portal</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="m-pie">
+    <div class="m-pie__in">
+      <span>© 2026 Comisión Arquidiocesana de Catequesis · Arquidiócesis de Panamá</span>
+      <nav aria-label="Enlaces del pie"><a href="/privacidad/">Aviso de privacidad</a><a href="/portal/">Portal</a></nav>
+    </div>
+  </footer>
+
+  <script src="/assets/vendor/qrcode-generator-1.4.4.js"></script>
+  <script type="module" src="/assets/js/modulo/semana.js"></script>
+</body>
+</html>
