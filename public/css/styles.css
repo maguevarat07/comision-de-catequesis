@@ -425,16 +425,13 @@ section.resources-section{padding:clamp(36px,5svh,58px) 0!important;min-height:0
 @keyframes roster-open{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
 
 /* Contact affordance and footer. */
-.floating-whatsapp{position:fixed;right:22px;bottom:22px;z-index:50;display:flex;align-items:center;gap:10px;text-decoration:none;filter:drop-shadow(0 10px 16px rgba(0,0,0,.24))}
-.floating-whatsapp>span:first-child{background:#fff;color:#1d1b1b;border-radius:999px;padding:12px 17px;font-weight:800;font-size:14px}
-.floating-whatsapp__circle{width:62px;height:62px;border:9px solid #175c3b;border-radius:50%;background:#1dca67;color:#fff;display:grid;place-items:center;box-sizing:content-box;transition:transform .3s}
-.floating-whatsapp svg{width:32px;height:32px}
-.floating-whatsapp__circle{background:#fff}
-.floating-whatsapp__circle img{display:block;width:37px;height:37px;object-fit:contain}
-.floating-whatsapp__circle:has(img[src$="whatsapp-flotante.png"]){width:76px;height:76px;padding:0;border:0;background:transparent;box-sizing:border-box}
-.floating-whatsapp__circle img[src$="whatsapp-flotante.png"]{width:100%;height:100%;object-fit:contain}
+.floating-whatsapp{position:fixed;right:22px;bottom:22px;z-index:50;display:block;width:76px;height:76px;text-decoration:none;filter:drop-shadow(0 10px 16px rgba(0,0,0,.24));isolation:isolate}
+.floating-whatsapp::before{content:"";position:absolute;inset:-3px;border:2px solid rgba(37,211,102,.65);border-radius:50%;pointer-events:none;animation:whatsapp-pulse 3s ease-out infinite}
+.floating-whatsapp__circle{display:block;width:100%;height:100%;transition:transform .3s ease}
+.floating-whatsapp__circle img{display:block;width:100%;height:100%;object-fit:contain}
+@keyframes whatsapp-pulse{0%,35%{transform:scale(.88);opacity:0}45%{opacity:.8}85%,100%{transform:scale(1.35);opacity:0}}
 .site-footer__social img{display:block;width:21px;height:21px;object-fit:contain}
-.floating-whatsapp:hover .floating-whatsapp__circle{transform:scale(1.08)}
+.floating-whatsapp:hover .floating-whatsapp__circle{transform:scale(1.12) rotate(-4deg)}
 .floating-whatsapp:focus-visible,.site-footer a:focus-visible{outline:3px solid #f0b544;outline-offset:4px}
 .site-footer{background:#1d1919;color:#d8d0c8;padding:66px clamp(20px,5vw,56px) 104px}
 .site-footer__grid{max-width:1440px;margin:auto;display:grid;grid-template-columns:1.45fr .85fr .85fr 1.1fr;gap:clamp(24px,4vw,74px)}
@@ -482,10 +479,9 @@ section.resources-section{padding:clamp(36px,5svh,58px) 0!important;min-height:0
   .territory-section__zones .swap{padding:10px 17px!important;margin-top:9px!important}
 }
 @media(max-width:860px){.cenafca-layout{grid-template-columns:1fr}.cenafca-logo-card{max-width:none;min-height:0}.cenafca-logo-card img{max-height:360px}.territory-section__layout{grid-template-columns:1fr}.territory-section__zones{width:100%}.team-roster ul{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:600px){.cenafca-detail__grid{grid-template-columns:1fr}.cenafca-detail__action{align-items:flex-start;flex-direction:column}.team-roster ul{grid-template-columns:1fr}.site-footer__grid{grid-template-columns:1fr 1fr}.site-footer__about{grid-column:1/-1}.site-footer__bottom{display:block}.site-footer__bottom p+p{margin-top:12px}.floating-whatsapp>span:first-child{display:none}.floating-whatsapp{right:13px;bottom:13px}.floating-whatsapp__circle{width:51px;height:51px;border-width:6px}}
-@media(max-width:600px){.team-director{gap:14px;padding:14px 16px}.team-director__photo{width:72px;height:72px;border-radius:12px}.team-director__identity strong{font-size:clamp(20px,6vw,27px)}.floating-whatsapp__circle img{width:31px;height:31px}}
-@media(max-width:600px){.floating-whatsapp__circle:has(img[src$="whatsapp-flotante.png"]){width:62px;height:62px}}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.team-roster__content{animation:none}.floating-whatsapp__circle,.site-footer__social a{transition:none}}
+@media(max-width:600px){.cenafca-detail__grid{grid-template-columns:1fr}.cenafca-detail__action{align-items:flex-start;flex-direction:column}.team-roster ul{grid-template-columns:1fr}.site-footer__grid{grid-template-columns:1fr 1fr}.site-footer__about{grid-column:1/-1}.site-footer__bottom{display:block}.site-footer__bottom p+p{margin-top:12px}.floating-whatsapp{right:13px;bottom:13px;width:62px;height:62px}}
+@media(max-width:600px){.team-director{gap:14px;padding:14px 16px}.team-director__photo{width:72px;height:72px;border-radius:12px}.team-director__identity strong{font-size:clamp(20px,6vw,27px)}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.team-roster__content{animation:none}.floating-whatsapp::before{animation:none}.floating-whatsapp__circle,.site-footer__social a{transition:none}}
 
 /* CENAFCA lives at its own route and scrolls naturally. */
 .cenafca-page{margin:0;background:#f7f4ed;color:#0e1b3d;line-height:1.6}
