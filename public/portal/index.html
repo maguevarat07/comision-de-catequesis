@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Portal del catequista | Comisión de Catequesis</title>
+  <meta name="description" content="Consulta tu carnet de catequista, tus documentos y la Semana del Catequista.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#0E1B3D">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/modulo.css">
+</head>
+<body class="sans modulo">
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+  <header class="cenafca-page__header">
+    <a class="cenafca-page__brand" href="/" aria-label="Volver al inicio de Comisión de Catequesis">
+      <img src="/assets/images/seccion-catequesis-oficial.png" alt="Logo de la Sección de Catequesis">
+      <span>Comisión Arquidiocesana<br><strong>de Catequesis</strong></span>
+    </a>
+    <nav aria-label="Navegación principal">
+      <a href="/">Inicio</a>
+      <a href="/registro/">Registro</a>
+      <a href="/portal/" aria-current="page" class="cenafca-page__nav-cta">Portal del catequista</a>
+    </nav>
+  </header>
+
+  <main id="contenido">
+    <section class="m-hero">
+      <div class="m-container m-container--ancho">
+        <p class="cenafca-page__breadcrumb"><a href="/">Inicio</a><span aria-hidden="true"> / </span>Portal del catequista</p>
+        <p class="cenafca-page__eyebrow">Catequistas con un solo corazón</p>
+        <h1 class="disp" id="titulo">Portal del catequista</h1>
+        <p class="m-lead" id="subtitulo">Entra con el correo con el que te registraste y tu número de catequista.</p>
+      </div>
+    </section>
+
+    <section class="m-section">
+      <div class="m-container m-container--ancho">
+        <div id="estado-global" hidden></div>
+
+        <!-- Acceso -->
+        <div id="vista-acceso" hidden>
+          <div class="m-card" style="max-width:560px;margin:0 auto">
+            <h2 class="disp">Entrar</h2>
+            <p class="m-sub">¿Aún no tienes número? <a href="/registro/">Regístrate aquí</a>.</p>
+            <form id="form-acceso" class="m-form" novalidate>
+              <div class="m-field"><label for="acc-correo">Correo registrado</label><input id="acc-correo" type="email" inputmode="email" autocomplete="email" required></div>
+              <div class="m-field"><label for="acc-numero">Número de catequista</label><input id="acc-numero" autocomplete="off" autocapitalize="characters" required placeholder="CAT-00001"><p class="m-help">También puedes escribir solo el número, por ejemplo 1.</p></div>
+              <div id="acc-aviso" hidden></div>
+              <button type="submit" class="m-btn m-btn--primario" id="btn-entrar">Entrar</button>
+            </form>
+            <details style="margin-top:22px">
+              <summary style="cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center">Olvidé mi número de catequista</summary>
+              <form id="form-recuperar" class="m-form" novalidate style="margin-top:10px">
+                <div class="m-field"><label for="rec-correo">Correo registrado</label><input id="rec-correo" type="email" inputmode="email" autocomplete="email" required></div>
+                <div id="rec-aviso" hidden></div>
+                <button type="submit" class="m-btn m-btn--borde" id="btn-recuperar">Enviarme mi número</button>
+              </form>
+            </details>
+          </div>
+        </div>
+
+        <!-- Panel -->
+        <div id="vista-panel" hidden>
+          <div class="m-admin-barra">
+            <div id="estado-registro"></div>
+            <button type="button" class="m-btn m-btn--borde m-btn--sm m-no-print" id="btn-salir">Cerrar sesión</button>
+          </div>
+          <div class="m-portal">
+            <div>
+              <div class="m-card">
+                <h2 class="disp">Mi carnet</h2>
+                <p class="m-sub">Muéstralo desde tu celular o descárgalo para imprimirlo.</p>
+                <div id="carnet"></div>
+              </div>
+              <div class="m-card" id="tarjeta-semana"></div>
+            </div>
+            <div>
+              <div class="m-card">
+                <h2 class="disp">Mis documentos</h2>
+                <ul class="m-lista-descargas" id="descargas"></ul>
+              </div>
+              <div class="m-card">
+                <h2 class="disp">Mis datos</h2>
+                <dl class="m-datos" id="datos"></dl>
+                <p class="m-help" style="margin-top:14px">Para corregir algún dato escribe a <a href="mailto:catequesispanama15@gmail.com">catequesispanama15@gmail.com</a>.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="m-pie">
+    <div class="m-pie__in">
+      <span>© 2026 Comisión Arquidiocesana de Catequesis · Arquidiócesis de Panamá</span>
+      <nav aria-label="Enlaces del pie"><a href="/privacidad/">Aviso de privacidad</a><a href="/registro/">Registro</a><a href="mailto:catequesispanama15@gmail.com">catequesispanama15@gmail.com</a></nav>
+    </div>
+  </footer>
+
+  <script src="/assets/vendor/qrcode-generator-1.4.4.js"></script>
+  <script type="module" src="/assets/js/modulo/portal.js"></script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Escanear pases | Comisión de Catequesis</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#0E1B3D">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/modulo.css">
+</head>
+<body class="sans modulo">
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+  <header class="cenafca-page__header">
+    <a class="cenafca-page__brand" href="/admin/" aria-label="Inicio del panel de administración">
+      <img src="/assets/images/seccion-catequesis-oficial.png" alt="Logo de la Sección de Catequesis">
+      <span>Control de acceso<br><strong>Semana del Catequista</strong></span>
+    </a>
+    <nav aria-label="Navegación del panel" id="nav-admin" hidden>
+      <a href="/admin/" id="nav-panel" hidden>Panel</a>
+      <a href="/admin/escanear/" aria-current="page">Escanear QR</a>
+      <span id="usuario" style="font-size:13px;color:#c8d3e8"></span>
+      <button type="button" class="m-btn m-btn--oro m-btn--sm" id="btn-salir">Salir</button>
+    </nav>
+  </header>
+
+  <main id="contenido">
+    <section class="m-section" style="padding-top:24px">
+      <div class="m-container" style="max-width:640px">
+        <div id="estado-global" hidden></div>
+        <div id="vista-acceso" hidden></div>
+
+        <div id="vista-escaner" hidden>
+          <h1 class="disp" style="margin:0 0 6px;font-size:clamp(26px,5vw,36px)">Escanear pase</h1>
+          <p class="m-sub">Apunta la cámara al código QR del pase o del carnet.</p>
+
+          <div class="m-escaner" id="camara-caja">
+            <video id="video" playsinline muted autoplay aria-label="Vista de la cámara"></video>
+            <div class="m-escaner__marco" aria-hidden="true"></div>
+          </div>
+          <div class="m-acciones" style="justify-content:center;margin:14px 0">
+            <button type="button" class="m-btn m-btn--primario" id="btn-camara">Activar cámara</button>
+            <button type="button" class="m-btn m-btn--borde" id="btn-siguiente" hidden>Escanear siguiente</button>
+          </div>
+          <div id="camara-aviso" hidden></div>
+
+          <div class="m-card" id="resultado" hidden aria-live="polite" style="margin-top:16px"></div>
+
+          <details style="margin-top:20px">
+            <summary style="cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center">Escribir el código manualmente</summary>
+            <form id="form-manual" class="m-form" style="margin-top:10px" novalidate>
+              <div class="m-field"><label for="codigo">Enlace o código del QR</label><input id="codigo" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+              <button type="submit" class="m-btn m-btn--borde">Verificar</button>
+            </form>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/assets/vendor/jsQR-1.4.0.js" defer></script>
+  <script type="module" src="/assets/js/modulo/escanear.js"></script>
+</body>
+</html>

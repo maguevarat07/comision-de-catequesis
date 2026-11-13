@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Administración | Comisión de Catequesis</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#0E1B3D">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/modulo.css">
+</head>
+<body class="sans modulo">
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+  <header class="cenafca-page__header">
+    <a class="cenafca-page__brand" href="/admin/" aria-label="Inicio del panel de administración">
+      <img src="/assets/images/seccion-catequesis-oficial.png" alt="Logo de la Sección de Catequesis">
+      <span>Panel de administración<br><strong>Registro de catequistas</strong></span>
+    </a>
+    <nav aria-label="Navegación del panel" id="nav-admin" hidden>
+      <a href="/admin/" aria-current="page">Panel</a>
+      <a href="/admin/escanear/">Escanear QR</a>
+      <span id="usuario" style="font-size:13px;color:#c8d3e8"></span>
+      <button type="button" class="m-btn m-btn--oro m-btn--sm" id="btn-salir">Salir</button>
+    </nav>
+  </header>
+
+  <main id="contenido">
+    <section class="m-section" style="padding-top:28px">
+      <div class="m-container m-container--ancho">
+        <div id="estado-global" hidden></div>
+        <div id="vista-acceso" hidden></div>
+
+        <div id="vista-panel" hidden>
+          <div class="m-admin-barra">
+            <h1 class="disp" style="margin:0;font-size:clamp(28px,4vw,40px)">Resumen</h1>
+            <p class="m-help" id="cuota" style="margin:0"></p>
+          </div>
+          <div class="m-kpis" id="kpis" aria-live="polite"></div>
+
+          <div class="m-tabs" role="tablist" aria-label="Listados">
+            <button class="m-tab" role="tab" id="tab-cat" aria-controls="panel-lista" aria-selected="true" data-tabla="catequistas">Catequistas</button>
+            <button class="m-tab" role="tab" id="tab-sem" aria-controls="panel-lista" aria-selected="false" tabindex="-1" data-tabla="semana">Semana del Catequista</button>
+          </div>
+
+          <div id="panel-lista" role="tabpanel" aria-labelledby="tab-cat">
+            <div class="m-admin-barra">
+              <form id="form-buscar" class="m-buscador" role="search">
+                <label for="q" class="m-label" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Buscar</label>
+                <input id="q" class="m-input" type="search" placeholder="Buscar por número, nombre, cédula, correo o parroquia">
+                <select id="filtro-estado" class="m-input" aria-label="Filtrar por estado">
+                  <option value="">Todos los estados</option>
+                  <option value="ACTIVO">Activos</option>
+                  <option value="PENDIENTE_DOCUMENTOS">Documentos pendientes</option>
+                  <option value="ANULADO">Anulados</option>
+                </select>
+              </form>
+              <div class="m-acciones">
+                <a class="m-btn m-btn--borde m-btn--sm" id="exp-actual" href="/api/admin/exportar?tabla=catequistas" download>Exportar CSV</a>
+                <a class="m-btn m-btn--texto m-btn--sm" href="/api/admin/exportar?tabla=pagos" download>Pagos (CSV)</a>
+              </div>
+            </div>
+            <div class="m-tabla-wrap">
+              <table class="m-tabla">
+                <caption style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)" id="tabla-caption">Catequistas registrados</caption>
+                <thead id="thead"></thead>
+                <tbody id="tbody"></tbody>
+              </table>
+            </div>
+            <p class="m-help" id="conteo" style="margin-top:10px"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog class="m-dialogo" id="dialogo" aria-labelledby="dlg-titulo">
+    <div class="m-dialogo__cab">
+      <h2 class="disp" id="dlg-titulo">Detalle</h2>
+      <button type="button" class="m-btn m-btn--texto" id="dlg-cerrar" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="m-dialogo__cuerpo" id="dlg-cuerpo"></div>
+  </dialog>
+
+  <script type="module" src="/assets/js/modulo/admin.js"></script>
+</body>
+</html>
