@@ -4,23 +4,27 @@ Prototipo de presentación de la Comisión de Catequesis de la Arquidiócesis de
 
 ## Desarrollo local
 
-Con Node.js 20 o superior:
+Con Node.js 20.12 o superior, después de `npm install`:
+
+| Comando | API en `/api/*` |
+|---|---|
+| `npm run dev` | API simulada en memoria (`scripts/api-simulada.cjs`), sin Google |
+| `npm run dev:emulado` | API real (`api/`) con el escritor `apps-script/Code.gs` ejecutándose sobre Google emulado en memoria |
+| `npm run dev:real` | API real contra la hoja, Drive y el escritor reales (`.env.local`). **Escribe en la hoja real** |
+
+Abrir http://localhost:4173. En los dos primeros modos los datos se borran al reiniciar y no se envían correos; una franja amarilla lo indica.
+
+Cuentas de prueba (modos simulado y emulado): catequista `prueba@ejemplo.com` con número `1`; panel con `aovv.26@gmail.com` (administrador) o `verificador@ejemplo.com` (solo escanear).
+
+Variables de la API simulada: `SIM_LATENCIA_MS` (450 ms por defecto), `SIM_SIN_DATOS=1` (sin catequistas de ejemplo; también en el modo emulado) y `SIM_FALLAR_DOCUMENTOS=1` (registros en `PENDIENTE_DOCUMENTOS`).
 
 ```sh
-npm run dev
+npm test                  # API real + escritor sobre Google emulado (68 comprobaciones)
+npm run google:verificar  # la cuenta de servicio lee la hoja real
+npm run build             # genera dist/, la carpeta pública para Vercel
 ```
 
-Abrir http://127.0.0.1:4173. No necesita instalar dependencias. Las rutas `/api/*` las atiende una **API simulada en memoria** (`scripts/api-simulada.cjs`): los datos se borran al reiniciar y no se envían correos. Una franja amarilla lo indica en las páginas del módulo.
-
-Variables útiles de la API simulada: `SIM_LATENCIA_MS` (latencia artificial, 450 ms por defecto), `SIM_SIN_DATOS=1` (arranca sin los dos catequistas de ejemplo) y `SIM_FALLAR_DOCUMENTOS=1` (deja los registros en `PENDIENTE_DOCUMENTOS` para probar «Regenerar documentos»).
-
-Cuentas de prueba: catequista `prueba@ejemplo.com` con número `1`; panel con `aovv.26@gmail.com` (administrador) o `verificador@ejemplo.com` (solo escanear).
-
-```sh
-npm run build
-```
-
-Genera `dist/`, la carpeta pública para Vercel.
+Configuración: copia `.env.example` como `.env.local`. En local, la clave de la cuenta de servicio se lee del JSON indicado en `GOOGLE_SERVICE_ACCOUNT_FILE` (fuera del repositorio). Despliegue paso a paso: [`docs/DESPLIEGUE.md`](docs/DESPLIEGUE.md).
 
 ## Estructura
 
@@ -28,10 +32,13 @@ Genera `dist/`, la carpeta pública para Vercel.
 - `public/css/styles.css`: tipografías, diseño y animaciones.
 - `public/js/app.js`: estado e interacciones de la muestra.
 - `public/assets/`: imágenes, fuentes y motor incluido en el archivo original.
-- `scripts/`: servidor local, API simulada y preparación para publicación.
+- `api/`: función única de Vercel (`index.js`) y su código (`_lib/`): rutas, lectura de Google, cliente del escritor, PDF y QR.
+- `apps-script/`: escritor de Apps Script (`Code.gs`) y su manifiesto.
+- `scripts/`: servidor local, API simulada, Google emulado y utilidades.
+- `tests/`: pruebas de la API.
 - `vercel.json`: configuración de publicación y cabeceras de seguridad.
 
-### Módulo de registro de catequistas (rama `feature/registro-catequistas`)
+### Módulo de registro de catequistas
 
 | Ruta | Qué es |
 |---|---|
@@ -57,7 +64,7 @@ La misión, visión, funciones y actividades proceden de `QUIÉNES SOMOS.docx`; 
 
 ## Ampliación posterior
 
-Ver `docs/PROXIMOS-PASOS.md`. Esta base admite contenido nuevo, formularios reales, servicios y API sin reemplazar el diseño. No se ha añadido un servidor innecesario para esta presentación.
+Ver `docs/PROXIMOS-PASOS.md`. Esta base admite contenido nuevo, formularios reales, servicios y API sin reemplazar el diseño. El registro de catequistas usa una sola función de Vercel; el resto del sitio sigue siendo estático.
 
 ## Recursos
 

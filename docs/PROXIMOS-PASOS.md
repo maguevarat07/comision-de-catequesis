@@ -2,19 +2,24 @@
 
 ## Módulo de registro de catequistas
 
-Hecho (rama `feature/registro-catequistas`):
+Hecho:
 
 - Frontend completo: registro, portal, Semana del Catequista, verificación, panel de administración, escáner QR y aviso de privacidad.
-- API simulada en memoria que cumple el contrato de `docs/API-CONTRATO.md`, para probar todos los flujos sin Google.
+- API real en `api/` (una función de Vercel): lectura de la hoja y Drive con la cuenta de servicio, sesiones firmadas, login con Google Identity Services, PDF (ficha, carnet CR80 y pase) y QR.
+- Escritor de Apps Script (`apps-script/Code.gs`): consecutivos bajo bloqueo, unicidad, Drive, correos con cuota y reintentos (`procesarPendientes`), anulaciones, entradas y respaldo diario.
+- Pruebas: `npm test` (68 comprobaciones de la API con el escritor sobre Google emulado) y la prueba de navegador en emulación móvil.
+- Cuenta de servicio `lector-inscripciones@catequesispanama.iam.gserviceaccount.com` configurada y leyendo la hoja.
 
-Pendiente, en este orden:
+Pendiente, en este orden (detalle en `docs/DESPLIEGUE.md`):
 
-1. **Credenciales de Google** (no existen en ningún repositorio local): cuenta de servicio con clave JSON y un ID de cliente OAuth de tipo *Aplicación web* en el proyecto `green-gearbox-495522-d8` o en uno nuevo. Activar las API de Sheets y Drive.
-2. **API real en `api/`** (una sola función de Vercel con enrutador interno, por el límite de 12 funciones del plan Hobby): lectura de Sheets con la cuenta de servicio, cliente HMAC del escritor, sesiones firmadas, `zod`, generación de PDF (`pdf-lib`, fuentes TTF) y QR (`qrcode`), y pruebas con `vitest`. Debe pasar las mismas pruebas que la API simulada.
-3. **Escritor de Apps Script** (`apps-script/Code.gs`): acciones `registrarCatequista`, `adjuntarDocumentos`, `inscribirSemana`, `registrarEntrada`, `anular`, `reenviarCorreo` y `recuperarNumero`, y activadores `procesarPendientes` y `respaldoDiario`. Requiere `clasp login` o pegarlo a mano.
-4. Añadir a `Config` las claves opcionales `SEMANA_PEDIR_TALLA` y `SEMANA_PEDIR_RESTRICCIONES` (por defecto TRUE).
-5. Revisión de la Comisión: aviso de privacidad, catálogo de niveles y de formación CENAFCA, nombres de las vicarías.
-6. Mejora futura: sustituir el comprobante manual por el Botón de Pago Yappy de Banco General (requiere cuenta comercial).
+1. Compartir la carpeta raíz de Drive con la cuenta de servicio (Lector).
+2. Desplegar el escritor de Apps Script (clasp o a mano), poner sus propiedades, autorizarlo, instalar los activadores y anotar la URL `/exec`.
+3. Crear el ID de cliente OAuth de tipo Aplicación web y ponerlo en `GOOGLE_CLIENT_ID`.
+4. Completar en `Config` los valores POR DEFINIR (Yappy, fechas y sede de la Semana, URL del sitio).
+5. Cargar las variables en Vercel (`npm run vercel:env`) y publicar.
+6. Prueba en un celular real (idealmente iPhone/Safari) contra producción; dejar la hoja sin datos de prueba.
+7. Revisión de la Comisión: aviso de privacidad, catálogo de niveles y de formación CENAFCA, nombres de las vicarías.
+8. Mejora futura: sustituir el comprobante manual por el Botón de Pago Yappy de Banco General (requiere cuenta comercial).
 
 ## Sitio general
 

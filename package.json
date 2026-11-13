@@ -2,13 +2,21 @@
   "name": "comision-de-catequesis",
   "version": "0.1.0",
   "private": true,
-  "description": "Comisión de Catequesis · Prototipo de presentación",
+  "description": "Comisión de Catequesis · sitio y registro de catequistas",
   "scripts": {
     "dev": "node scripts/serve.cjs",
+    "dev:emulado": "node scripts/serve.cjs emulado",
+    "dev:real": "node scripts/serve.cjs real",
     "build": "node scripts/build.cjs",
-    "google:verificar": "node scripts/verificar-google.cjs"
+    "test": "node tests/api.test.mjs",
+    "google:verificar": "node scripts/verificar-google.cjs",
+    "vercel:env": "node scripts/exportar-env-vercel.cjs"
   },
   "engines": {
     "node": ">=20.12"
+  },
+  "dependencies": {
+    "pdf-lib": "^1.17.1",
+    "qrcode": "^1.5.4"
   }
 }

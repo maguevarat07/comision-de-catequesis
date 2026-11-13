@@ -1,6 +1,6 @@
 # Contrato de la API · Registro de catequistas
 
-El frontend (`public/`) solo conoce estas rutas. Hoy las implementa la **API simulada** (`scripts/api-simulada.cjs`, en memoria) y en la siguiente fase las implementará la **API real** en `api/` (función única de Vercel + Google Sheets/Drive/Gmail). Ambas deben comportarse igual.
+El frontend (`public/`) solo conoce estas rutas. Las implementan la **API simulada** (`scripts/api-simulada.cjs`, en memoria) y la **API real** (`api/`, función única de Vercel + Google Sheets/Drive/Gmail vía el escritor de Apps Script). Ambas se comportan igual; `npm test` lo comprueba sobre la real.
 
 ## Reglas comunes
 
@@ -35,7 +35,7 @@ El frontend (`public/`) solo conoce estas rutas. Hoy las implementa la **API sim
 
 | Método y ruta | Cuerpo / parámetros | Respuesta |
 |---|---|---|
-| `GET /api/salud` | — | `{ ok, modo, configLeida, hora }` |
+| `GET /api/salud` | — | `{ ok, modo, configLeida, escritor, hora }` |
 | `GET /api/config-publica` | — | `{ ok, config: { modo: 'simulado'\|'google', googleClientId, urlSitio, registroAbierto, costoRegistro, costoSemana, moneda, yappy: { directorio, telefono, instrucciones }, semana: { edicion, abierta, fechas, sede, cupo, inscritos, hayCupo, costo, moneda, campos: { talla, restricciones } } } }` |
 | `POST /api/registro` **(idem)** | `{ datos: { nombres, apellidos, cedula, fecha_nacimiento, sexo, telefono, correo, direccion, parroquia, vicaria_zona, anios_servicio, nivel_que_imparte[], formacion_cenafca, coordinador_parroquial, yappy_referencia, consentimiento_datos: true, consentimiento_imagen: true }, foto, firma, comprobante, comprobante_sha256 }` | `{ ok, numero, estado, correoEnviado, correo, documentos: { pdf, carnet } }` y abre la sesión `cat_sesion` |
 | `POST /api/recuperar` | `{ correo }` | Siempre `{ ok, mensaje }` genérico (no revela si existe) |
@@ -56,7 +56,7 @@ El frontend (`public/`) solo conoce estas rutas. Hoy las implementa la **API sim
 | Método y ruta | Rol | Notas |
 |---|---|---|
 | `POST /api/auth/google` | — | `{ credential }` (ID token de Google Identity Services). Se verifica en el servidor contra `GOOGLE_CLIENT_ID`; el correo debe estar en `ADMIN_EMAILS` o `VERIFICADORES_EMAILS` |
-| `POST /api/auth/simulado` | — | `{ email }`. **Solo en la API simulada**; la real responde 404 |
+| `POST /api/auth/simulado` | — | `{ email }`. **Solo sin Google real** (API simulada o modo emulado); en producción responde 404 |
 | `POST /api/auth/salir` · `GET /api/auth/yo` | — | `yo` → `{ ok, email, rol: 'admin'\|'verificador' }` |
 | `POST /api/verificar/entrada` | ambos | `{ t }` → `{ ok, yaHabiaEntrado, checkin_at, checkin_por }` |
 | `GET /api/admin/resumen` | admin | Contadores, `recaudado`, `cuotaCorreo` (`MailApp.getRemainingDailyQuota()`), `correosPendientes` |
