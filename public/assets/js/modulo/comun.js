@@ -121,7 +121,7 @@ export function normalizarTelefono(v) {
   return d;
 }
 export function telefonoValido(v) {
-  return /^(?:6\d{7}|[2-9]\d{6})$/.test(normalizarTelefono(v));
+  return /^6\d{7}$/.test(normalizarTelefono(v));
 }
 export function formatearTelefono(v) {
   const d = normalizarTelefono(v);

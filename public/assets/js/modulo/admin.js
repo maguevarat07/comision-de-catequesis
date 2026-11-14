@@ -23,6 +23,7 @@ cargarConfig().then(marcarModo).catch(() => {});
   $('#usuario').textContent = s.email;
   $('#vista-panel').hidden = false;
   cargarResumen();
+  contarCumpleanosHoy();
   cambiarVista('aprobaciones', false);
 })();
 
@@ -72,10 +73,11 @@ function cambiarVista(v, enfocar = true) {
   vista = v;
   tabs.forEach((x) => { const on = x.dataset.vista === v; x.setAttribute('aria-selected', String(on)); x.tabIndex = on ? 0 : -1; if (on && enfocar && document.activeElement?.classList.contains('m-tab')) x.focus(); });
   const tab = tabs.find((x) => x.dataset.vista === v);
-  const dash = v === 'dashboard';
-  $('#panel-dashboard').hidden = !dash;
-  $('#panel-lista').hidden = dash;
-  if (dash) { cargarDashboard(); return; }
+  // Vistas con panel propio; el resto comparte el listado.
+  const propios = { dashboard: ['#panel-dashboard', cargarDashboard], territorio: ['#panel-territorio', cargarTerritorioAdmin], cumpleanos: ['#panel-cumple', cargarCumpleanos] };
+  Object.entries(propios).forEach(([k, [sel]]) => { $(sel).hidden = k !== v; });
+  $('#panel-lista').hidden = !!propios[v];
+  if (propios[v]) { propios[v][1](); return; }
   $('#panel-lista').setAttribute('aria-labelledby', tab.id);
   $('#ayuda-aprobar').hidden = v !== 'aprobaciones';
   $('#filtro-estado').hidden = v !== 'catequistas';
@@ -148,7 +150,12 @@ function pintarFiltroTerritorio() {
 const dlg = $('#dialogo');
 $('#dlg-cerrar').addEventListener('click', () => dlg.close());
 dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
-dlg.addEventListener('close', () => { if (dlg.dataset.cambio) { delete dlg.dataset.cambio; cargarResumen(); if (vista === 'dashboard') cargarDashboard(); else cargarLista(); } });
+dlg.addEventListener('close', () => {
+  if (!dlg.dataset.cambio) return;
+  delete dlg.dataset.cambio;
+  cargarResumen();
+  ({ dashboard: cargarDashboard, territorio: cargarTerritorioAdmin, cumpleanos: cargarCumpleanos }[vista] || cargarLista)();
+});
 
 const tablaFilas = (filas) => `<dl class="m-datos">${filas.map(([k, v]) => html`<dt>${k}</dt><dd>${v === '' || v == null ? '—' : v}</dd>`).join('')}</dl>`;
 const medio = (url, texto) => (url ? html`<figure><a href="${url}" target="_blank" rel="noopener"><img src="${url}" alt="${texto}" loading="lazy"></a>${texto}</figure>` : '');
@@ -545,4 +552,236 @@ $('#dash-csv').addEventListener('click', () => {
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+});
+
+// ---------- Catálogo territorial: parroquias, vicarías y coordinadores ----------
+
+const terrEstado = { datos: null };
+const normal = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+
+async function cargarTerritorioAdmin() {
+  $('#terr-cuerpo').innerHTML = '<tr><td colspan="4" class="m-vacio">Cargando…</td></tr>';
+  try {
+    terrEstado.datos = await api('/api/admin/territorio');
+    const sel = $('#terr-zona');
+    if (sel.options.length === 1) sel.insertAdjacentHTML('beforeend', terrEstado.datos.zonas.map((z) => html`<option value="${z.id}">${z.nombre} (${z.area})</option>`).join(''));
+    aviso($('#terr-aviso'), 'info', terrEstado.datos.origen === 'base'
+      ? 'Este es el catálogo inicial. El primer cambio que guardes lo copiará a la hoja de Google (pestañas «Vicarias» y «Parroquias») y desde entonces se usará el de la hoja.'
+      : null);
+    pintarTerritorio();
+  } catch (e) {
+    aviso($('#terr-aviso'), 'error', e.message);
+    $('#terr-cuerpo').innerHTML = '';
+  }
+}
+
+['#terr-q', '#terr-zona', '#terr-inactivas'].forEach((s) => $(s).addEventListener(s === '#terr-q' ? 'input' : 'change', pintarTerritorio));
+$('#terr-buscar').addEventListener('submit', (e) => e.preventDefault());
+
+function pintarTerritorio() {
+  const d = terrEstado.datos;
+  if (!d) return;
+  const q = normal($('#terr-q').value.trim());
+  const zonaSel = $('#terr-zona').value;
+  const inactivas = $('#terr-inactivas').checked;
+  const coincide = (...t) => !q || q.split(/\s+/).every((p) => normal(t.join(' ')).includes(p));
+  const filas = [];
+  let nPar = 0;
+  for (const z of d.zonas) {
+    if (zonaSel && z.id !== zonaSel) continue;
+    const bloques = [];
+    for (const v of z.vicarias) {
+      if (!v.activa && !inactivas) continue;
+      const ps = v.parroquias.filter((p) => (p.activa || inactivas) && coincide(p.nombre, p.coordinador, v.nombre, z.nombre));
+      if (q && !ps.length && !coincide(v.nombre)) continue;
+      nPar += ps.length;
+      const total = v.parroquias.reduce((a, p) => a + p.catequistas, 0);
+      bloques.push(html`<tr class="m-terr-vic"><th scope="rowgroup" colspan="2">${v.etiqueta}${v.activa ? '' : crudo(' <span class="m-badge">Inactiva</span>')}</th><td class="m-n">${total}</td>
+        <td class="m-terr-acc"><button type="button" class="m-btn m-btn--texto m-btn--sm" data-editar-vicaria="${v.id}" aria-label="${`Editar ${v.etiqueta}`}">Editar vicaría</button></td></tr>`);
+      for (const p of ps) {
+        bloques.push(html`<tr class="${p.activa ? '' : 'm-terr-inactiva'}">
+          <td><span class="m-par">${p.nombre}</span>${p.propuesta ? crudo(' <span class="m-badge" title="Adscripción propuesta, pendiente de confirmación oficial">Propuesta</span>') : ''}${p.activa ? '' : crudo(' <span class="m-badge">Inactiva</span>')}</td>
+          <td>${p.coordinador || crudo('<span class="m-cero">Sin coordinador</span>')}</td>
+          <td class="m-n">${p.catequistas || crudo('<span class="m-cero">0</span>')}</td>
+          <td class="m-terr-acc"><button type="button" class="m-btn m-btn--borde m-btn--sm" data-editar-parroquia="${p.id}" aria-label="${`Editar ${p.nombre}`}">Editar</button></td>
+        </tr>`);
+      }
+    }
+    if (bloques.length) filas.push(html`<tr class="m-terr-zona"><th scope="rowgroup" colspan="4">Zona ${z.nombre} <span>${z.area}</span></th></tr>`, ...bloques);
+  }
+  $('#terr-cuerpo').innerHTML = filas.join('') || '<tr><td colspan="4" class="m-vacio">Nada coincide con la búsqueda.</td></tr>';
+  $('#terr-pie').textContent = `${nPar} parroquias mostradas. Los cambios actualizan solos la parroquia, vicaría, zona y coordinador de los catequistas registrados.`;
+
+  const fuera = d.fuera.filter((f) => coincide(f.nombre, f.vicaria));
+  $('#terr-fuera-sec').hidden = !fuera.length;
+  $('#terr-fuera').innerHTML = fuera.map((f, i) => html`<tr><td><span class="m-par">${f.nombre}</span></td><td>${f.vicaria}</td><td class="m-n">${f.catequistas}</td>
+    <td class="m-terr-acc"><button type="button" class="m-btn m-btn--oro m-btn--sm" data-agregar="${i}">Agregar al catálogo</button></td></tr>`).join('');
+  terrEstado.fuera = fuera;
+}
+
+$('#terr-cuerpo').addEventListener('click', (e) => {
+  const bp = e.target.closest('[data-editar-parroquia]');
+  const bv = e.target.closest('[data-editar-vicaria]');
+  if (bp) abrirParroquia(bp.dataset.editarParroquia);
+  if (bv) abrirVicaria(bv.dataset.editarVicaria);
+});
+$('#terr-fuera').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-agregar]');
+  if (!b) return;
+  const f = terrEstado.fuera[Number(b.dataset.agregar)];
+  abrirParroquia(null, { nombre: f.nombre, vicaria_id: f.vicaria_id });
+});
+$('#terr-nueva-parroquia').addEventListener('click', () => abrirParroquia(null));
+$('#terr-nueva-vicaria').addEventListener('click', () => abrirVicaria(null));
+
+const todasVicarias = () => terrEstado.datos.zonas.flatMap((z) => z.vicarias.map((v) => ({ ...v, zona: z })));
+const buscarParroquia = (id) => todasVicarias().flatMap((v) => v.parroquias.map((p) => ({ ...p, vicaria: v }))).find((p) => p.id === id);
+
+function opcionesVicaria(sel) {
+  return terrEstado.datos.zonas.map((z) => html`<optgroup label="${`Zona ${z.nombre}`}">${crudo(z.vicarias.map((v) => html`<option value="${v.id}"${v.id === sel ? ' selected' : ''}>${v.etiqueta}${v.activa ? '' : ' (inactiva)'}</option>`).join(''))}</optgroup>`).join('');
+}
+
+function abrirParroquia(id, prellenado = {}) {
+  const p = id ? buscarParroquia(id) : null;
+  const val = { nombre: '', vicaria_id: '', coordinador: '', propuesta: false, activa: true, ...(p ? { nombre: p.nombre, vicaria_id: p.vicaria.id, coordinador: p.coordinador, propuesta: p.propuesta, activa: p.activa } : {}), ...prellenado };
+  $('#dlg-titulo').textContent = p ? `Editar parroquia` : 'Nueva parroquia';
+  $('#dlg-cuerpo').innerHTML = html`
+    <form class="m-form" id="form-terr" novalidate>
+      ${p ? crudo(html`<p class="m-help" style="margin:0">${p.catequistas} catequistas vigentes en esta parroquia.</p>`) : ''}
+      <div class="m-field"><label for="t-nombre">Nombre de la parroquia</label><input id="t-nombre" maxlength="120" required value="${val.nombre}" placeholder="San José — Paraíso"><p class="m-help">Si hay varias con el mismo nombre, añade el lugar: «San José — Chame».</p></div>
+      <div class="m-field"><label for="t-vicaria">Vicaría</label><select id="t-vicaria" required><option value="">Selecciona la vicaría</option>${crudo(opcionesVicaria(val.vicaria_id))}</select></div>
+      <div class="m-field"><label for="t-coord">Coordinador(a) de catequesis</label><input id="t-coord" maxlength="200" value="${val.coordinador}" placeholder="Nombre y apellido; varios separados por comas"><p class="m-help">Se propone en el formulario de registro de esta parroquia.</p></div>
+      <label class="m-check"><input type="checkbox" id="t-propuesta"${val.propuesta ? ' checked' : ''}><span><strong>Adscripción propuesta</strong><br><span class="m-help">Pendiente de confirmación oficial.</span></span></label>
+      <label class="m-check"><input type="checkbox" id="t-activa"${val.activa ? ' checked' : ''}><span><strong>Activa</strong><br><span class="m-help">Si la desactivas, deja de aparecer en el registro; sus catequistas se conservan.</span></span></label>
+      <div id="t-aviso" hidden></div>
+      <div class="m-acciones"><button type="submit" class="m-btn m-btn--oro" id="t-guardar">Guardar</button></div>
+    </form>`;
+  if (!dlg.open) dlg.showModal();
+  $('#t-nombre').focus();
+  enlazarFormTerritorio('parroquia', () => ({
+    id: p ? p.id : undefined, nombre: $('#t-nombre').value.trim(), vicaria_id: $('#t-vicaria').value, coordinador: $('#t-coord').value.trim(),
+    propuesta: $('#t-propuesta').checked, activa: $('#t-activa').checked,
+  }), { nombre: '#t-nombre', vicaria_id: '#t-vicaria' });
+}
+
+function abrirVicaria(id) {
+  const v = id ? todasVicarias().find((x) => x.id === id) : null;
+  $('#dlg-titulo').textContent = v ? 'Editar vicaría' : 'Nueva vicaría';
+  $('#dlg-cuerpo').innerHTML = html`
+    <form class="m-form" id="form-terr" novalidate>
+      <div class="m-field"><label for="t-nombre">Nombre de la vicaría</label><input id="t-nombre" maxlength="120" required value="${v ? v.nombre : ''}" placeholder="Santa Eduviges"><p class="m-help">Sin la palabra «Vicaría»: se añade sola.</p></div>
+      <div class="m-field"><label for="t-zona">Zona pastoral</label><select id="t-zona" required><option value="">Selecciona la zona</option>${crudo(terrEstado.datos.zonas.map((z) => html`<option value="${z.id}"${v && v.zona.id === z.id ? ' selected' : ''}>${z.nombre} (${z.area})</option>`).join(''))}</select></div>
+      ${v ? crudo(html`<label class="m-check"><input type="checkbox" id="t-activa"${v.activa ? ' checked' : ''}><span><strong>Activa</strong><br><span class="m-help">Para desactivarla, primero mueve o desactiva sus parroquias.</span></span></label>`) : ''}
+      <div id="t-aviso" hidden></div>
+      <div class="m-acciones"><button type="submit" class="m-btn m-btn--oro" id="t-guardar">Guardar</button></div>
+    </form>`;
+  if (!dlg.open) dlg.showModal();
+  $('#t-nombre').focus();
+  enlazarFormTerritorio('vicaria', () => ({ id: v ? v.id : undefined, nombre: $('#t-nombre').value.trim(), zona_id: $('#t-zona').value, activa: $('#t-activa') ? $('#t-activa').checked : true }), { nombre: '#t-nombre', zona_id: '#t-zona', activa: '#t-activa' });
+}
+
+/**
+ * Guardar en dos pasos: primero una vista previa (cuántos registros de catequistas cambiarán);
+ * si hay alguno, se pide confirmación antes de escribir.
+ */
+function enlazarFormTerritorio(tipo, valores, camposDom) {
+  const f = $('#form-terr');
+  const av = $('#t-aviso');
+  const idem = nuevaClave();
+  let confirmado = false;
+  f.addEventListener('input', () => { confirmado = false; $('#t-guardar').textContent = 'Guardar'; aviso(av, 'info', null); });
+  f.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const cuerpo = valores();
+    Object.values(camposDom).forEach((s) => { if ($(s)) errorCampo($(s), ''); });
+    const b = $('#t-guardar');
+    ocupado(b, true, confirmado ? 'Guardando…' : 'Comprobando…');
+    try {
+      if (!confirmado) {
+        const pre = await api(`/api/admin/territorio/${tipo}`, { metodo: 'POST', idem: nuevaClave(), cuerpo: { ...cuerpo, simular: true } });
+        if (pre.afectados > 0) {
+          confirmado = true;
+          ocupado(b, false);
+          b.textContent = `Confirmar y actualizar ${pre.afectados} ${pre.afectados === 1 ? 'registro' : 'registros'}`;
+          aviso(av, 'warn', [
+            `Este cambio actualizará ${pre.afectados} ${pre.afectados === 1 ? 'registro' : 'registros'} de catequistas (parroquia, vicaría, zona o coordinador).`,
+            'Los carnets ya emitidos no cambian; si hace falta, usa «Regenerar documentos» en cada registro.',
+          ]);
+          b.focus();
+          return;
+        }
+      }
+      const r = await api(`/api/admin/territorio/${tipo}`, { metodo: 'POST', idem, cuerpo });
+      dlg.dataset.cambio = '1';
+      f.innerHTML = html`<div class="m-aviso m-aviso--ok"><p>Cambios guardados.${r.actualizados ? ` Se actualizaron ${r.actualizados} registros de catequistas.` : ''}</p></div>
+        <div class="m-acciones"><button type="button" class="m-btn m-btn--primario" id="t-cerrar">Cerrar</button></div>`;
+      $('#t-cerrar').addEventListener('click', () => dlg.close());
+      $('#t-cerrar').focus();
+    } catch (err) {
+      ocupado(b, false);
+      confirmado = false;
+      b.textContent = 'Guardar';
+      if (err.campos) Object.entries(err.campos).forEach(([k, msg]) => { if (camposDom[k] && $(camposDom[k])) errorCampo($(camposDom[k]), msg); });
+      aviso(av, 'error', err.message);
+    }
+  });
+}
+
+// ---------- Cumpleaños ----------
+
+const fmtDia = (iso) => new Date(`${iso}T12:00:00`).toLocaleDateString('es-PA', { weekday: 'long', day: 'numeric', month: 'long' });
+
+async function contarCumpleanosHoy() {
+  try {
+    const r = await api('/api/admin/cumpleanos?dias=1');
+    const n = r.items.filter((x) => x.dias === 0).length;
+    $('#n-cumple').hidden = !n;
+    $('#n-cumple').textContent = n;
+  } catch { /* el contador es opcional */ }
+}
+
+$('#cumple-dias').addEventListener('change', cargarCumpleanos);
+
+async function cargarCumpleanos() {
+  $('#cumple-hoy').innerHTML = '<li class="m-help">Cargando…</li>';
+  try {
+    const r = await api(`/api/admin/cumpleanos?dias=${$('#cumple-dias').value}`);
+    aviso($('#cumple-estado'), 'warn', r.activo ? null : 'Los saludos automáticos están desactivados (SALUDO_CUMPLEANOS en FALSE en la hoja Config). Puedes enviarlos a mano.');
+    const hoy = r.items.filter((x) => x.dias === 0);
+    const prox = r.items.filter((x) => x.dias > 0);
+    $('#n-cumple').hidden = !hoy.length;
+    $('#n-cumple').textContent = hoy.length;
+    $('#cumple-hoy').innerHTML = hoy.length
+      ? hoy.map((x) => {
+        const enviado = x.saludo && String(x.saludo.estado).startsWith('ENVIADO');
+        const estado = enviado ? html`<span class="m-badge m-badge--ok">Saludo enviado · ${fmtFecha(x.saludo.fecha, true)}</span>`
+          : x.saludo && x.saludo.estado === 'PENDIENTE' ? '<span class="m-badge m-badge--warn">Saludo en cola</span>' : '<span class="m-badge">Saludo sin enviar</span>';
+        return html`<li class="m-cumple">
+          <span class="m-cumple__icono" aria-hidden="true">🎂</span>
+          <div><strong>${x.nombre}</strong><span class="m-help" style="display:block">${x.numero} · ${x.parroquia} · cumple ${x.edad} años</span><span style="display:block;margin-top:6px">${crudo(estado)}</span></div>
+          ${enviado ? '' : crudo(html`<button type="button" class="m-btn m-btn--oro m-btn--sm" data-saludar="${x.id}">Enviar saludo</button>`)}
+        </li>`;
+      }).join('')
+      : '<li class="m-help">Hoy no cumple años ningún catequista aprobado.</li>';
+    $('#cumple-prox').innerHTML = prox.length
+      ? prox.map((x) => html`<tr><td>${fmtDia(x.fecha)}<span class="m-help" style="display:block">${x.dias === 1 ? 'mañana' : `en ${x.dias} días`}</span></td><td><strong>${x.nombre}</strong><span class="m-help" style="display:block">${x.numero}</span></td><td>${x.parroquia}</td><td class="m-n">${x.edad} años</td></tr>`).join('')
+      : '<tr><td colspan="4" class="m-vacio">Nadie cumple años en este periodo.</td></tr>';
+  } catch (e) {
+    $('#cumple-hoy').innerHTML = '';
+    aviso($('#cumple-aviso'), 'error', e.message);
+  }
+}
+
+$('#cumple-hoy').addEventListener('click', async (e) => {
+  const b = e.target.closest('[data-saludar]');
+  if (!b) return;
+  ocupado(b, true, 'Enviando…');
+  try {
+    const r = await api('/api/admin/cumpleanos/saludar', { metodo: 'POST', idem: nuevaClave(), cuerpo: { id: b.dataset.saludar } });
+    aviso($('#cumple-aviso'), r.enviado ? 'ok' : 'warn', r.mensaje);
+    cargarCumpleanos();
+  } catch (err) {
+    ocupado(b, false);
+    aviso($('#cumple-aviso'), 'error', err.message);
+  }
 });

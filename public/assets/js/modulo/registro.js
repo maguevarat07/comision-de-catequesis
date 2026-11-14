@@ -5,9 +5,12 @@ import {
 } from './comun.js';
 import { Recortador, reducir, sha256Hex, tamañoDataUrl } from './imagenes.js';
 import { abrirFirma } from './firma.js';
+import { crearAutocompletar } from './autocompletar.js';
+import { controlCedula, controlCelular, controlCorreo, mensajeCedula, mensajeCelular, mensajeCorreo } from './formato.js';
 
 const TOTAL = 7;
-const CLAVE_BORRADOR = 'cat-registro-borrador-v2';
+const CLAVE_BORRADOR = 'cat-registro-borrador-v3';
+let buscador = null; // autocompletar de parroquias
 const form = $('#asistente');
 const pasos = $$('.m-paso', form);
 let paso = 1;
@@ -28,6 +31,9 @@ const estado = {
 llenarSelect($('#formacion_cenafca'), FORMACION_CENAFCA);
 $('#niveles').innerHTML = NIVELES.map((n, i) => html`<label class="m-chip"><input type="checkbox" name="nivel" value="${n}" id="nivel-${i}"><span>${n}</span></label>`).join('');
 $('#fecha_nacimiento').max = new Date().toISOString().slice(0, 10);
+controlCedula($('#cedula'));
+controlCelular($('#telefono'));
+controlCorreo($('#correo'), $('#correo2'));
 
 (async function iniciar() {
   try {
@@ -47,6 +53,7 @@ $('#fecha_nacimiento').max = new Date().toISOString().slice(0, 10);
   $('#pago-telefono').textContent = config.yappy.telefono || '—';
   $('#pago-instrucciones').textContent = config.yappy.instrucciones || '';
   restaurarBorrador();
+  restaurarParroquia();
   actualizarUbicacion({ completarCoordinador: false });
   form.hidden = false;
   mostrarPaso(1, false);
@@ -54,12 +61,34 @@ $('#fecha_nacimiento').max = new Date().toISOString().slice(0, 10);
 
 // ---------- Parroquia → vicaría → zona y coordinador ----------
 
-/** Selector de parroquias agrupado por «Zona · Vicaría» y vicarías para «Mi parroquia no está en la lista». */
+const OPCION_OTRA = { id: OTRA_PARROQUIA, titulo: 'Mi parroquia no está en la lista', detalle: 'Escribirás el nombre y elegirás la vicaría' };
+
+/** Autocompletar de parroquias (busca por nombre, barrio, vicaría o zona) y vicarías para «otra». */
 function pintarParroquias() {
-  const grupos = territorio.zonas.flatMap((z) => z.vicarias.map((v) => html`<optgroup label="${`${v.etiqueta} · Zona ${z.nombre}`}">${crudo(v.parroquias.map((p) => html`<option value="${p.id}">${p.nombre}</option>`).join(''))}</optgroup>`));
-  $('#parroquia_id').innerHTML = `<option value="">Selecciona tu parroquia</option>${grupos.join('')}<optgroup label="Otra"><option value="${OTRA_PARROQUIA}">Mi parroquia no está en la lista</option></optgroup>`;
+  const opciones = [...territorio.parroquias.values()].map((p) => ({
+    id: p.id, titulo: p.nombre, detalle: `${p.vicaria.etiqueta} · Zona ${p.zona.nombre}`, buscar: `${p.nombre} ${p.vicaria.nombre} ${p.zona.nombre} ${p.zona.area}`,
+  }));
+  buscador = crearAutocompletar({
+    input: $('#parroquia_buscar'), lista: $('#parroquia_lista'), opciones: () => opciones, fija: OPCION_OTRA,
+    alElegir: (o) => {
+      $('#parroquia_id').value = o ? o.id : '';
+      if (o) errorCampo($('#parroquia_buscar'), '');
+      actualizarUbicacion();
+      guardarBorrador();
+      if (o && o.id === OTRA_PARROQUIA) $('#parroquia').focus();
+    },
+  });
   const vics = territorio.zonas.map((z) => html`<optgroup label="${`Zona ${z.nombre} (${z.area})`}">${crudo(z.vicarias.map((v) => html`<option value="${v.id}">${v.etiqueta}</option>`).join(''))}</optgroup>`);
   $('#vicaria_id').innerHTML = `<option value="">Selecciona la vicaría</option>${vics.join('')}`;
+}
+
+/** Vuelve a poner en el buscador la parroquia guardada en el borrador. */
+function restaurarParroquia() {
+  const id = $('#parroquia_id').value;
+  const p = territorio.parroquias.get(id);
+  if (p) buscador.fijar({ id: p.id, titulo: p.nombre });
+  else if (id === OTRA_PARROQUIA) buscador.fijar(OPCION_OTRA);
+  else $('#parroquia_id').value = ''; // parroquia retirada del catálogo
 }
 
 /** Muestra la vicaría y la zona de la parroquia elegida y propone su coordinador(a). */
@@ -87,7 +116,6 @@ function actualizarUbicacion({ completarCoordinador = true } = {}) {
     ? `Según la estructura de la Comisión: ${sugerido}. Corrígelo si en tu parroquia es otra persona.`
     : 'Escribe el nombre de quien coordina la catequesis en tu parroquia.';
 }
-$('#parroquia_id').addEventListener('change', () => { actualizarUbicacion(); errorCampo($('#parroquia_id'), ''); });
 $('#vicaria_id').addEventListener('change', () => actualizarUbicacion({ completarCoordinador: false }));
 
 /** Texto legible de la parroquia elegida (revisión). */
@@ -115,7 +143,6 @@ function restaurarBorrador() {
   try {
     const d = JSON.parse(sessionStorage.getItem(CLAVE_BORRADOR) || 'null');
     if (!d) return;
-    // Un <select> ignora un valor que no está entre sus opciones (p. ej. una parroquia retirada del catálogo).
     CAMPOS_TEXTO.forEach((k) => { if (d[k] != null) $('#' + k).value = d[k]; });
     if (d.sexo) { const r = form.querySelector(`input[name=sexo][value="${CSS.escape(d.sexo)}"]`); if (r) r.checked = true; }
     (d.niveles || []).forEach((v) => { const c = form.querySelector(`input[name=nivel][value="${CSS.escape(v)}"]`); if (c) c.checked = true; });
@@ -179,21 +206,21 @@ function validarPaso(n) {
     chequear('nombres', v('nombres').length >= 2, 'Escribe tus nombres.');
     chequear('apellidos', v('apellidos').length >= 2, 'Escribe tus apellidos.');
     $('#cedula').value = normalizarCedula(v('cedula'));
-    chequear('cedula', cedulaValida(v('cedula')), 'Formato no válido. Usa guiones, por ejemplo 8-123-4567.');
+    chequear('cedula', cedulaValida(v('cedula')), v('cedula') ? mensajeCedula(v('cedula')) : 'Escribe tu cédula, por ejemplo 8-123-4567.');
     const e = edad(v('fecha_nacimiento'));
     chequear('fecha_nacimiento', !Number.isNaN(e) && e >= 12 && e <= 100, v('fecha_nacimiento') ? 'Revisa la fecha de nacimiento.' : 'Indica tu fecha de nacimiento.');
     const sexoOk = !!form.sexo.value;
     $('#sexo').setAttribute('aria-invalid', String(!sexoOk));
     errorCampo($('#sexo'), sexoOk ? '' : 'Selecciona una opción.');
     if (!sexoOk) ok = false;
-    chequear('telefono', telefonoValido(v('telefono')), 'Escribe un celular de Panamá, por ejemplo 6000-0000.');
+    chequear('telefono', telefonoValido(v('telefono')), v('telefono') ? mensajeCelular(v('telefono')) : 'Escribe tu celular, por ejemplo 6000-0000.');
     if (telefonoValido(v('telefono'))) $('#telefono').value = formatearTelefono(v('telefono'));
-    chequear('correo', correoValido(v('correo')), 'Escribe un correo válido.');
-    chequear('correo2', v('correo2').toLowerCase() === v('correo').toLowerCase() && !!v('correo2'), 'Los correos no coinciden.');
+    chequear('correo', !mensajeCorreo(v('correo')), v('correo') ? mensajeCorreo(v('correo')) : 'Escribe tu correo.');
+    chequear('correo2', v('correo2').toLowerCase() === v('correo').toLowerCase() && !!v('correo2'), v('correo2') ? 'Los correos no coinciden.' : 'Vuelve a escribir tu correo.');
   }
   if (n === 2) {
     const v = (id) => $('#' + id).value.trim();
-    chequear('parroquia_id', !!v('parroquia_id'), 'Selecciona tu parroquia.');
+    chequear('parroquia_buscar', !!v('parroquia_id'), v('parroquia_buscar') ? 'Elige tu parroquia de la lista de sugerencias.' : 'Escribe y elige tu parroquia.');
     if (v('parroquia_id') === OTRA_PARROQUIA) {
       chequear('parroquia', v('parroquia').length >= 3, 'Escribe el nombre de tu parroquia.');
       chequear('vicaria_id', !!v('vicaria_id'), 'Selecciona la vicaría de tu parroquia.');
@@ -370,7 +397,7 @@ function manejarError(err) {
   if (err.codigo === 'VALIDACION' && err.campos) {
     const primero = Object.keys(err.campos).map((k) => PASO_DE_CAMPO[k] || TOTAL).sort((a, b) => a - b)[0];
     mostrarPaso(primero);
-    Object.entries(err.campos).forEach(([k, msg]) => { const el = $('#' + k); if (el) errorCampo(el, msg); });
+    Object.entries(err.campos).forEach(([k, msg]) => { const el = $('#' + (k === 'parroquia_id' ? 'parroquia_buscar' : k)); if (el) errorCampo(el, msg); });
     aviso($('#aviso-envio'), 'error', err.message);
     return;
   }

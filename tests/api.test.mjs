@@ -297,6 +297,93 @@ ok(rec1.d.mensaje === rec2.d.mensaje && google.buzon.length === antes + 1 && goo
 await req(null, '/api/recuperar', { metodo: 'POST', cuerpo: { correo: 'rech@ejemplo.com' } });
 ok(google.buzon.at(-1).asunto === `Tu número de catequista: ${reReg.d.numero}`, 'recuperar ignora el registro rechazado y envía el vigente');
 
+// ---------------- Celular ----------------
+
+const fijo = await registrar('fijo@ejemplo.com', '8-600-6000', 'FIJO001', { telefono: '2345678' });
+ok(fijo.s === 400 && fijo.d.campos.telefono, 'un teléfono fijo (7 dígitos) ya no se acepta: debe ser celular');
+const sin6 = await registrar('fijo@ejemplo.com', '8-600-6000', 'FIJO001', { telefono: '7123-4567' });
+ok(sin6.s === 400 && sin6.d.campos.telefono, 'un número de 8 dígitos que no empieza por 6 se rechaza');
+
+// ---------------- Catálogo territorial editable ----------------
+
+const nombresDe = (correo) => filas('Catequistas').find((c) => c.correo === correo);
+const t0 = await req(a, '/api/admin/territorio');
+const sj = t0.d.zonas.flatMap((z) => z.vicarias).flatMap((x) => x.parroquias).find((p) => p.id === 'san-judas-tadeo');
+ok(t0.s === 200 && t0.d.origen === 'base' && sj.catequistas === filas('Catequistas').filter((c) => c.parroquia === 'San Judas Tadeo' && ['ACTIVO', 'PENDIENTE_APROBACION', 'PENDIENTE_DOCUMENTOS'].includes(c.estado)).length, `panel: catálogo inicial con catequistas por parroquia (San Judas: ${sj.catequistas})`);
+ok(t0.d.fuera.some((f) => f.nombre === 'Capilla Nueva Esperanza' && f.vicaria_id === 'san-cristobal'), 'panel: lista las parroquias escritas a mano');
+ok((await req(v, '/api/admin/territorio')).s === 403, 'verificador no ve el catálogo editable');
+ok(google.hojas.Vicarias && google.hojas.Parroquias && google.hojas.Parroquias.length === 1, 'asegurarEsquema_ creó las pestañas Vicarias y Parroquias (vacías)');
+
+// Un catequista de San Judas con un coordinador propio: el cambio de coordinador no debe pisarlo.
+await registrar('propio@ejemplo.com', '8-610-6100', 'PROP001', { coordinador_parroquial: 'Hna. Propia' });
+const editarPar = (cuerpo, simular = false) => req(a, '/api/admin/territorio/parroquia', { metodo: 'POST', idem: crypto.randomUUID(), cuerpo: { ...cuerpo, simular } });
+const sjBase = { id: 'san-judas-tadeo', vicaria_id: 'carmen-juan-diaz', propuesta: false, activa: true };
+const prev = await editarPar({ ...sjBase, nombre: 'San Judas Tadeo — Juan Díaz', coordinador: 'Pamela Rodríguez, Ariadne Abrego y Dalet González' }, true);
+const enSJ = filas('Catequistas').filter((c) => c.parroquia === 'San Judas Tadeo').length;
+ok(prev.s === 200 && prev.d.simulado && prev.d.afectados === enSJ && filas('Catequistas').filter((c) => c.parroquia === 'San Judas Tadeo').length === enSJ, `vista previa: ${prev.d.afectados} registros afectados y nada cambia todavía`);
+const ren = await editarPar({ ...sjBase, nombre: 'San Judas Tadeo — Juan Díaz', coordinador: 'Pamela Rodríguez, Ariadne Abrego y Dalet González' });
+ok(ren.s === 200 && ren.d.actualizados === enSJ && !filas('Catequistas').some((c) => c.parroquia === 'San Judas Tadeo'), `renombrar la parroquia actualiza ${ren.d.actualizados} registros`);
+ok(filas('Parroquias').length === 100 && filas('Parroquias').find((p) => p.id === 'san-judas-tadeo').nombre === 'San Judas Tadeo — Juan Díaz', 'la primera edición siembra el catálogo en la hoja (100 parroquias) y guarda el cambio');
+const t1 = await req(null, '/api/territorio');
+ok(t1.d.zonas.flatMap((z) => z.vicarias).flatMap((x) => x.parroquias).find((p) => p.id === 'san-judas-tadeo').nombre === 'San Judas Tadeo — Juan Díaz', 'el formulario de registro recibe el nombre nuevo');
+const coord = await editarPar({ ...sjBase, nombre: 'San Judas Tadeo — Juan Díaz', coordinador: 'Nueva Coordinadora' });
+ok(coord.s === 200 && coord.d.actualizados >= 1 && filas('Parroquias').find((p) => p.id === 'san-judas-tadeo').coordinador === 'Nueva Coordinadora', `cambio de coordinador guardado (${coord.d.actualizados} registros)`);
+ok(filas('Catequistas').filter((c) => c.parroquia === 'San Judas Tadeo — Juan Díaz' && c.correo !== 'propio@ejemplo.com').every((c) => c.coordinador_parroquial === 'Nueva Coordinadora'), 'el coordinador nuevo pasa a los registros que tenían el anterior');
+ok(nombresDe('propio@ejemplo.com').coordinador_parroquial === 'Hna. Propia', 'se respeta el coordinador que escribió el catequista');
+const mover = await editarPar({ ...sjBase, vicaria_id: 'cristo-rey', nombre: 'San Judas Tadeo — Juan Díaz', coordinador: 'Nueva Coordinadora' });
+const movido = nombresDe('propio@ejemplo.com');
+ok(mover.s === 200 && movido.vicaria_zona === 'Vicaría Cristo Rey' && movido.zona_pastoral === 'Zona Santa María la Antigua (Panamá Centro)', 'mover la parroquia de vicaría actualiza vicaría y zona de sus catequistas');
+await editarPar({ ...sjBase, nombre: 'San Judas Tadeo — Juan Díaz', coordinador: 'Nueva Coordinadora' });
+const dupNom = await editarPar({ nombre: 'santísima trinidad', vicaria_id: 'cristo-rey', coordinador: '' });
+ok(dupNom.s === 400 && dupNom.d.campos.nombre, 'no se permite una parroquia con nombre repetido');
+ok((await editarPar({ nombre: 'Parroquia Sin Vicaría', vicaria_id: 'no-existe' })).d.campos?.vicaria_id, 'una parroquia necesita una vicaría válida');
+const alta = await editarPar({ nombre: 'Capilla Nueva Esperanza', vicaria_id: 'san-cristobal', coordinador: 'Coordinador Nuevo', propuesta: true });
+const deOtra = nombresDe('otra@ejemplo.com');
+ok(alta.s === 200 && alta.d.actualizados === 1 && deOtra.coordinador_parroquial === 'Coordinador Nuevo', 'agregar al catálogo una parroquia escrita a mano adopta sus registros y les pone el coordinador');
+ok(!(await req(a, '/api/admin/territorio')).d.fuera.some((f) => f.nombre === 'Capilla Nueva Esperanza'), 'y deja de aparecer como «fuera del catálogo»');
+const inact = await editarPar({ id: 'santa-ana', nombre: 'Santa Ana', vicaria_id: 'la-merced-santa-maria', coordinador: '', activa: false });
+const pubIn = await req(null, '/api/territorio');
+ok(inact.s === 200 && !pubIn.d.zonas.flatMap((z) => z.vicarias).flatMap((x) => x.parroquias).some((p) => p.id === 'santa-ana'), 'una parroquia desactivada no se ofrece en el registro');
+ok((await registrar('inact@ejemplo.com', '8-620-6200', 'INAC001', { parroquia_id: 'santa-ana' })).d.campos?.parroquia_id, 'ni se acepta al registrarse');
+const editarVic = (cuerpo) => req(a, '/api/admin/territorio/vicaria', { metodo: 'POST', idem: crypto.randomUUID(), cuerpo });
+const nv = await editarVic({ nombre: 'San Miguelito Centro', zona_id: 'cristo-redentor' });
+ok(nv.s === 200 && filas('Vicarias').some((x) => x.id === 'san-miguelito-centro'), 'alta de una vicaría nueva (la Arquidiócesis informa 13)');
+const enEdu = filas('Catequistas').filter((c) => c.vicaria_zona === 'Vicaría Santa Eduviges').length;
+const rv = await editarVic({ id: 'santa-eduviges', nombre: 'Santa Eduviges — Bethania', zona_id: 'santa-maria-la-antigua' });
+ok(rv.s === 200 && rv.d.actualizados === enEdu && nombresDe('trini@ejemplo.com').vicaria_zona === 'Vicaría Santa Eduviges — Bethania', 'renombrar una vicaría actualiza la vicaría de sus catequistas');
+ok((await editarVic({ id: 'cristo-rey', nombre: 'Cristo Rey', zona_id: 'santa-maria-la-antigua', activa: false })).d.campos?.activa, 'no se desactiva una vicaría con parroquias activas');
+ok(filas('Auditoria').some((x) => x.accion === 'EDITAR_TERRITORIO') && filas('Auditoria').some((x) => x.accion === 'ALTA_TERRITORIO'), 'Auditoria registra los cambios del catálogo');
+const est2 = await req(a, '/api/admin/estadisticas');
+ok(est2.d.zonas.flatMap((z) => z.vicarias).some((x) => x.nombre === 'Vicaría Santa Eduviges — Bethania'), 'el dashboard usa el catálogo editado');
+
+// ---------------- Cumpleaños ----------------
+
+const hoyPa = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Panama' }).format(new Date());
+const rc = await registrar('cumple@ejemplo.com', '8-630-6300', 'CUMP001', { fecha_nacimiento: `1990-${hoyPa.slice(5)}` });
+const cumpleId = idDe('cumple@ejemplo.com');
+await req(a, '/api/admin/aprobar', { metodo: 'POST', idem: crypto.randomUUID(), cuerpo: { id: cumpleId } });
+const lc = await req(a, '/api/admin/cumpleanos?dias=30');
+const itC = lc.d.items.find((x) => x.id === cumpleId);
+ok(lc.s === 200 && lc.d.activo && itC && itC.dias === 0 && itC.edad === Number(hoyPa.slice(0, 4)) - 1990 && !itC.saludo, `cumpleaños de hoy en el panel (${itC && itC.edad} años, sin saludo todavía)`);
+ok(!lc.d.items.some((x) => x.correo === 'rech@ejemplo.com'), 'solo aparecen catequistas aprobados');
+const jC = jar();
+await req(jC, '/api/portal/entrar', { metodo: 'POST', cuerpo: { correo: 'cumple@ejemplo.com', numero: rc.d.numero } });
+ok((await req(jC, '/api/portal/yo')).d.catequista.cumpleanosHoy === true, 'el portal sabe que hoy es su cumpleaños');
+const antesC = google.buzon.length;
+const n1 = google.gas.saludarCumpleanos();
+const n2 = google.gas.saludarCumpleanos();
+const saludo = google.buzon.at(-1);
+ok(n1 >= 1 && n2 === 0 && google.buzon.length === antesC + n1, `el activador saluda una vez (${n1}) y no repite el mismo año`);
+ok(saludo.para === 'cumple@ejemplo.com' && saludo.asunto === '¡Feliz cumpleaños, Ana!' && saludo.html.includes('catequista'), 'correo de cumpleaños con el nombre');
+ok((await req(a, '/api/admin/cumpleanos')).d.items.find((x) => x.id === cumpleId).saludo.estado === 'ENVIADO', 'el panel muestra el saludo enviado');
+const manual = await req(a, '/api/admin/cumpleanos/saludar', { metodo: 'POST', idem: crypto.randomUUID(), cuerpo: { id: cumpleId } });
+ok(manual.s === 200 && manual.d.enviado && google.buzon.at(-1).para === 'cumple@ejemplo.com', 'saludo manual desde el panel');
+ok((await req(a, '/api/admin/cumpleanos/saludar', { metodo: 'POST', idem: crypto.randomUUID(), cuerpo: { id: rechId } })).d.codigo === 'NO_ACTIVO', 'no se saluda a un registro no aprobado');
+const { diasDesdeCumple, diasHastaCumple } = require('../api/_lib/cumpleanos.js');
+const en = (iso) => new Date(`${iso}T15:00:00Z`);
+ok(diasDesdeCumple('2000-02-29', en('2027-02-28')) === 0 && diasDesdeCumple('2000-02-29', en('2028-02-29')) === 0 && diasDesdeCumple('2000-02-29', en('2028-02-28')) === -1, 'nacidos el 29 de febrero: el 28 en años no bisiestos');
+ok(diasHastaCumple('1990-01-02', en('2026-12-31')) === 2 && diasHastaCumple('1990-12-31', en('2026-12-31')) === 0, 'días hasta el próximo cumpleaños, también cruzando el año');
+
 // Cuota agotada → PENDIENTE y reintento por el activador (correo de «recibido» y de aprobación)
 google.fijarCuota(0);
 const rq = await registrar('cuota@ejemplo.com', '8-888-8888', 'REF8888');
@@ -321,11 +408,19 @@ ok((await escribir(JSON.stringify({ body: viejo, signature: crypto.createHmac('s
 const numeros = await Promise.all(Array.from({ length: 20 }, (_, i) => registrar(`lote${i}@ejemplo.com`, `3-${100 + i}-${1000 + i}`, `LOTE${1000 + i}`).then((r) => r.d.numero)));
 const ordenados = numeros.map((n) => Number(n.slice(4))).sort((x, y) => x - y);
 ok(new Set(numeros).size === 20 && ordenados.every((n, i) => i === 0 || n === ordenados[i - 1] + 1), `20 registros simultáneos → ${numeros.length} números únicos y consecutivos`);
-principal.cerrar();
 
 // ---------------- Libro anterior a la aprobación (migración) y aprobación desactivada ----------------
 
-const antiguo = await levantar({ esquemaAntiguo: true, config: { REQUIERE_APROBACION: false } });
+// Exclusión individual del saludo (SALUDO_CUMPLEANOS_EXCLUIR) en el libro principal.
+google.hojas.Config.push(['SALUDO_CUMPLEANOS_EXCLUIR', 'Otra@Ejemplo.com, cumple3@ejemplo.com', '']);
+const rc3 = await registrar('cumple3@ejemplo.com', '8-640-6400', 'CUMP003', { fecha_nacimiento: `1991-${hoyPa.slice(5)}` });
+await req(a, '/api/admin/aprobar', { metodo: 'POST', idem: crypto.randomUUID(), cuerpo: { id: idDe('cumple3@ejemplo.com') } });
+ok(rc3.s === 200 && google.gas.saludarCumpleanos() === 0 && !google.buzon.some((m) => m.para === 'cumple3@ejemplo.com' && m.asunto.startsWith('¡Feliz')), 'SALUDO_CUMPLEANOS_EXCLUIR: no se saluda a quien pidió no recibirlo');
+ok(!(await req(a, '/api/admin/cumpleanos')).d.items.some((x) => x.correo === 'cumple3@ejemplo.com'), 'y no aparece en la lista del panel');
+
+principal.cerrar();
+
+const antiguo = await levantar({ esquemaAntiguo: true, config: { REQUIERE_APROBACION: false, SALUDO_CUMPLEANOS: false } });
 B = antiguo.B;
 ok(!COLUMNAS_NUEVAS.some((c) => antiguo.google.hojas.Catequistas[0].includes(c)), 'libro antiguo: Catequistas sin las columnas nuevas');
 const rAnt = await registrar('antiguo@ejemplo.com', '8-900-9000', 'ANT0001');
@@ -333,6 +428,8 @@ const cabAnt = antiguo.google.hojas.Catequistas[0];
 ok(COLUMNAS_NUEVAS.every((c) => cabAnt.includes(c)), 'asegurarEsquema_ agrega las columnas que faltan');
 ok(filas('Catequistas', antiguo.google)[0].zona_pastoral === 'Zona Nuestra Señora del Carmen (Panamá Este)', 'y el primer registro ya guarda la zona');
 ok(rAnt.s === 200 && rAnt.d.estado === 'ACTIVO' && antiguo.google.buzon[0].asunto.startsWith('Bienvenido'), 'REQUIERE_APROBACION en FALSE: el registro queda ACTIVO y recibe el carnet');
+await registrar('cumple2@ejemplo.com', '8-901-9001', 'ANT0002', { fecha_nacimiento: `1985-${hoyPa.slice(5)}` });
+ok(antiguo.google.gas.saludarCumpleanos() === 0 && !antiguo.google.buzon.some((m) => m.asunto.startsWith('¡Feliz')), 'SALUDO_CUMPLEANOS en FALSE: no se envían saludos');
 antiguo.cerrar();
 
 console.log(fallos ? `\n${fallos} de ${total} FALLARON` : `\nTODO OK (${total} comprobaciones)`);

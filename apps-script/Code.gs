@@ -365,6 +365,44 @@ var ACCIONES = {
     },
   },
 
+  /**
+   * Alta o edición de una vicaría o parroquia del catálogo territorial, y propagación a los
+   * registros de catequistas según `reglas` (las calcula la API: api/_lib/territorio.js).
+   * Si la pestaña aún está vacía, primero se siembra con `semilla` (el catálogo inicial).
+   */
+  guardarTerritorio: {
+    bajoBloqueo: function (libro, d) {
+      if (d.tabla !== 'Vicarias' && d.tabla !== 'Parroquias') throw fallo_('VALIDACION', 'Tabla no válida.');
+      var t = ahora_();
+      ['Vicarias', 'Parroquias'].forEach(function (nombre) {
+        var tab = libro.tabla(nombre);
+        if (!tab.filas.length && d.semilla && d.semilla[nombre]) d.semilla[nombre].forEach(function (f) { libro.insertar(nombre, f); });
+      });
+      var campos = {};
+      Object.keys(d.fila).forEach(function (k) { if (k !== 'id') campos[k] = d.fila[k]; });
+      campos.actualizado_at = t;
+      campos.actualizado_por = d.por;
+      var actual = libro.buscar(d.tabla, d.fila.id);
+      if (actual) libro.actualizar(d.tabla, actual, campos);
+      else { campos.id = d.fila.id; libro.insertar(d.tabla, campos); }
+      var actualizados = aplicarReglas_(libro, d.reglas || []);
+      libro.auditar(d.por, actual ? 'EDITAR_TERRITORIO' : 'ALTA_TERRITORIO', d.tabla, d.fila.id, (d.fila.nombre || '') + ' · ' + actualizados + ' registros actualizados');
+      return { ok: true, id: d.fila.id, actualizados: actualizados };
+    },
+  },
+
+  /** Saludo de cumpleaños manual desde el panel (el automático lo hace saludarCumpleanos). */
+  saludarCumpleanos: {
+    despues: function (res, d, prep, config, ss, sheetId) {
+      var c = leerTabla_(ss, 'Catequistas').porId[d.id];
+      if (!c) return error_('INEXISTENTE', 'Registro no encontrado.');
+      if (c.estado !== 'ACTIVO') return error_('NO_ACTIVO', 'Solo se saluda a catequistas aprobados.');
+      var enviado = enviarCumple_(ss, sheetId, config, c, '');
+      escribirSueltos_(ss, sheetId, function (libro) { libro.auditar(d.por, 'SALUDO_CUMPLEANOS', 'Catequistas', c.id, enviado ? 'enviado' : 'pendiente'); });
+      return { ok: true, enviado: enviado };
+    },
+  },
+
   /** Envía el número al correo si existe; la respuesta nunca revela si existe. */
   recuperarNumero: {
     despues: function (res, d, prep, config, ss, sheetId) {
@@ -394,6 +432,8 @@ function procesarPendientes() {
     else if (m.tipo === 'RECHAZO' && cat[m.referencia_id] && cat[m.referencia_id].estado === 'RECHAZADO') enviarRechazo_(ss, sheetId, config, cat[m.referencia_id], m.id);
     else if (m.tipo === 'SEMANA' && sem[m.referencia_id] && sem[m.referencia_id].estado !== 'ANULADA') enviarSemana_(ss, sheetId, config, sem[m.referencia_id], '', m.id);
     else if (m.tipo === 'RECUPERAR' && cat[m.referencia_id]) enviarRecuperar_(ss, sheetId, config, cat[m.referencia_id], m.id);
+    // Un saludo atrasado solo se envía el mismo día o el siguiente; después ya no tiene sentido.
+    else if (m.tipo === 'CUMPLE' && cat[m.referencia_id] && cat[m.referencia_id].estado === 'ACTIVO' && diasDesdeCumple_(cat[m.referencia_id].fecha_nacimiento, new Date()) <= 1) enviarCumple_(ss, sheetId, config, cat[m.referencia_id], m.id);
     else escribirSueltos_(ss, sheetId, function (libro) { var f = libro.buscar('Correos', m.id); if (f) libro.actualizar('Correos', f, { estado: 'DESCARTADO', error: 'El registro ya no está vigente' }); });
   }
 }
@@ -407,13 +447,51 @@ function respaldoDiario() {
   archivo.makeCopy(archivo.getName() + ' · respaldo ' + sello, DriveApp.getFolderById(config.DRIVE_RESPALDOS));
 }
 
-/** Ejecutar una vez desde el editor: crea (o recrea) los dos activadores. */
+/**
+ * Saludo de cumpleaños: cada mañana escribe a los catequistas ACTIVO que cumplen años hoy
+ * (los nacidos el 29 de febrero, el 28 en años no bisiestos). Un saludo por persona y año.
+ * Se desactiva con SALUDO_CUMPLEANOS = FALSE en Config. Texto opcional: SALUDO_CUMPLEANOS_TEXTO.
+ */
+function saludarCumpleanos() {
+  var sheetId = PropertiesService.getScriptProperties().getProperty('SHEET_ID');
+  var ss = SpreadsheetApp.openById(sheetId);
+  var config = leerConfig_(ss);
+  if (config.SALUDO_CUMPLEANOS !== undefined && config.SALUDO_CUMPLEANOS !== '' && !esVerdadero_(config.SALUDO_CUMPLEANOS)) return 0;
+  var hoy = new Date();
+  var anio = Utilities.formatDate(hoy, ZONA, 'yyyy');
+  var yaSaludados = {};
+  leerTabla_(ss, 'Correos').filas.forEach(function (m) { if (m.tipo === 'CUMPLE' && String(m.fecha).slice(0, 4) === anio) yaSaludados[m.referencia_id] = true; });
+  // Quien pidió no recibir el saludo: correos separados por comas en SALUDO_CUMPLEANOS_EXCLUIR.
+  var excluidos = String(config.SALUDO_CUMPLEANOS_EXCLUIR || '').split(',').map(minus_).filter(String);
+  var enviados = 0;
+  leerTabla_(ss, 'Catequistas').filas.forEach(function (c) {
+    if (c.estado !== 'ACTIVO' || yaSaludados[c.id] || excluidos.indexOf(minus_(c.correo)) >= 0 || diasDesdeCumple_(c.fecha_nacimiento, hoy) !== 0) return;
+    if (enviarCumple_(ss, sheetId, config, c, '')) enviados++;
+  });
+  return enviados;
+}
+
+/** Días transcurridos desde el cumpleaños de este año (0 = hoy; negativo = aún no llega). NaN si no hay fecha. */
+function diasDesdeCumple_(fechaNacimiento, hoy) {
+  var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(fechaNacimiento || ''));
+  if (!m) return NaN;
+  var y = Number(Utilities.formatDate(hoy, ZONA, 'yyyy'));
+  var mes = Number(m[2]);
+  var dia = Number(m[3]);
+  var bisiesto = (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+  if (mes === 2 && dia === 29 && !bisiesto) dia = 28;
+  var hoyUtc = Date.UTC(y, Number(Utilities.formatDate(hoy, ZONA, 'MM')) - 1, Number(Utilities.formatDate(hoy, ZONA, 'dd')));
+  return Math.round((hoyUtc - Date.UTC(y, mes - 1, dia)) / 86400000);
+}
+
+/** Ejecutar una vez desde el editor: crea (o recrea) los activadores. */
 function instalarActivadores() {
   ScriptApp.getProjectTriggers().forEach(function (t) {
-    if (['procesarPendientes', 'respaldoDiario'].indexOf(t.getHandlerFunction()) >= 0) ScriptApp.deleteTrigger(t);
+    if (['procesarPendientes', 'respaldoDiario', 'saludarCumpleanos'].indexOf(t.getHandlerFunction()) >= 0) ScriptApp.deleteTrigger(t);
   });
   ScriptApp.newTrigger('procesarPendientes').timeBased().everyHours(1).create();
   ScriptApp.newTrigger('respaldoDiario').timeBased().everyDays(1).atHour(2).inTimezone(ZONA).create();
+  ScriptApp.newTrigger('saludarCumpleanos').timeBased().everyDays(1).atHour(7).inTimezone(ZONA).create();
 }
 
 /** Ejecutar una vez desde el editor para conceder los permisos (Drive, Sheets, Gmail). */
@@ -471,6 +549,23 @@ function enviarRechazo_(ss, sheetId, config, c, correoId) {
     boton_(url + '/registro/', 'Registrarme de nuevo'));
   return enviar_(ss, sheetId, config, {
     tipo: 'RECHAZO', referencia_id: c.id, para: c.correo, asunto: 'Tu registro de catequista ' + c.numero_catequista + ' necesita correcciones',
+    html: html, correoId: correoId,
+  });
+}
+
+/** Saludo de cumpleaños. El texto se puede personalizar con SALUDO_CUMPLEANOS_TEXTO en Config. */
+function enviarCumple_(ss, sheetId, config, c, correoId) {
+  var url = urlSitio_(config);
+  var texto = config.SALUDO_CUMPLEANOS_TEXTO ||
+    'Hoy damos gracias a Dios por tu vida y por tu entrega como catequista. Que el Señor te siga bendiciendo y que María te acompañe en este nuevo año de vida y de servicio.';
+  var html = plantilla_(config, '¡Feliz cumpleaños!',
+    '<p style="font-size:30px;text-align:center;margin:4px 0 8px" aria-hidden="true">🎉</p>' +
+    '<p>Querido(a) <strong>' + esc_(c.nombres) + '</strong>:</p>' +
+    '<p>' + esc_(texto).replace(/\n/g, '<br>') + '</p>' +
+    '<p>Con cariño,<br><strong>' + esc_(config.REMITENTE_NOMBRE || 'Comisión Arquidiocesana de Catequesis') + '</strong></p>' +
+    boton_(url + '/portal/', 'Visitar mi portal'));
+  return enviar_(ss, sheetId, config, {
+    tipo: 'CUMPLE', referencia_id: c.id, para: c.correo, asunto: '¡Feliz cumpleaños, ' + String(c.nombres || '').split(' ')[0] + '!',
     html: html, correoId: correoId,
   });
 }
@@ -664,7 +759,12 @@ function celda_(v) {
 // Columnas añadidas después de crear el libro. asegurarEsquema_ las agrega al final de la
 // fila de encabezados si faltan (las lecturas usan el nombre de la columna, no su posición).
 var COLUMNAS_NUEVAS = { Catequistas: ['zona_pastoral', 'revisado_at', 'revisado_por', 'motivo_rechazo'] };
-var VERSION_ESQUEMA = 'esquema:2';
+// Pestañas del catálogo territorial editable desde el panel (mismas columnas que api/_lib/territorio.js).
+var PESTANAS_NUEVAS = {
+  Vicarias: ['id', 'nombre', 'zona_id', 'activa', 'orden', 'actualizado_at', 'actualizado_por'],
+  Parroquias: ['id', 'nombre', 'vicaria_id', 'coordinador', 'propuesta', 'activa', 'orden', 'actualizado_at', 'actualizado_por'],
+};
+var VERSION_ESQUEMA = 'esquema:3';
 
 function asegurarEsquema_(ss) {
   var cache = CacheService.getScriptCache();
@@ -672,6 +772,11 @@ function asegurarEsquema_(ss) {
   var lock = LockService.getScriptLock();
   if (!lock.tryLock(ESPERA_BLOQUEO_MS)) return; // otra ejecución lo está haciendo
   try {
+    Object.keys(PESTANAS_NUEVAS).forEach(function (nombre) {
+      if (ss.getSheetByName(nombre)) return;
+      var cab = PESTANAS_NUEVAS[nombre];
+      ss.insertSheet(nombre).getRange(1, 1, 1, cab.length).setValues([cab]);
+    });
     Object.keys(COLUMNAS_NUEVAS).forEach(function (nombre) {
       var sh = ss.getSheetByName(nombre);
       var ancho = sh.getLastColumn();
@@ -697,6 +802,32 @@ function migrarEsquema() {
   CacheService.getScriptCache().remove(VERSION_ESQUEMA);
   asegurarEsquema_(ss);
   console.log('Encabezados de Catequistas: ' + ss.getSheetByName('Catequistas').getRange(1, 1, 1, ss.getSheetByName('Catequistas').getLastColumn()).getValues()[0].join(', '));
+}
+
+/**
+ * Aplica reglas { donde: { col: valor | [valores] }, poner: { col: valor } } a Catequistas, en orden.
+ * Misma semántica que aplicarReglas() de api/_lib/territorio.js. Devuelve cuántos registros cambiaron.
+ */
+function aplicarReglas_(libro, reglas) {
+  var cat = libro.tabla('Catequistas');
+  var tocados = {};
+  reglas.forEach(function (r) {
+    cat.filas.forEach(function (f) {
+      var cumple = Object.keys(r.donde).every(function (k) {
+        var v = r.donde[k];
+        var actual = String(f[k] === undefined ? '' : f[k]);
+        return Array.isArray(v) ? v.indexOf(actual) >= 0 : actual === String(v);
+      });
+      if (!cumple) return;
+      var cambios = {};
+      Object.keys(r.poner).forEach(function (k) { if (String(f[k] === undefined ? '' : f[k]) !== String(r.poner[k])) cambios[k] = r.poner[k]; });
+      if (!Object.keys(cambios).length) return;
+      cambios.actualizado_at = ahora_();
+      libro.actualizar('Catequistas', f, cambios);
+      tocados[f.id] = true;
+    });
+  });
+  return Object.keys(tocados).length;
 }
 
 function requiereAprobacion_(config) {

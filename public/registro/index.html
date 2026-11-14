@@ -30,7 +30,7 @@
         <p class="cenafca-page__breadcrumb"><a href="/">Inicio</a><span aria-hidden="true"> / </span>Registro de catequistas</p>
         <p class="cenafca-page__eyebrow">Catequistas con un solo corazón</p>
         <h1 class="disp">Registro de catequistas</h1>
-        <p class="m-lead">Completa tus datos, tu foto y tu firma. Al terminar recibirás tu número de catequista, tu carnet y la ficha de inscripción en tu correo.</p>
+        <p class="m-lead">Completa tus datos, tu foto y tu firma. Al terminar recibirás tu número de catequista y tu ficha de inscripción. Cuando la Comisión apruebe tu registro, te enviaremos el carnet por correo.</p>
       </div>
     </section>
 
@@ -57,7 +57,7 @@
             <div class="m-grid">
               <div class="m-field"><label for="nombres">Nombres</label><input id="nombres" name="nombres" autocomplete="given-name" required maxlength="80"></div>
               <div class="m-field"><label for="apellidos">Apellidos</label><input id="apellidos" name="apellidos" autocomplete="family-name" required maxlength="80"></div>
-              <div class="m-field"><label for="cedula">Cédula</label><input id="cedula" name="cedula" required maxlength="20" autocapitalize="characters" placeholder="8-123-4567" aria-describedby="cedula-ayuda"><p id="cedula-ayuda" class="m-help">Con guiones. Ej.: 8-123-4567, PE-12-345, E-8-12345.</p></div>
+              <div class="m-field"><label for="cedula">Cédula</label><input id="cedula" name="cedula" required maxlength="20" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="8-123-4567" aria-describedby="cedula-ayuda"><p id="cedula-ayuda" class="m-help">Con guiones. Ej.: 8-123-4567, PE-12-345, E-8-12345, 8AV-123-456.</p></div>
               <div class="m-field"><label for="fecha_nacimiento">Fecha de nacimiento</label><input id="fecha_nacimiento" name="fecha_nacimiento" type="date" required autocomplete="bday"></div>
               <fieldset class="m-field m-span-2" style="border:0;margin:0;padding:0">
                 <legend class="m-label" style="margin-bottom:6px">Sexo</legend>
@@ -66,10 +66,10 @@
                   <label class="m-chip"><input type="radio" name="sexo" value="Masculino"><span>Masculino</span></label>
                 </div>
               </fieldset>
-              <div class="m-field"><label for="telefono">Celular</label><input id="telefono" name="telefono" type="tel" inputmode="tel" autocomplete="tel-national" required placeholder="6000-0000"></div>
+              <div class="m-field"><label for="telefono">Celular</label><input id="telefono" name="telefono" type="tel" inputmode="numeric" autocomplete="tel-national" required placeholder="6000-0000" aria-describedby="telefono-ayuda"><p id="telefono-ayuda" class="m-help">8 dígitos, empieza por 6.</p></div>
               <div class="m-field"><label for="direccion">Dirección <span class="m-opt">(opcional)</span></label><input id="direccion" name="direccion" autocomplete="street-address" maxlength="200" placeholder="Corregimiento, barrio"></div>
-              <div class="m-field"><label for="correo">Correo electrónico</label><input id="correo" name="correo" type="email" inputmode="email" autocomplete="email" required maxlength="160"></div>
-              <div class="m-field"><label for="correo2">Confirma tu correo</label><input id="correo2" name="correo2" type="email" inputmode="email" autocomplete="off" required maxlength="160"><p class="m-help">Aquí recibirás tu carnet y tu número.</p></div>
+              <div class="m-field"><label for="correo">Correo electrónico</label><input id="correo" name="correo" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" required maxlength="160" placeholder="nombre@gmail.com"></div>
+              <div class="m-field"><label for="correo2">Confirma tu correo</label><input id="correo2" name="correo2" type="email" inputmode="email" autocomplete="off" autocapitalize="off" spellcheck="false" required maxlength="160"><p class="m-help">Aquí recibirás tu carnet y tu número.</p></div>
             </div>
           </fieldset>
 
@@ -78,10 +78,12 @@
             <legend class="disp" style="font-size:clamp(24px,3.4vw,32px);margin:0 0 6px;padding:0">Datos pastorales</legend>
             <p class="m-sub">Cuéntanos dónde y cómo sirves.</p>
             <div class="m-grid">
-              <div class="m-field m-span-2">
-                <label for="parroquia_id">Parroquia</label>
-                <select id="parroquia_id" name="parroquia_id" required aria-describedby="parroquia_id-ayuda"><option value="">Cargando parroquias…</option></select>
-                <p class="m-help" id="parroquia_id-ayuda">Están agrupadas por vicaría. Si la tuya no aparece, elige «Mi parroquia no está en la lista» al final.</p>
+              <div class="m-field m-span-2 m-combo">
+                <label for="parroquia_buscar">Parroquia</label>
+                <input id="parroquia_buscar" name="parroquia_buscar" required maxlength="120" placeholder="Escribe el nombre o el barrio de tu parroquia" aria-describedby="parroquia_buscar-ayuda">
+                <input type="hidden" id="parroquia_id" name="parroquia_id">
+                <ul id="parroquia_lista" class="m-combo__lista" hidden aria-label="Parroquias sugeridas"></ul>
+                <p class="m-help" id="parroquia_buscar-ayuda">Por ejemplo «san judas» o «chorrera». Si la tuya no aparece, elige «Mi parroquia no está en la lista».</p>
               </div>
               <div class="m-field" id="campo-parroquia-otra" hidden><label for="parroquia">Nombre de tu parroquia</label><input id="parroquia" name="parroquia" maxlength="120" placeholder="Parroquia San José"></div>
               <div class="m-field" id="campo-vicaria-otra" hidden><label for="vicaria_id">Vicaría de tu parroquia</label><select id="vicaria_id" name="vicaria_id"></select></div>

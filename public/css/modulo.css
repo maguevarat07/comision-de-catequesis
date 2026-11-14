@@ -240,6 +240,48 @@
 .m-ubicacion strong{display:block;margin-top:2px}
 .m-badge--info{background:#eef3fb;color:#1d3677}
 
+/* Registro: autocompletar de parroquias */
+.m-combo{position:relative}
+.m-combo__lista{position:absolute;z-index:30;left:0;right:0;top:calc(100% - 4px);margin:0;padding:6px;list-style:none;background:#fff;border:1.5px solid var(--m-navy);border-radius:14px;box-shadow:0 18px 40px rgba(14,27,61,.18);max-height:min(360px,60vh);overflow:auto}
+.m-combo__lista [role=option]{display:flex;flex-direction:column;gap:1px;padding:10px 12px;border-radius:10px;cursor:pointer;min-height:44px;justify-content:center}
+.m-combo__lista [role=option]:hover,.m-combo__lista [aria-selected=true]{background:#f3f6fc}
+.m-combo__lista [aria-selected=true]{outline:2px solid var(--m-gold);outline-offset:-2px}
+.m-combo__titulo{font-weight:700}
+.m-combo__titulo mark{background:#ffe7a8;color:inherit;border-radius:3px;padding:0 1px}
+.m-combo__detalle{font-size:13px;color:var(--m-muted)}
+.m-combo__fija{border-top:1px solid var(--m-line);margin-top:4px;border-radius:0 0 10px 10px}
+.m-combo__fija .m-combo__titulo{color:var(--m-navy);text-decoration:underline;text-underline-offset:3px}
+.m-combo__vacio{padding:10px 12px;color:var(--m-muted);font-size:14px}
+
+/* Campos con formato correcto y sugerencias */
+.m-field input.m-valido{border-color:var(--m-ok);background-image:linear-gradient(transparent,transparent);box-shadow:inset 0 0 0 1px rgba(31,122,77,.15)}
+.m-sugerencia{margin:0;font-size:14px;color:var(--m-warn)}
+.m-sugerencia .m-btn{min-height:36px;padding:2px 4px;font-size:14px;color:var(--m-navy)}
+
+/* Portal: cumpleaños */
+.m-feliz{display:flex;gap:14px;align-items:center;margin:0 0 18px;padding:16px 18px;border-radius:16px;background:linear-gradient(90deg,#fff4dc,#fffaf0);border:2px solid var(--m-gold)}
+.m-feliz span{font-size:34px;line-height:1}
+.m-feliz p{margin:0}
+
+/* Panel: catálogo territorial */
+.m-oculto{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.m-tabla--terr tbody tr{cursor:default}
+.m-tabla--terr tbody tr:hover{background:inherit}
+.m-tabla--terr td{white-space:normal}
+.m-terr-zona th{background:var(--m-navy);color:#fff;font-size:14px;letter-spacing:.04em;text-transform:none;position:static}
+.m-terr-zona th span{font-weight:500;opacity:.8;margin-left:6px}
+.m-terr-vic th,.m-terr-vic td{background:#f3f6fc;color:var(--m-ink);font-size:14.5px;text-transform:none;letter-spacing:0;position:static}
+.m-terr-acc{text-align:right;width:1%;white-space:nowrap}
+.m-terr-acc .m-btn{white-space:nowrap}
+#terr-buscar .m-check-sm{white-space:nowrap}
+.m-terr-inactiva td{opacity:.6}
+
+/* Panel: cumpleaños */
+.m-cumples{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr));gap:12px}
+.m-cumple .m-badge{white-space:nowrap}
+.m-cumple{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;background:#fff;border:1.5px solid var(--m-line);border-radius:16px;padding:14px 16px}
+.m-cumple__icono{font-size:30px;line-height:1}
+
 /* Panel: aprobación */
 .m-tab__n{display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 6px;margin-left:6px;border-radius:99px;background:var(--m-gold);color:var(--m-navy);font-size:12.5px;font-variant-numeric:tabular-nums}
 .m-kpi--accion{font:inherit;text-align:left;color:inherit;cursor:pointer}

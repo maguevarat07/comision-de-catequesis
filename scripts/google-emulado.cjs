@@ -99,6 +99,7 @@ function crearGoogleEmulado({ config = {}, cuotaCorreo = 100, esquemaAntiguo = f
           getValue: () => celda(fila, col),
           getValues: () => Array.from({ length: nFilas }, (_, i) => Array.from({ length: nCols }, (__, j) => celda(fila + i, col + j))),
           setValue: (v) => { (hojas[nombre][fila] = hojas[nombre][fila] || [])[col] = v; },
+          setValues: (vs) => vs.forEach((f, i) => f.forEach((v, j) => { (hojas[nombre][fila + i] = hojas[nombre][fila + i] || [])[col + j] = v; })),
         };
       },
     };
@@ -174,7 +175,7 @@ function crearGoogleEmulado({ config = {}, cuotaCorreo = 100, esquemaAntiguo = f
   const contexto = {
     console,
     Date, JSON, Math, Object, String, Number, Array, Error, isFinite, encodeURIComponent,
-    SpreadsheetApp: { openById: (id) => { if (id !== sheetId) throw new Error('Libro desconocido'); return { getSheetByName: hoja, getName: () => 'Catequesis · Base de Registro (emulado)' }; }, flush: () => {} },
+    SpreadsheetApp: { openById: (id) => { if (id !== sheetId) throw new Error('Libro desconocido'); return { getSheetByName: hoja, getName: () => 'Catequesis · Base de Registro (emulado)', insertSheet: (n) => { if (hojas[n]) throw new Error(`Ya existe la hoja ${n}`); crearHoja(n, []); return hoja(n); } }; }, flush: () => {} },
     Sheets, DriveApp, MailApp, CacheService,
     LockService: { getScriptLock: () => ({ tryLock: () => true, releaseLock: () => {} }) },
     PropertiesService: { getScriptProperties: () => ({ getProperty: (k) => props.get(k) ?? null, setProperty: (k, v) => props.set(k, String(v)) }) },

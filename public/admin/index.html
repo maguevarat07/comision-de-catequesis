@@ -41,7 +41,66 @@
             <button class="m-tab" role="tab" id="tab-apr" aria-controls="panel-lista" aria-selected="true" data-vista="aprobaciones">Por aprobar <span class="m-tab__n" id="n-aprobar" hidden></span></button>
             <button class="m-tab" role="tab" id="tab-dash" aria-controls="panel-dashboard" aria-selected="false" tabindex="-1" data-vista="dashboard">Dashboard</button>
             <button class="m-tab" role="tab" id="tab-cat" aria-controls="panel-lista" aria-selected="false" tabindex="-1" data-vista="catequistas">Catequistas</button>
+            <button class="m-tab" role="tab" id="tab-terr" aria-controls="panel-territorio" aria-selected="false" tabindex="-1" data-vista="territorio">Parroquias</button>
+            <button class="m-tab" role="tab" id="tab-cumple" aria-controls="panel-cumple" aria-selected="false" tabindex="-1" data-vista="cumpleanos">Cumpleaños <span class="m-tab__n" id="n-cumple" hidden></span></button>
             <button class="m-tab" role="tab" id="tab-sem" aria-controls="panel-lista" aria-selected="false" tabindex="-1" data-vista="semana">Semana del Catequista</button>
+          </div>
+
+          <!-- Catálogo territorial: parroquias, vicarías y coordinadores -->
+          <div id="panel-territorio" role="tabpanel" aria-labelledby="tab-terr" hidden>
+            <div id="terr-aviso" hidden style="margin-bottom:14px"></div>
+            <div class="m-admin-barra">
+              <form id="terr-buscar" class="m-buscador" role="search">
+                <label for="terr-q" class="m-label" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Buscar en el catálogo</label>
+                <input id="terr-q" class="m-input" type="search" placeholder="Buscar parroquia, vicaría o coordinador">
+                <select id="terr-zona" class="m-input" aria-label="Filtrar por zona pastoral"><option value="">Todas las zonas</option></select>
+                <label class="m-check-sm"><input type="checkbox" id="terr-inactivas"> Mostrar inactivas</label>
+              </form>
+              <div class="m-acciones">
+                <button type="button" class="m-btn m-btn--oro m-btn--sm" id="terr-nueva-parroquia">Nueva parroquia</button>
+                <button type="button" class="m-btn m-btn--borde m-btn--sm" id="terr-nueva-vicaria">Nueva vicaría</button>
+              </div>
+            </div>
+            <section id="terr-fuera-sec" hidden aria-labelledby="terr-fuera-titulo" style="margin-bottom:22px">
+              <h2 class="m-dash-titulo" id="terr-fuera-titulo">Escritas por catequistas (no están en el catálogo)</h2>
+              <div class="m-tabla-wrap">
+                <table class="m-tabla m-tabla--terr">
+                  <thead><tr><th scope="col">Nombre escrito</th><th scope="col">Vicaría elegida</th><th scope="col" class="m-n">Catequistas</th><th scope="col"><span class="m-oculto">Acciones</span></th></tr></thead>
+                  <tbody id="terr-fuera"></tbody>
+                </table>
+              </div>
+            </section>
+            <div class="m-tabla-wrap">
+              <table class="m-tabla m-tabla--terr">
+                <caption class="m-oculto">Catálogo de parroquias por zona y vicaría</caption>
+                <thead><tr><th scope="col">Parroquia</th><th scope="col">Coordinador(a)</th><th scope="col" class="m-n">Catequistas</th><th scope="col"><span class="m-oculto">Acciones</span></th></tr></thead>
+                <tbody id="terr-cuerpo"></tbody>
+              </table>
+            </div>
+            <p class="m-help" id="terr-pie" style="margin-top:10px"></p>
+          </div>
+
+          <!-- Cumpleaños -->
+          <div id="panel-cumple" role="tabpanel" aria-labelledby="tab-cumple" hidden>
+            <div id="cumple-estado" hidden style="margin-bottom:14px"></div>
+            <div id="cumple-aviso" hidden style="margin-bottom:14px"></div>
+            <div class="m-admin-barra">
+              <p class="m-help" style="margin:0;max-width:640px">Cada día a las 7:00 a. m. se envía un saludo por correo a los catequistas <strong>aprobados</strong> que cumplen años. Aquí puedes ver quién cumple y enviar el saludo a mano.</p>
+              <label class="m-check-sm">Próximos
+                <select id="cumple-dias" class="m-input" style="width:auto;min-height:40px;padding:6px 10px">
+                  <option value="7">7 días</option><option value="30" selected>30 días</option><option value="60">60 días</option><option value="90">90 días</option>
+                </select>
+              </label>
+            </div>
+            <h2 class="m-dash-titulo">Hoy</h2>
+            <ul class="m-cumples" id="cumple-hoy"></ul>
+            <h2 class="m-dash-titulo" style="margin-top:26px">Próximos cumpleaños</h2>
+            <div class="m-tabla-wrap">
+              <table class="m-tabla m-tabla--terr">
+                <thead><tr><th scope="col">Fecha</th><th scope="col">Catequista</th><th scope="col">Parroquia</th><th scope="col" class="m-n">Cumple</th></tr></thead>
+                <tbody id="cumple-prox"></tbody>
+              </table>
+            </div>
           </div>
 
           <!-- Listados: cola de aprobación, catequistas y Semana -->

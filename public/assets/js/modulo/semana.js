@@ -4,8 +4,10 @@ import {
 } from './comun.js';
 import { reducir, sha256Hex, tamañoDataUrl } from './imagenes.js';
 import { qrSvg } from './carnet.js';
+import { controlCelular, mensajeCelular } from './formato.js';
 
 const form = $('#form-semana');
+controlCelular($('#telefono'));
 const estado = { comprobante: null, sha: '', idem: nuevaClave(), campos: { talla: true, restricciones: true } };
 
 $('#talla_camiseta').innerHTML = TALLAS.map((t) => html`<label class="m-chip"><input type="radio" name="talla" value="${t}"><span>${t}</span></label>`).join('');
@@ -77,7 +79,7 @@ form.addEventListener('submit', async (e) => {
   e.preventDefault();
   let ok = true;
   const tel = $('#telefono');
-  errorCampo(tel, telefonoValido(tel.value) ? '' : 'Escribe un celular de Panamá, por ejemplo 6000-0000.');
+  errorCampo(tel, telefonoValido(tel.value) ? '' : mensajeCelular(tel.value));
   if (!telefonoValido(tel.value)) ok = false;
   const talla = form.talla.value;
   if (estado.campos.talla) {

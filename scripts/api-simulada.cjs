@@ -5,6 +5,11 @@
 
 const crypto = require('node:crypto');
 const territorio = require('../api/_lib/territorio.js');
+const { diasDesdeCumple, diasHastaCumple, fechaCumple, edadQueCumple, hoyPanama } = require('../api/_lib/cumpleanos.js');
+
+// Catálogo territorial: el inicial hasta la primera edición desde el panel (como la API real con la hoja vacía).
+let terrFilas = null;
+const terrActual = () => (terrFilas ? territorio.crearTerritorio(terrFilas, 'hoja') : territorio.BASE);
 
 const FUERA = ['ANULADO', 'RECHAZADO']; // estados en los que el registro ya no existe para el catequista
 const LIMITE_CUERPO = 4.5 * 1024 * 1024; // igual que Vercel
@@ -249,7 +254,7 @@ function vistaPortal(c) {
   return {
     catequista: {
       numero: c.numero_catequista, nombres: c.nombres, apellidos: c.apellidos, correo: c.correo, telefono: c.telefono,
-      parroquia: c.parroquia, vicaria_zona: c.vicaria_zona, zona_pastoral: territorio.clasificar(c).zona.replace(territorio.SIN_CLASIFICAR, ''), estado: c.estado, fecha_registro: c.fecha_registro, vigencia_hasta: c.vigencia_hasta,
+      parroquia: c.parroquia, vicaria_zona: c.vicaria_zona, zona_pastoral: terrActual().clasificar(c).zona.replace(territorio.SIN_CLASIFICAR, ''), cumpleanosHoy: c.estado === 'ACTIVO' && diasDesdeCumple(c.fecha_nacimiento) === 0, estado: c.estado, fecha_registro: c.fecha_registro, vigencia_hasta: c.vigencia_hasta,
       fotoUrl: c.foto_file_id ? '/api/portal/archivo/foto' : '', firmaUrl: c.firma_file_id ? '/api/portal/archivo/firma' : '',
       verificacionUrl: urlVerificacionCarnet(c),
     },
@@ -276,7 +281,7 @@ const ruta = (metodo, patron, fn, opciones = {}) => rutas.push({ metodo, patron,
 
 ruta('GET', /^\/api\/salud$/, () => ({ ok: true, modo: 'simulado', configLeida: true, hora: ahora() }));
 ruta('GET', /^\/api\/config-publica$/, () => ({ ok: true, config: configPublica() }));
-ruta('GET', /^\/api\/territorio$/, () => ({ ok: true, ...territorio.catalogoPublico() }));
+ruta('GET', /^\/api\/territorio$/, () => ({ ok: true, ...terrActual().catalogoPublico() }));
 
 // Registro de catequista
 ruta('POST', /^\/api\/registro$/, async (req, ctx) => {
@@ -293,7 +298,7 @@ ruta('POST', /^\/api\/registro$/, async (req, ctx) => {
     formacion_cenafca: texto(d.formacion_cenafca, 60), coordinador_parroquial: texto(d.coordinador_parroquial, 120),
     yappy_referencia: normRef(d.yappy_referencia),
   };
-  const lugar = territorio.resolverParroquia(d);
+  const lugar = terrActual().resolverParroquia(d);
   if (lugar.error) Object.assign(campos, lugar.error);
   else Object.assign(datos, { parroquia: lugar.parroquia, vicaria_zona: lugar.vicaria_zona, zona_pastoral: lugar.zona_pastoral, coordinador_parroquial: datos.coordinador_parroquial || lugar.coordinador });
   req2('nombres', datos.nombres.length >= 2, 'Escribe tus nombres.');
@@ -301,7 +306,7 @@ ruta('POST', /^\/api\/registro$/, async (req, ctx) => {
   req2('cedula', RE_CEDULA.test(datos.cedula), 'Cédula con formato no válido.');
   req2('fecha_nacimiento', /^\d{4}-\d{2}-\d{2}$/.test(datos.fecha_nacimiento), 'Fecha no válida.');
   req2('sexo', ['Femenino', 'Masculino'].includes(datos.sexo), 'Selecciona una opción.');
-  req2('telefono', /^(?:6\d{7}|[2-9]\d{6})$/.test(datos.telefono), 'Teléfono no válido.');
+  req2('telefono', /^6\d{7}$/.test(datos.telefono), 'El celular debe tener 8 dígitos y empezar por 6.');
   req2('correo', RE_CORREO.test(datos.correo), 'Correo no válido.');
   req2('nivel_que_imparte', !!datos.nivel_que_imparte, 'Selecciona al menos un nivel.');
   req2('formacion_cenafca', !!datos.formacion_cenafca, 'Selecciona una opción.');
@@ -426,7 +431,7 @@ ruta('POST', /^\/api\/semana\/inscribir$/, async (req, ctx) => {
   const b = ctx.cuerpo;
   const campos = {};
   const tel = normTel(b.telefono);
-  if (!/^(?:6\d{7}|[2-9]\d{6})$/.test(tel)) campos.telefono = 'Teléfono no válido.';
+  if (!/^6\d{7}$/.test(tel)) campos.telefono = 'El celular debe tener 8 dígitos y empezar por 6.';
   const ref = normRef(b.yappy_referencia);
   if (!/^[A-Z0-9-]{4,40}$/.test(ref)) campos.yappy_referencia = 'Referencia de Yappy no válida.';
   if (sp.campos.talla && !['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'].includes(b.talla_camiseta)) campos.talla_camiseta = 'Selecciona una talla.';
@@ -541,7 +546,7 @@ ruta('GET', /^\/api\/admin\/catequistas$/, (req, ctx) => {
   const orden = estado === 'PENDIENTE_APROBACION' ? 1 : -1; // la cola se atiende por orden de llegada
   const items = db.Catequistas
     .filter((c) => (!estado || c.estado === estado) && coincide(q, c.numero_catequista, c.nombres, c.apellidos, c.cedula, c.correo, c.parroquia))
-    .map((c) => ({ c, k: territorio.clasificar(c) }))
+    .map((c) => ({ c, k: terrActual().clasificar(c) }))
     .filter(({ k }) => filtro.every(([campo, v]) => k[campo] === v))
     .sort((a, b) => orden * a.c.numero_catequista.localeCompare(b.c.numero_catequista))
     .map(({ c, k }) => ({ id: c.id, numero: c.numero_catequista, nombre: nombreDe(c), cedula: c.cedula, correo: c.correo, parroquia: c.parroquia, vicaria_zona: k.vicaria, zona_pastoral: k.zona, estado: c.estado, fecha_registro: c.fecha_registro }));
@@ -549,8 +554,83 @@ ruta('GET', /^\/api\/admin\/catequistas$/, (req, ctx) => {
 });
 ruta('GET', /^\/api\/admin\/estadisticas$/, (req) => {
   exigirAdmin(req);
-  return { ok: true, ...territorio.estadisticas(db.Catequistas), generado: ahora() };
+  return { ok: true, ...terrActual().estadisticas(db.Catequistas), generado: ahora() };
 });
+ruta('GET', /^\/api\/admin\/territorio$/, (req) => {
+  exigirAdmin(req);
+  return { ok: true, ...terrActual().catalogoAdmin(db.Catequistas) };
+});
+// Mismas validaciones y reglas que la API real; aquí las filas viven en memoria.
+ruta('POST', /^\/api\/admin\/territorio\/(parroquia|vicaria)$/, (req, ctx) => {
+  const a = exigirAdmin(req);
+  const terr = terrActual();
+  const b = ctx.cuerpo;
+  const campos = {};
+  const nombre = texto(b.nombre, 120).replace(/\s+/g, ' ');
+  if (nombre.length < 3) campos.nombre = 'Escribe el nombre (mínimo 3 caracteres).';
+  let tabla;
+  let fila;
+  let reglas;
+  if (ctx.m[1] === 'parroquia') {
+    tabla = 'Parroquias';
+    const antes = b.id ? terr.parroquia(String(b.id)) : null;
+    if (b.id && !antes) fallo(404, 'INEXISTENTE', 'Parroquia no encontrada.');
+    const v = terr.vicaria(String(b.vicaria_id || ''));
+    if (!v) campos.vicaria_id = 'Selecciona la vicaría.';
+    const otra = terr.parroquiaPorNombre(nombre);
+    if (otra && (!antes || otra.id !== antes.id)) campos.nombre = 'Ya existe una parroquia con ese nombre.';
+    if (Object.keys(campos).length) fallo(400, 'VALIDACION', 'Revisa los datos marcados.', campos);
+    const coordinador = texto(b.coordinador, 200);
+    fila = { id: antes ? antes.id : terr.nuevoId(nombre, 'Parroquias'), nombre, vicaria_id: v.id, coordinador, propuesta: b.propuesta ? 'TRUE' : 'FALSE', activa: b.activa === false ? 'FALSE' : 'TRUE', orden: String(antes ? antes.orden : terr.maxOrden('Parroquias') + 1) };
+    reglas = territorio.reglasParroquia(antes && { nombre: antes.nombre, vicaria: antes.vicaria.etiqueta, zona: antes.zona.etiqueta, coordinador: antes.coordinador }, { nombre, vicaria: v.etiqueta, zona: v.zona.etiqueta, coordinador });
+  } else {
+    tabla = 'Vicarias';
+    const antes = b.id ? terr.vicaria(String(b.id)) : null;
+    if (b.id && !antes) fallo(404, 'INEXISTENTE', 'Vicaría no encontrada.');
+    const z = terr.zona(String(b.zona_id || ''));
+    if (!z) campos.zona_id = 'Selecciona la zona pastoral.';
+    const otra = terr.vicariaPorNombre(nombre);
+    if (otra && (!antes || otra.id !== antes.id)) campos.nombre = 'Ya existe una vicaría con ese nombre.';
+    if (antes && b.activa === false && antes.parroquias.some((p) => p.activa)) campos.activa = 'Desactiva o mueve antes sus parroquias activas.';
+    if (Object.keys(campos).length) fallo(400, 'VALIDACION', 'Revisa los datos marcados.', campos);
+    fila = { id: antes ? antes.id : terr.nuevoId(nombre, 'Vicarias'), nombre, zona_id: z.id, activa: b.activa === false ? 'FALSE' : 'TRUE', orden: String(antes ? antes.orden : terr.maxOrden('Vicarias') + 1) };
+    reglas = territorio.reglasVicaria(antes && { etiqueta: antes.etiqueta, zona: antes.zona.etiqueta }, { etiqueta: 'Vicaría ' + nombre, zona: z.etiqueta });
+  }
+  const afectados = territorio.aplicarReglas(db.Catequistas.map((c) => ({ ...c })), reglas).length;
+  if (b.simular) return { ok: true, simulado: true, afectados, id: fila.id };
+  terrFilas = terrFilas || terr.filas();
+  const t = ahora();
+  const lista = terrFilas[tabla];
+  const i = lista.findIndex((x) => x.id === fila.id);
+  const nueva = { ...(i >= 0 ? lista[i] : {}), ...fila, actualizado_at: t, actualizado_por: a.email };
+  if (i >= 0) lista[i] = nueva; else lista.push(nueva);
+  const tocadas = territorio.aplicarReglas(db.Catequistas, reglas);
+  tocadas.forEach((id) => { db.Catequistas.find((c) => c.id === id).actualizado_at = t; });
+  auditar(a.email, i >= 0 ? 'EDITAR_TERRITORIO' : 'ALTA_TERRITORIO', tabla, fila.id, fila.nombre + ' · ' + tocadas.length + ' registros actualizados');
+  return { ok: true, id: fila.id, actualizados: tocadas.length };
+}, { idempotente: true });
+ruta('GET', /^\/api\/admin\/cumpleanos$/, (req, ctx) => {
+  exigirAdmin(req);
+  const dias = Math.max(1, Math.min(90, Math.floor(num(ctx.url.searchParams.get('dias'))) || 30));
+  const anio = hoyPanama().slice(0, 4);
+  const saludos = new Map();
+  db.Correos.forEach((m) => { if (m.tipo === 'CUMPLE' && String(m.fecha).slice(0, 4) === anio) saludos.set(m.referencia_id, { estado: m.estado, fecha: m.fecha }); });
+  const items = db.Catequistas.filter((c) => c.estado === 'ACTIVO')
+    .map((c) => ({ c, falta: diasHastaCumple(c.fecha_nacimiento) }))
+    .filter(({ falta }) => falta >= 0 && falta <= dias)
+    .sort((x, y) => x.falta - y.falta || nombreDe(x.c).localeCompare(nombreDe(y.c), 'es'))
+    .map(({ c, falta }) => ({ id: c.id, numero: c.numero_catequista, nombre: nombreDe(c), parroquia: c.parroquia, correo: c.correo, fecha: fechaCumple(c.fecha_nacimiento, falta), dias: falta, edad: edadQueCumple(c.fecha_nacimiento, falta), saludo: saludos.get(c.id) || null }));
+  return { ok: true, hoy: hoyPanama(), activo: bool(config.SALUDO_CUMPLEANOS ?? 'TRUE'), dias, items };
+});
+ruta('POST', /^\/api\/admin\/cumpleanos\/saludar$/, (req, ctx) => {
+  const a = exigirAdmin(req);
+  const c = db.Catequistas.find((x) => x.id === ctx.cuerpo.id);
+  if (!c) fallo(404, 'INEXISTENTE', 'Registro no encontrado.');
+  if (c.estado !== 'ACTIVO') fallo(409, 'NO_ACTIVO', 'Solo se saluda a catequistas aprobados.');
+  const enviado = enviarCorreo(c.correo, '¡Feliz cumpleaños, ' + c.nombres.split(' ')[0] + '!', 'CUMPLE', c.id);
+  auditar(a.email, 'SALUDO_CUMPLEANOS', 'Catequistas', c.id, enviado ? 'enviado' : 'pendiente');
+  return { ok: true, enviado, mensaje: enviado ? 'Saludo enviado a ' + c.correo + '.' : 'Se agotó la cuota diaria: el saludo quedó pendiente y se reintentará.' };
+}, { idempotente: true });
 ruta('POST', /^\/api\/admin\/(aprobar|rechazar)$/, (req, ctx) => {
   const a = exigirAdmin(req);
   const aprobar = ctx.m[1] === 'aprobar';
@@ -687,7 +767,7 @@ ruta('GET', /^\/api\/admin\/exportar$/, (req, ctx) => {
   exigirAdmin(req);
   const tabla = ctx.url.searchParams.get('tabla');
   const fuentes = {
-    catequistas: [db.Catequistas.map((c) => { const k = territorio.clasificar(c); return { ...c, vicaria_zona: k.vicaria, zona_pastoral: k.zona }; }), ['numero_catequista', 'estado', 'fecha_registro', 'nombres', 'apellidos', 'cedula', 'fecha_nacimiento', 'sexo', 'telefono', 'correo', 'direccion', 'parroquia', 'vicaria_zona', 'zona_pastoral', 'anios_servicio', 'nivel_que_imparte', 'formacion_cenafca', 'coordinador_parroquial', 'yappy_referencia', 'vigencia_hasta', 'correo_enviado_at', 'revisado_at', 'revisado_por', 'motivo_rechazo']],
+    catequistas: [db.Catequistas.map((c) => { const k = terrActual().clasificar(c); return { ...c, vicaria_zona: k.vicaria, zona_pastoral: k.zona }; }), ['numero_catequista', 'estado', 'fecha_registro', 'nombres', 'apellidos', 'cedula', 'fecha_nacimiento', 'sexo', 'telefono', 'correo', 'direccion', 'parroquia', 'vicaria_zona', 'zona_pastoral', 'anios_servicio', 'nivel_que_imparte', 'formacion_cenafca', 'coordinador_parroquial', 'yappy_referencia', 'vigencia_hasta', 'correo_enviado_at', 'revisado_at', 'revisado_por', 'motivo_rechazo']],
     semana: [db.SemanaCatequista.filter((s) => s.edicion === config.SEMANA_EDICION), ['numero_inscripcion_semana', 'numero_catequista', 'correo', 'edicion', 'estado', 'fecha_inscripcion', 'talla_camiseta', 'restricciones_alimentarias', 'yappy_referencia', 'checkin_at', 'checkin_por']],
     pagos: [db.Pagos, ['tipo', 'numero_catequista', 'monto', 'moneda', 'metodo', 'yappy_referencia', 'estado', 'creado_at', 'anulado_at', 'anulado_por', 'motivo_anulacion']],
   }[tabla];
@@ -727,6 +807,15 @@ function sembrar() {
   // Un registro antiguo (antes del catálogo) para ver cómo se clasifica.
   ejemplos.push({ nombres: 'Registro', apellidos: 'Antiguo', cedula: '2-111-3333', correo: 'antiguo@ejemplo.com', parroquia: 'Parroquia San José', vicaria_zona: 'Vicaría Cristo Redentor (San Miguelito)', estado: 'ACTIVO' });
 
+  // Los primeros aprobados cumplen años hoy o en los próximos días (para ver la pestaña Cumpleaños).
+  const DESFASES = [0, 0, 2, 5, 9, 14, 21, 33];
+  let aprobados = 0;
+  const cumpleEjemplo = (i) => {
+    const e = ejemplos[i];
+    if (e.estado !== 'ACTIVO' || aprobados >= DESFASES.length) return (1970 + (i % 30)) + '-04-12';
+    const d = new Date(Date.now() + DESFASES[aprobados++] * 86400000);
+    return (1972 + i) + '-' + hoyPanama(d).slice(5);
+  };
   ejemplos.forEach((e, i) => {
     const t = new Date(Date.now() - (ejemplos.length - i) * 5 * 3600 * 1000).toISOString();
     const id = uid();
@@ -735,7 +824,7 @@ function sembrar() {
     const c = {
       id, numero_catequista: numero, estado: 'PENDIENTE_DOCUMENTOS', fecha_registro: t, nombres: e.nombres, apellidos: e.apellidos, cedula: e.cedula, correo: e.correo,
       parroquia: lugar.parroquia, vicaria_zona: lugar.vicaria_zona, zona_pastoral: lugar.zona_pastoral,
-      fecha_nacimiento: '1985-04-12', sexo: i % 3 ? 'Femenino' : 'Masculino', telefono: '60001234', direccion: 'Ciudad de Panamá', anios_servicio: 1 + (i % 15), nivel_que_imparte: elegir(['Primera Comunión', 'Confirmación', 'Perseverancia', 'Catequesis familiar']), formacion_cenafca: 'En curso',
+      fecha_nacimiento: cumpleEjemplo(i), sexo: i % 3 ? 'Femenino' : 'Masculino', telefono: '60001234', direccion: 'Ciudad de Panamá', anios_servicio: 1 + (i % 15), nivel_que_imparte: elegir(['Primera Comunión', 'Confirmación', 'Perseverancia', 'Catequesis familiar']), formacion_cenafca: 'En curso',
       coordinador_parroquial: lugar.coordinador || 'Hna. Ejemplo', foto_file_id: '', firma_file_id: '', comprobante_file_id: '', yappy_referencia: 'SIM' + numero.replace(/\D/g, ''), comprobante_sha256: 'sim-' + id,
       pdf_inscripcion_file_id: '', carnet_file_id: '', vigencia_hasta: vigencia(), correo_enviado_at: '', consentimiento_datos: t, consentimiento_imagen: t, creado_at: t, actualizado_at: t,
       notas_admin: 'Dato de ejemplo (simulado)', revisado_at: '', revisado_por: '', motivo_rechazo: '',

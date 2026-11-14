@@ -13,6 +13,10 @@ Hecho:
 - Aprobación de registros: los catequistas quedan **Por aprobar** hasta que un administrador los aprueba (se envía el carnet) o los rechaza con motivo (se envía el motivo y pueden registrarse de nuevo). Desactivable con `REQUIERE_APROBACION` en `Config`.
 - Estructura territorial (4 zonas, 11 vicarías, 100 parroquias) en `api/_lib/territorio.js`: el registro deduce vicaría y zona y propone el coordinador; el panel tiene un dashboard por zona, vicaría y parroquia.
 
+- Catálogo territorial editable desde el panel (pestañas `Vicarias` y `Parroquias` del libro), con actualización automática de los registros de catequistas.
+- Registro: parroquia con autocompletar; cédula, celular (8 dígitos, empieza por 6) y correo con formato en vivo.
+- Saludo de cumpleaños diario a catequistas aprobados (activador `saludarCumpleanos`), con vista y envío manual en el panel.
+
 Pendiente, en este orden (detalle en `docs/DESPLIEGUE.md`):
 
 1. Compartir la carpeta raíz de Drive con la cuenta de servicio (Lector).

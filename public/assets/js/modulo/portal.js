@@ -27,10 +27,15 @@ function mostrarAcceso() {
 function pintarPanel({ catequista: c, documentos: d, semana: s }) {
   $('#vista-acceso').hidden = true;
   $('#vista-panel').hidden = false;
-  $('#titulo').textContent = `Hola, ${c.nombres.split(' ')[0]}`;
+  $('#titulo').textContent = c.cumpleanosHoy ? `¡Feliz cumpleaños, ${c.nombres.split(' ')[0]}!` : `Hola, ${c.nombres.split(' ')[0]}`;
   $('#subtitulo').textContent = `Catequista ${c.numero} · ${c.parroquia}`;
   document.title = `${c.numero} · Portal del catequista`;
   $('#estado-registro').innerHTML = `Estado del registro: ${insignaEstado(c.estado)}`;
+  const previo = document.querySelector('.m-feliz');
+  if (previo) previo.remove();
+  if (c.cumpleanosHoy) {
+    $('#estado-registro').insertAdjacentHTML('beforebegin', '<div class="m-feliz" role="note"><span aria-hidden="true">🎉</span><p><strong>¡Hoy celebramos tu vida!</strong> La Comisión de Catequesis da gracias a Dios por ti y por tu servicio. Que el Señor te bendiga en este nuevo año.</p></div>');
+  }
 
   // El carnet (en pantalla y en PDF) se entrega cuando la Comisión aprueba el registro.
   $('#carnet').innerHTML = c.estado === 'ACTIVO'

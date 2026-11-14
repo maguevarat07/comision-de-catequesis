@@ -19,7 +19,7 @@ Cuentas de prueba (modos simulado y emulado): catequista `prueba@ejemplo.com` co
 Variables de la API simulada: `SIM_LATENCIA_MS` (450 ms por defecto), `SIM_SIN_DATOS=1` (sin catequistas de ejemplo; también en el modo emulado) y `SIM_FALLAR_DOCUMENTOS=1` (registros en `PENDIENTE_DOCUMENTOS`).
 
 ```sh
-npm test                  # API real + escritor sobre Google emulado (117 comprobaciones)
+npm test                  # API real + escritor sobre Google emulado (155 comprobaciones)
 npm run google:verificar  # la cuenta de servicio lee la hoja real
 npm run build             # genera dist/, la carpeta pública para Vercel
 ```
@@ -42,11 +42,11 @@ Configuración: copia `.env.example` como `.env.local`. En local, la clave de la
 
 | Ruta | Qué es |
 |---|---|
-| `/registro/` | Registro en 7 pasos: datos, pastoral (parroquia del catálogo → vicaría, zona y coordinador automáticos), foto (recorte 600×600), firma táctil, pago Yappy, consentimientos y revisión |
+| `/registro/` | Registro en 7 pasos: datos (cédula, celular y correo con formato en vivo y sugerencia de correo), pastoral (parroquia con autocompletar → vicaría, zona y coordinador automáticos), foto (recorte 600×600), firma táctil, pago Yappy, consentimientos y revisión |
 | `/portal/` | Acceso con correo + número; carnet digital CR80, descargas y estado de la Semana |
 | `/portal/semana/` | Inscripción a la Semana del Catequista (solo catequistas `ACTIVO`) |
 | `/verificar/` | Validez de carnets (`?c=`) y pases (`?t=`); con sesión de personal, datos y registro de entrada |
-| `/admin/` | Panel: cola **Por aprobar** (aprobar o rechazar con motivo), **dashboard** de catequistas por zona, vicaría y parroquia, búsqueda, detalle con archivos, anular, regenerar, reenviar y CSV |
+| `/admin/` | Panel: cola **Por aprobar** (aprobar o rechazar con motivo), **dashboard** de catequistas por zona, vicaría y parroquia, **Parroquias** (editar vicarías, parroquias y coordinadores con actualización automática de los registros), **Cumpleaños** (saludo diario por correo), búsqueda, detalle con archivos, anular, regenerar, reenviar y CSV |
 | `/admin/escanear/` | Lector QR con la cámara (BarcodeDetector o jsQR) |
 | `/privacidad/` | Aviso de privacidad (Ley 81 de 2019) — borrador para revisión |
 

@@ -79,6 +79,16 @@ Completa los valores **POR DEFINIR**: `YAPPY_DIRECTORIO`, `YAPPY_TELEFONO`, `SEM
 - Al publicar esta versión hay que **volver a desplegar el escritor** (`apps-script/Code.gs`): Implementar → Gestionar implementaciones → editar la existente → Nueva versión, para conservar la misma URL `/exec`.
 - El catálogo de zonas, vicarías, parroquias y coordinadores está en `api/_lib/territorio.js`. Los coordinadores salen de la sección «Equipo» de la portada: si cambian, actualiza los dos sitios.
 
+### Catálogo territorial editable y saludos de cumpleaños
+
+- Desde la pestaña **Parroquias** del panel se crean y editan vicarías, parroquias y coordinadores. El escritor crea solo las pestañas `Vicarias` y `Parroquias`; la primera vez que guardas un cambio las llena con el catálogo inicial. Desde entonces **la hoja manda** sobre `api/_lib/territorio.js`. No las edites a mano salvo para corregir algo puntual: usa el panel, que además actualiza los registros de los catequistas.
+- Cada instancia de la API guarda el catálogo 30 segundos: un cambio puede tardar hasta medio minuto en verse en el formulario de registro.
+- **Cumpleaños:** tras desplegar esta versión del escritor, **ejecuta otra vez `instalarActivadores()`** desde el editor de Apps Script para crear el activador diario `saludarCumpleanos` (7:00 a. m., hora de Panamá). Claves opcionales en `Config`:
+  - `SALUDO_CUMPLEANOS`: FALSE para desactivar los saludos automáticos (TRUE si falta).
+  - `SALUDO_CUMPLEANOS_TEXTO`: texto propio del saludo.
+  - `SALUDO_CUMPLEANOS_EXCLUIR`: correos, separados por comas, de quienes pidieron no recibirlo.
+- Cada saludo gasta un correo de la cuota diaria. Si se agota, queda pendiente y se reintenta ese día o el siguiente; después se descarta.
+
 ## 5. Probar en local contra Google real
 
 ```sh
