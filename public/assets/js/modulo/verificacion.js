@@ -7,7 +7,7 @@ const TEXTOS = {
   carnet: {
     VALIDO: ['ok', '✓', 'Carnet válido', 'El titular es catequista registrado de la Arquidiócesis de Panamá.'],
     VENCIDO: ['warn', '!', 'Carnet vencido', 'El carnet existe, pero su vigencia terminó.'],
-    PENDIENTE: ['warn', '…', 'Registro en proceso', 'El registro existe y sus documentos aún se están generando.'],
+    PENDIENTE: ['warn', '…', 'Registro en revisión', 'El registro existe, pero la Comisión aún no lo ha aprobado. Todavía no es un carnet válido.'],
     ANULADO: ['error', '✕', 'Carnet anulado', 'Este carnet fue anulado y no es válido.'],
     INEXISTENTE: ['error', '?', 'Carnet no reconocido', 'El código no corresponde a ningún carnet emitido por la Comisión.'],
   },

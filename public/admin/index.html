@@ -37,20 +37,27 @@
           </div>
           <div class="m-kpis" id="kpis" aria-live="polite"></div>
 
-          <div class="m-tabs" role="tablist" aria-label="Listados">
-            <button class="m-tab" role="tab" id="tab-cat" aria-controls="panel-lista" aria-selected="true" data-tabla="catequistas">Catequistas</button>
-            <button class="m-tab" role="tab" id="tab-sem" aria-controls="panel-lista" aria-selected="false" tabindex="-1" data-tabla="semana">Semana del Catequista</button>
+          <div class="m-tabs" role="tablist" aria-label="Secciones del panel">
+            <button class="m-tab" role="tab" id="tab-apr" aria-controls="panel-lista" aria-selected="true" data-vista="aprobaciones">Por aprobar <span class="m-tab__n" id="n-aprobar" hidden></span></button>
+            <button class="m-tab" role="tab" id="tab-dash" aria-controls="panel-dashboard" aria-selected="false" tabindex="-1" data-vista="dashboard">Dashboard</button>
+            <button class="m-tab" role="tab" id="tab-cat" aria-controls="panel-lista" aria-selected="false" tabindex="-1" data-vista="catequistas">Catequistas</button>
+            <button class="m-tab" role="tab" id="tab-sem" aria-controls="panel-lista" aria-selected="false" tabindex="-1" data-vista="semana">Semana del Catequista</button>
           </div>
 
-          <div id="panel-lista" role="tabpanel" aria-labelledby="tab-cat">
+          <!-- Listados: cola de aprobación, catequistas y Semana -->
+          <div id="panel-lista" role="tabpanel" aria-labelledby="tab-apr">
+            <div class="m-aviso m-aviso--info" id="ayuda-aprobar" style="margin-bottom:16px"><p>Abre cada registro, revisa la foto, los datos y el comprobante de Yappy, y apruébalo o recházalo. Al aprobar se envía el carnet; al rechazar, el motivo que escribas. La cola va del registro más antiguo al más reciente.</p></div>
+            <div class="m-filtro-activo" id="filtro-territorio" hidden></div>
             <div class="m-admin-barra">
               <form id="form-buscar" class="m-buscador" role="search">
                 <label for="q" class="m-label" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Buscar</label>
                 <input id="q" class="m-input" type="search" placeholder="Buscar por número, nombre, cédula, correo o parroquia">
-                <select id="filtro-estado" class="m-input" aria-label="Filtrar por estado">
+                <select id="filtro-estado" class="m-input" aria-label="Filtrar por estado" hidden>
                   <option value="">Todos los estados</option>
-                  <option value="ACTIVO">Activos</option>
+                  <option value="ACTIVO">Aprobados</option>
+                  <option value="PENDIENTE_APROBACION">Por aprobar</option>
                   <option value="PENDIENTE_DOCUMENTOS">Documentos pendientes</option>
+                  <option value="RECHAZADO">Rechazados</option>
                   <option value="ANULADO">Anulados</option>
                 </select>
               </form>
@@ -61,12 +68,59 @@
             </div>
             <div class="m-tabla-wrap">
               <table class="m-tabla">
-                <caption style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)" id="tabla-caption">Catequistas registrados</caption>
+                <caption style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)" id="tabla-caption">Registros por aprobar</caption>
                 <thead id="thead"></thead>
                 <tbody id="tbody"></tbody>
               </table>
             </div>
             <p class="m-help" id="conteo" style="margin-top:10px"></p>
+          </div>
+
+          <!-- Dashboard territorial -->
+          <div id="panel-dashboard" role="tabpanel" aria-labelledby="tab-dash" hidden>
+            <div class="m-admin-barra">
+              <div class="m-segmento" role="radiogroup" aria-label="Qué catequistas contar" id="dash-medida">
+                <label><input type="radio" name="medida" value="ACTIVO" checked><span>Aprobados</span></label>
+                <label><input type="radio" name="medida" value="PENDIENTE_APROBACION"><span>Por aprobar</span></label>
+                <label><input type="radio" name="medida" value="VIGENTES"><span>Todos los vigentes</span></label>
+              </div>
+              <div class="m-acciones">
+                <button type="button" class="m-btn m-btn--borde m-btn--sm" id="dash-csv">Descargar tabla (CSV)</button>
+                <button type="button" class="m-btn m-btn--texto m-btn--sm" id="dash-recargar">Actualizar</button>
+              </div>
+            </div>
+            <nav class="m-migas" aria-label="Nivel del dashboard" id="dash-migas"></nav>
+            <div id="dash-aviso" hidden></div>
+
+            <h2 class="m-dash-titulo">Por zona pastoral</h2>
+            <div class="m-zonas" id="dash-zonas"></div>
+
+            <div class="m-dash-grid">
+              <section aria-labelledby="dash-vic-titulo">
+                <h2 class="m-dash-titulo" id="dash-vic-titulo">Por vicaría</h2>
+                <ul class="m-barras" id="dash-vicarias"></ul>
+              </section>
+              <section aria-labelledby="dash-par-titulo">
+                <div class="m-admin-barra" style="margin-bottom:10px">
+                  <h2 class="m-dash-titulo" id="dash-par-titulo" style="margin:0">Por parroquia</h2>
+                  <label class="m-check-sm"><input type="checkbox" id="dash-ceros"> Mostrar parroquias sin catequistas</label>
+                </div>
+                <div class="m-tabla-wrap m-tabla-wrap--alta">
+                  <table class="m-tabla m-tabla--dash">
+                    <caption style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Catequistas por parroquia</caption>
+                    <thead><tr>
+                      <th scope="col"><button type="button" class="m-orden" data-orden="nombre">Parroquia</button></th>
+                      <th scope="col">Coordinador(a)</th>
+                      <th scope="col" class="m-n"><button type="button" class="m-orden" data-orden="ACTIVO">Aprobados</button></th>
+                      <th scope="col" class="m-n"><button type="button" class="m-orden" data-orden="PENDIENTE_APROBACION">Por aprobar</button></th>
+                      <th scope="col" class="m-n"><button type="button" class="m-orden" data-orden="RECHAZADO">Rechazados</button></th>
+                    </tr></thead>
+                    <tbody id="dash-parroquias"></tbody>
+                  </table>
+                </div>
+                <p class="m-help" id="dash-par-pie" style="margin-top:8px"></p>
+              </section>
+            </div>
           </div>
         </div>
       </div>

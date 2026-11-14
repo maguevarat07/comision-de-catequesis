@@ -10,6 +10,7 @@
 
 const crypto = require('node:crypto');
 const pdf = require('./pdf.js');
+const territorio = require('./territorio.js');
 
 const LIMITE_CUERPO = 4.5 * 1024 * 1024;
 const COOKIE_CAT = 'cat_sesion';
@@ -45,7 +46,9 @@ const normRef = (v) => texto(v, 40).toUpperCase().replace(/\s+/g, '');
 const nombreDe = (c) => `${c.nombres || ''} ${c.apellidos || ''}`.trim();
 
 // Códigos del escritor → HTTP. Lo no listado es un fallo interno del escritor.
-const HTTP_ESCRITOR = { DUPLICADO: 409, COMPROBANTE_REPETIDO: 409, REFERENCIA_REPETIDA: 409, YA_INSCRITO: 409, CERRADO: 409, SIN_CUPO: 409, ANULADO: 409, NO_ACTIVO: 403, INEXISTENTE: 404, VALIDACION: 400, OCUPADO: 503 };
+const HTTP_ESCRITOR = { DUPLICADO: 409, COMPROBANTE_REPETIDO: 409, REFERENCIA_REPETIDA: 409, YA_INSCRITO: 409, CERRADO: 409, SIN_CUPO: 409, ANULADO: 409, RECHAZADO: 409, NO_PENDIENTE: 409, SIN_DOCUMENTOS: 409, NO_ACTIVO: 403, INEXISTENTE: 404, VALIDACION: 400, OCUPADO: 503 };
+// Estados en los que el registro ya no existe para el catequista (portal, recuperar número, unicidad).
+const FUERA = ['ANULADO', 'RECHAZADO'];
 
 function crearApi(deps) {
   const { env, leer, descargar, escritor, verificarGoogle, modo = 'google' } = deps;
@@ -150,7 +153,7 @@ function crearApi(deps) {
   function catequistaDe(req, d) {
     const s = leerCookie(req, COOKIE_CAT);
     const c = s && s.k === 'cat' && d.Catequistas.find((x) => x.id === s.i);
-    return c && c.estado !== 'ANULADO' ? c : null;
+    return c && !FUERA.includes(c.estado) ? c : null;
   }
   function staffDe(req, config) {
     const s = leerCookie(req, COOKIE_STAFF);
@@ -220,11 +223,12 @@ function crearApi(deps) {
     return {
       catequista: {
         numero: c.numero_catequista, nombres: c.nombres, apellidos: c.apellidos, correo: c.correo, telefono: c.telefono,
-        parroquia: c.parroquia, vicaria_zona: c.vicaria_zona, estado: c.estado, fecha_registro: c.fecha_registro, vigencia_hasta: c.vigencia_hasta,
+        parroquia: c.parroquia, vicaria_zona: c.vicaria_zona, zona_pastoral: territorio.clasificar(c).zona.replace(territorio.SIN_CLASIFICAR, ''), estado: c.estado, fecha_registro: c.fecha_registro, vigencia_hasta: c.vigencia_hasta,
         fotoUrl: c.foto_file_id ? '/api/portal/archivo/foto' : '', firmaUrl: c.firma_file_id ? '/api/portal/archivo/firma' : '',
         verificacionUrl: urlCarnet(base, c),
       },
-      documentos: { pdf: c.pdf_inscripcion_file_id ? '/api/portal/archivo/pdf' : '', carnet: c.carnet_file_id ? '/api/portal/archivo/carnet' : '' },
+      // El carnet se entrega solo cuando la Comisión aprueba el registro.
+      documentos: { pdf: c.pdf_inscripcion_file_id ? '/api/portal/archivo/pdf' : '', carnet: c.carnet_file_id && c.estado === 'ACTIVO' ? '/api/portal/archivo/carnet' : '' },
       semana: {
         ...sp,
         puedeInscribirse: c.estado === 'ACTIVO' && sp.abierta && sp.hayCupo && !insc,
@@ -262,6 +266,9 @@ function crearApi(deps) {
     return { ok: true, modo, configLeida, escritor: escritor.disponible, hora: ahora() };
   });
 
+  // Catálogo zona → vicaría → parroquia (con coordinador sugerido) para el formulario de registro.
+  ruta('GET', /^\/api\/territorio$/, () => ({ ok: true, ...territorio.catalogoPublico() }));
+
   ruta('GET', /^\/api\/config-publica$/, async (req) => {
     const d = await datos('SemanaCatequista');
     const c = d.config;
@@ -285,11 +292,15 @@ function crearApi(deps) {
     const v = {
       nombres: texto(dd.nombres, 80), apellidos: texto(dd.apellidos, 80), cedula: normCedula(dd.cedula), fecha_nacimiento: texto(dd.fecha_nacimiento, 10),
       sexo: texto(dd.sexo, 20), telefono: normTel(dd.telefono), correo: normCorreo(dd.correo), direccion: texto(dd.direccion, 200),
-      parroquia: texto(dd.parroquia, 120), vicaria_zona: texto(dd.vicaria_zona, 120), anios_servicio: Math.max(0, Math.min(80, Math.floor(num(dd.anios_servicio)))),
+      anios_servicio: Math.max(0, Math.min(80, Math.floor(num(dd.anios_servicio)))),
       nivel_que_imparte: (Array.isArray(dd.nivel_que_imparte) ? dd.nivel_que_imparte : [dd.nivel_que_imparte]).map((x) => texto(x, 60)).filter(Boolean).slice(0, 10).join('; '),
       formacion_cenafca: texto(dd.formacion_cenafca, 60), coordinador_parroquial: texto(dd.coordinador_parroquial, 120),
       yappy_referencia: normRef(dd.yappy_referencia),
     };
+    // Parroquia del catálogo: la vicaría y la zona se toman del catálogo, no del cliente.
+    const lugar = territorio.resolverParroquia(dd);
+    if (lugar.error) Object.assign(campos, lugar.error);
+    else Object.assign(v, { parroquia: lugar.parroquia, vicaria_zona: lugar.vicaria_zona, zona_pastoral: lugar.zona_pastoral, coordinador_parroquial: v.coordinador_parroquial || lugar.coordinador });
     exigir('nombres', v.nombres.length >= 2, 'Escribe tus nombres.');
     exigir('apellidos', v.apellidos.length >= 2, 'Escribe tus apellidos.');
     exigir('cedula', RE_CEDULA.test(v.cedula), 'Cédula con formato no válido.');
@@ -297,8 +308,6 @@ function crearApi(deps) {
     exigir('sexo', ['Femenino', 'Masculino'].includes(v.sexo), 'Selecciona una opción.');
     exigir('telefono', /^(?:6\d{7}|[2-9]\d{6})$/.test(v.telefono), 'Teléfono no válido.');
     exigir('correo', RE_CORREO.test(v.correo), 'Correo no válido.');
-    exigir('parroquia', v.parroquia.length >= 3, 'Indica tu parroquia.');
-    exigir('vicaria_zona', !!v.vicaria_zona, 'Selecciona la vicaría.');
     exigir('nivel_que_imparte', !!v.nivel_que_imparte, 'Selecciona al menos un nivel.');
     exigir('formacion_cenafca', !!v.formacion_cenafca, 'Selecciona una opción.');
     exigir('yappy_referencia', /^[A-Z0-9-]{4,40}$/.test(v.yappy_referencia), 'Referencia de Yappy no válida.');
@@ -315,12 +324,14 @@ function crearApi(deps) {
     const base = urlSitio(d.config, req);
     if (!bool(d.config.REGISTRO_ABIERTO)) fallo(409, 'CERRADO', 'El registro de catequistas está cerrado en este momento.');
     // Comprobación previa (respuesta rápida, sin subir archivos). La definitiva la hace el escritor bajo bloqueo.
+    // Un registro rechazado (y su pago) no bloquea un registro nuevo corregido.
     let conflicto = null;
-    if (d.Catequistas.some((c) => c.correo.toLowerCase() === v.correo || c.cedula.toUpperCase() === v.cedula)) {
+    const pagosVigentes = d.Pagos.filter((p) => p.estado !== 'RECHAZADO');
+    if (d.Catequistas.some((c) => c.estado !== 'RECHAZADO' && (c.correo.toLowerCase() === v.correo || c.cedula.toUpperCase() === v.cedula))) {
       conflicto = [409, 'DUPLICADO', 'Ya existe un registro con estos datos. Si ya te registraste, puedes recuperar tu número de catequista por correo.'];
-    } else if (d.Pagos.some((p) => p.comprobante_sha256 === comp.sha256)) {
+    } else if (pagosVigentes.some((p) => p.comprobante_sha256 === comp.sha256)) {
       conflicto = [409, 'COMPROBANTE_REPETIDO', 'Este comprobante ya fue utilizado en otro registro. Adjunta el comprobante de tu propio pago.'];
-    } else if (d.Pagos.some((p) => normRef(p.yappy_referencia) === v.yappy_referencia)) {
+    } else if (pagosVigentes.some((p) => normRef(p.yappy_referencia) === v.yappy_referencia)) {
       conflicto = [409, 'REFERENCIA_REPETIDA', 'Esta referencia de Yappy ya fue registrada. Revisa el número de confirmación de tu pago.'];
     }
 
@@ -335,7 +346,9 @@ function crearApi(deps) {
     }
     const c = { ...v, id: r1.id, numero_catequista: r1.numero, fecha_registro: r1.fecha_registro, vigencia_hasta: r1.vigencia_hasta, consentimiento_datos: r1.fecha_registro, consentimiento_imagen: r1.fecha_registro };
 
-    // 2) y 3) Documentos + ACTIVO + correo. Si fallan, el registro queda PENDIENTE_DOCUMENTOS y se regenera desde el panel.
+    // 2) y 3) Documentos + estado + correo. El escritor deja el registro PENDIENTE_APROBACION (correo de
+    // «recibido») o ACTIVO si Config no exige aprobación. Si fallan, queda PENDIENTE_DOCUMENTOS y se
+    // regenera desde el panel.
     let r2 = null;
     try {
       const docs = await documentosCatequista(c, d.config, base, foto, firma);
@@ -345,10 +358,12 @@ function crearApi(deps) {
       log.error('[api] documentos del registro:', e.message);
     }
     const listo = !!(r2 && r2.ok);
+    const estado = listo ? r2.estado || 'ACTIVO' : 'PENDIENTE_DOCUMENTOS';
     ctx.cookies.push(cookieSesion(COOKIE_CAT, { k: 'cat', i: c.id }, SESION_CAT_S));
     return {
-      ok: true, numero: c.numero_catequista, estado: listo ? 'ACTIVO' : 'PENDIENTE_DOCUMENTOS', correoEnviado: !!(listo && r2.correoEnviado), correo: c.correo,
-      documentos: { pdf: listo ? '/api/portal/archivo/pdf' : '', carnet: listo ? '/api/portal/archivo/carnet' : '' },
+      ok: true, numero: c.numero_catequista, estado, correoEnviado: !!(listo && r2.correoEnviado), correo: c.correo,
+      parroquia: c.parroquia, vicaria_zona: c.vicaria_zona, zona_pastoral: c.zona_pastoral,
+      documentos: { pdf: listo ? '/api/portal/archivo/pdf' : '', carnet: estado === 'ACTIVO' ? '/api/portal/archivo/carnet' : '' },
     };
   }, { idempotente: true });
 
@@ -372,7 +387,7 @@ function crearApi(deps) {
     claves.forEach(limitarIntentos);
     const inicio = Date.now();
     const d = await datos('Catequistas');
-    const c = d.Catequistas.find((x) => x.correo.toLowerCase() === correo && x.numero_catequista === numero && x.estado !== 'ANULADO');
+    const c = d.Catequistas.find((x) => x.correo.toLowerCase() === correo && x.numero_catequista === numero && !FUERA.includes(x.estado));
     await espera(Math.max(0, 700 - (Date.now() - inicio))); // espera fija, con y sin acierto
     if (!c) {
       claves.forEach(registrarFallo);
@@ -402,6 +417,7 @@ function crearApi(deps) {
       if (!s) fallo(404, 'INEXISTENTE', 'El archivo aún no está disponible.');
       return { generado: { mime: 'application/pdf', bytes: await documentoPase(s, c, d.config, urlSitio(d.config, req)), nombre: `${s.numero_inscripcion_semana}_pase.pdf` }, descarga: true };
     }
+    if (clave === 'carnet' && c.estado !== 'ACTIVO') fallo(404, 'INEXISTENTE', 'Tu carnet estará disponible cuando la Comisión apruebe tu registro.');
     const fileId = { foto: c.foto_file_id, firma: c.firma_file_id, pdf: c.pdf_inscripcion_file_id, carnet: c.carnet_file_id }[clave];
     return { archivo: fileId, descarga: clave === 'pdf' || clave === 'carnet' };
   });
@@ -469,7 +485,7 @@ function crearApi(deps) {
       const c = d.Catequistas.find((x) => x.id === p.i);
       if (!c) return { ok: true, tipo, estado: 'INEXISTENTE', staff: !!staff };
       const vencido = c.vigencia_hasta && c.vigencia_hasta < hoyPanama();
-      const estado = c.estado === 'ANULADO' ? 'ANULADO' : vencido ? 'VENCIDO' : c.estado === 'ACTIVO' ? 'VALIDO' : 'PENDIENTE';
+      const estado = FUERA.includes(c.estado) ? 'ANULADO' : vencido ? 'VENCIDO' : c.estado === 'ACTIVO' ? 'VALIDO' : 'PENDIENTE';
       return {
         ok: true, tipo, estado, staff: !!staff, publico: { numero: c.numero_catequista, vigencia_hasta: c.vigencia_hasta },
         detalle: staff ? { nombre: nombreDe(c), numero: c.numero_catequista, parroquia: c.parroquia, vicaria_zona: c.vicaria_zona, fotoUrl: `/api/admin/archivo/catequistas/${c.id}/foto` } : undefined,
@@ -540,6 +556,7 @@ function crearApi(deps) {
     return {
       ok: true, edicion: ed, moneda: d.config.MONEDA || 'B/.',
       registrados: cat.length, activos: cat.filter((c) => c.estado === 'ACTIVO').length,
+      porAprobar: cat.filter((c) => c.estado === 'PENDIENTE_APROBACION').length, rechazados: cat.filter((c) => c.estado === 'RECHAZADO').length,
       pendientes: cat.filter((c) => c.estado === 'PENDIENTE_DOCUMENTOS').length, anulados: cat.filter((c) => c.estado === 'ANULADO').length,
       inscritosSemana: sem.filter((s) => s.estado !== 'ANULADA').length, entradas: sem.filter((s) => s.checkin_at && s.estado !== 'ANULADA').length,
       recaudado: d.Pagos.filter((p) => p.estado === 'DECLARADO_AUTO').reduce((a, p) => a + num(p.monto), 0),
@@ -553,12 +570,42 @@ function crearApi(deps) {
     exigirAdmin(req, d.config);
     const q = (ctx.url.searchParams.get('q') || '').trim().toLowerCase();
     const estado = ctx.url.searchParams.get('estado') || '';
+    // Filtros del dashboard: zona, vicaría o parroquia exactas (como las agrupa territorio.clasificar).
+    const filtro = ['zona', 'vicaria', 'parroquia'].map((k) => [k, ctx.url.searchParams.get(k) || '']).filter(([, val]) => val);
+    // La cola de aprobación se atiende por orden de llegada; el resto, del más reciente al más antiguo.
+    const orden = estado === 'PENDIENTE_APROBACION' ? 1 : -1;
     const items = d.Catequistas
       .filter((c) => (!estado || c.estado === estado) && coincide(q, c.numero_catequista, c.nombres, c.apellidos, c.cedula, c.correo, c.parroquia))
-      .sort((a, b) => b.numero_catequista.localeCompare(a.numero_catequista))
-      .map((c) => ({ id: c.id, numero: c.numero_catequista, nombre: nombreDe(c), cedula: c.cedula, correo: c.correo, parroquia: c.parroquia, vicaria_zona: c.vicaria_zona, estado: c.estado, fecha_registro: c.fecha_registro }));
+      .map((c) => ({ c, k: territorio.clasificar(c) }))
+      .filter(({ k }) => filtro.every(([campo, val]) => k[campo] === val))
+      .sort((a, b) => orden * a.c.numero_catequista.localeCompare(b.c.numero_catequista))
+      .map(({ c, k }) => ({ id: c.id, numero: c.numero_catequista, nombre: nombreDe(c), cedula: c.cedula, correo: c.correo, parroquia: c.parroquia, vicaria_zona: k.vicaria, zona_pastoral: k.zona, estado: c.estado, fecha_registro: c.fecha_registro }));
     return { ok: true, items };
   });
+
+  // Dashboard: catequistas por zona → vicaría → parroquia, con el conteo por estado en cada nivel.
+  ruta('GET', /^\/api\/admin\/estadisticas$/, async (req) => {
+    const d = await datos('Catequistas');
+    exigirAdmin(req, d.config);
+    return { ok: true, ...territorio.estadisticas(d.Catequistas), generado: ahora() };
+  });
+
+  // Aprobación o rechazo de un registro pendiente.
+  ruta('POST', /^\/api\/admin\/(aprobar|rechazar)$/, async (req, ctx) => {
+    const d = await datos('Catequistas');
+    const a = exigirAdmin(req, d.config);
+    const decision = ctx.m[1] === 'aprobar' ? 'APROBAR' : 'RECHAZAR';
+    const id = String(ctx.cuerpo.id || '');
+    const motivo = texto(ctx.cuerpo.motivo, 300);
+    if (decision === 'RECHAZAR' && motivo.length < 5) fallo(400, 'VALIDACION', 'Escribe el motivo del rechazo (mínimo 5 caracteres). Se enviará al catequista.', { motivo: 'Motivo obligatorio' });
+    const c = RE_ID.test(id) && d.Catequistas.find((x) => x.id === id);
+    if (!c) fallo(404, 'INEXISTENTE', 'Registro no encontrado.');
+    const r = await escribir('revisar', { id, decision, motivo, por: a.email }, ctx.idem, urlSitio(d.config, req));
+    const aviso = r.yaRevisado ? 'Este registro ya estaba revisado.'
+      : decision === 'APROBAR' ? (r.correoEnviado ? 'Registro aprobado. Enviamos el carnet al catequista.' : 'Registro aprobado. El correo con el carnet quedó pendiente y se reintentará automáticamente.')
+        : (r.correoEnviado ? 'Registro rechazado. Enviamos el motivo al catequista.' : 'Registro rechazado. El correo quedó pendiente y se reintentará automáticamente.');
+    return { ok: true, estado: r.estado, yaRevisado: !!r.yaRevisado, correoEnviado: !!r.correoEnviado, mensaje: aviso };
+  }, { idempotente: true });
   const SIN_ARCHIVOS = (o) => Object.fromEntries(Object.entries(o).filter(([k]) => !k.endsWith('_file_id') && k !== 'qr_token' && k !== 'comprobante_sha256'));
   ruta('GET', /^\/api\/admin\/catequistas\/([\w-]+)$/, async (req, ctx) => {
     const d = await datos('Catequistas', 'SemanaCatequista', 'Pagos', 'Correos');
@@ -635,6 +682,7 @@ function crearApi(deps) {
     const c = d.Catequistas.find((x) => x.id === ctx.cuerpo.id);
     if (!c) fallo(404, 'INEXISTENTE', 'Registro no encontrado.');
     if (c.estado === 'ANULADO') fallo(409, 'ANULADO', 'No se regeneran documentos de un registro anulado.');
+    if (c.estado === 'RECHAZADO') fallo(409, 'RECHAZADO', 'No se regeneran documentos de un registro rechazado.');
     const [foto, firma] = await Promise.all([descargar(c.foto_file_id), descargar(c.firma_file_id)]);
     if (!foto || !firma) log.error('[api] regenerar: no se pudo leer la foto o la firma de Drive', c.numero_catequista);
     const docs = await documentosCatequista(c, d.config, urlSitio(d.config, req), foto, firma);
@@ -668,7 +716,7 @@ function crearApi(deps) {
     exigirAdmin(req, d.config);
     const tabla = ctx.url.searchParams.get('tabla');
     const fuentes = {
-      catequistas: [d.Catequistas, ['numero_catequista', 'estado', 'fecha_registro', 'nombres', 'apellidos', 'cedula', 'fecha_nacimiento', 'sexo', 'telefono', 'correo', 'direccion', 'parroquia', 'vicaria_zona', 'anios_servicio', 'nivel_que_imparte', 'formacion_cenafca', 'coordinador_parroquial', 'yappy_referencia', 'vigencia_hasta', 'correo_enviado_at']],
+      catequistas: [d.Catequistas.map((c) => ({ ...c, ...(({ zona, vicaria }) => ({ zona_pastoral: zona, vicaria_zona: vicaria }))(territorio.clasificar(c)) })), ['numero_catequista', 'estado', 'fecha_registro', 'nombres', 'apellidos', 'cedula', 'fecha_nacimiento', 'sexo', 'telefono', 'correo', 'direccion', 'parroquia', 'vicaria_zona', 'zona_pastoral', 'anios_servicio', 'nivel_que_imparte', 'formacion_cenafca', 'coordinador_parroquial', 'yappy_referencia', 'vigencia_hasta', 'correo_enviado_at', 'revisado_at', 'revisado_por', 'motivo_rechazo']],
       semana: [d.SemanaCatequista.filter((s) => s.edicion === String(d.config.SEMANA_EDICION || '')), ['numero_inscripcion_semana', 'numero_catequista', 'correo', 'edicion', 'estado', 'fecha_inscripcion', 'talla_camiseta', 'restricciones_alimentarias', 'yappy_referencia', 'checkin_at', 'checkin_por']],
       pagos: [d.Pagos, ['tipo', 'numero_catequista', 'monto', 'moneda', 'metodo', 'yappy_referencia', 'estado', 'creado_at', 'anulado_at', 'anulado_por', 'motivo_anulacion']],
     }[tabla];

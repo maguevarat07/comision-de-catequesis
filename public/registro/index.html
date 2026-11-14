@@ -78,15 +78,24 @@
             <legend class="disp" style="font-size:clamp(24px,3.4vw,32px);margin:0 0 6px;padding:0">Datos pastorales</legend>
             <p class="m-sub">Cuéntanos dónde y cómo sirves.</p>
             <div class="m-grid">
-              <div class="m-field"><label for="parroquia">Parroquia</label><input id="parroquia" name="parroquia" required maxlength="120" placeholder="Parroquia San José"></div>
-              <div class="m-field"><label for="vicaria_zona">Vicaría o zona pastoral</label><select id="vicaria_zona" name="vicaria_zona" required></select></div>
+              <div class="m-field m-span-2">
+                <label for="parroquia_id">Parroquia</label>
+                <select id="parroquia_id" name="parroquia_id" required aria-describedby="parroquia_id-ayuda"><option value="">Cargando parroquias…</option></select>
+                <p class="m-help" id="parroquia_id-ayuda">Están agrupadas por vicaría. Si la tuya no aparece, elige «Mi parroquia no está en la lista» al final.</p>
+              </div>
+              <div class="m-field" id="campo-parroquia-otra" hidden><label for="parroquia">Nombre de tu parroquia</label><input id="parroquia" name="parroquia" maxlength="120" placeholder="Parroquia San José"></div>
+              <div class="m-field" id="campo-vicaria-otra" hidden><label for="vicaria_id">Vicaría de tu parroquia</label><select id="vicaria_id" name="vicaria_id"></select></div>
+              <div class="m-span-2 m-ubicacion" id="ubicacion" hidden aria-live="polite">
+                <div><span>Vicaría</span><strong id="ubicacion-vicaria">—</strong></div>
+                <div><span>Zona pastoral</span><strong id="ubicacion-zona">—</strong></div>
+              </div>
               <div class="m-field"><label for="anios_servicio">Años de servicio como catequista</label><input id="anios_servicio" name="anios_servicio" type="number" inputmode="numeric" min="0" max="80" required></div>
               <div class="m-field"><label for="formacion_cenafca">Formación CENAFCA</label><select id="formacion_cenafca" name="formacion_cenafca" required></select></div>
               <fieldset class="m-field m-span-2" style="border:0;margin:0;padding:0" id="niveles-grupo">
                 <legend class="m-label" style="margin-bottom:6px">Nivel que impartes <span class="m-opt">(puedes marcar varios)</span></legend>
                 <div class="m-chips" id="niveles"></div>
               </fieldset>
-              <div class="m-field m-span-2"><label for="coordinador_parroquial">Coordinador(a) parroquial de catequesis</label><input id="coordinador_parroquial" name="coordinador_parroquial" required maxlength="120" placeholder="Nombre de quien coordina la catequesis en tu parroquia"></div>
+              <div class="m-field m-span-2"><label for="coordinador_parroquial">Coordinador(a) parroquial de catequesis</label><input id="coordinador_parroquial" name="coordinador_parroquial" required maxlength="120" placeholder="Nombre de quien coordina la catequesis en tu parroquia" aria-describedby="coordinador-ayuda"><p class="m-help" id="coordinador-ayuda">Al elegir tu parroquia lo completamos con la estructura de la Comisión. Corrígelo si en tu parroquia es otra persona.</p></div>
             </div>
           </fieldset>
 
@@ -189,7 +198,7 @@
         <!-- Éxito -->
         <div id="exito" class="m-card m-exito" hidden tabindex="-1">
           <div class="m-exito__icono" aria-hidden="true">✓</div>
-          <h2 class="disp">¡Bienvenido(a), catequista!</h2>
+          <h2 class="disp" id="exito-titulo">¡Bienvenido(a), catequista!</h2>
           <p class="m-sub" style="margin-bottom:0">Tu número de catequista es</p>
           <p class="m-numero" id="exito-numero">CAT-00000</p>
           <div id="exito-aviso" style="max-width:560px;margin:0 auto 20px"></div>

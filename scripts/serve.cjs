@@ -68,6 +68,6 @@ http.createServer((req, res) => {
   const textos = { simulado: 'API simulada en /api (datos en memoria)', emulado: 'API real con Google emulado (Code.gs en memoria)', real: 'API real contra Google (.env.local)' };
   console.log(`Local: http://localhost:${PUERTO}  ·  ${textos[MODO] || MODO}`);
   if (sembrar) {
-    try { await sembrar(); console.log('Datos de ejemplo: prueba@ejemplo.com / CAT-00001 y jose@ejemplo.com / CAT-00002'); } catch (e) { console.error('No se pudieron sembrar los datos de ejemplo:', e.message); }
+    try { await sembrar(); console.log('Datos de ejemplo: prueba@ejemplo.com / CAT-00001 (aprobado) y jose@ejemplo.com / CAT-00002 (por aprobar)'); } catch (e) { console.error('No se pudieron sembrar los datos de ejemplo:', e.message); }
   }
 });

@@ -10,6 +10,9 @@ Hecho:
 - Pruebas: `npm test` (68 comprobaciones de la API con el escritor sobre Google emulado) y la prueba de navegador en emulación móvil.
 - Cuenta de servicio `lector-inscripciones@catequesispanama.iam.gserviceaccount.com` configurada y leyendo la hoja.
 
+- Aprobación de registros: los catequistas quedan **Por aprobar** hasta que un administrador los aprueba (se envía el carnet) o los rechaza con motivo (se envía el motivo y pueden registrarse de nuevo). Desactivable con `REQUIERE_APROBACION` en `Config`.
+- Estructura territorial (4 zonas, 11 vicarías, 100 parroquias) en `api/_lib/territorio.js`: el registro deduce vicaría y zona y propone el coordinador; el panel tiene un dashboard por zona, vicaría y parroquia.
+
 Pendiente, en este orden (detalle en `docs/DESPLIEGUE.md`):
 
 1. Compartir la carpeta raíz de Drive con la cuenta de servicio (Lector).
@@ -19,6 +22,8 @@ Pendiente, en este orden (detalle en `docs/DESPLIEGUE.md`):
 5. Cargar las variables en Vercel (`npm run vercel:env`) y publicar.
 6. Prueba en un celular real (idealmente iPhone/Safari) contra producción; dejar la hoja sin datos de prueba.
 7. Revisión de la Comisión: aviso de privacidad, catálogo de niveles y de formación CENAFCA, nombres de las vicarías.
+   - Estructura territorial: confirmar las adscripciones marcadas como «Propuesta» (San Carlo Acutis, Virgen de Guadalupe – Las Garzas, San Isidro Labrador – Cañita, San Pablo VI – Howard), las dos vicarías que faltan (la Arquidiócesis informa 13) y los nombres vigentes de las vicarías de Panamá Oeste.
+   - Coordinadores: confirmar que «Nuestra Señora del Carmen (Pasadena)» del equipo corresponde a la parroquia de Juan Díaz, y completar los coordinadores de las parroquias que no tienen.
 8. Mejora futura: sustituir el comprobante manual por el Botón de Pago Yappy de Banco General (requiere cuenta comercial).
 
 ## Sitio general

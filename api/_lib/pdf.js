@@ -182,7 +182,8 @@ async function fichaInscripcion(c, { foto, firma, moneda = 'B/.', costo = '', ur
   campo('Dirección', c.direccion);
   seccion('Servicio catequético');
   campo('Parroquia', c.parroquia);
-  campo('Vicaría / zona', c.vicaria_zona);
+  campo('Vicaría', c.vicaria_zona);
+  if (c.zona_pastoral) campo('Zona pastoral', c.zona_pastoral);
   campo('Años de servicio', String(c.anios_servicio ?? ''));
   campo('Nivel que imparte', c.nivel_que_imparte);
   campo('Formación CENAFCA', c.formacion_cenafca);

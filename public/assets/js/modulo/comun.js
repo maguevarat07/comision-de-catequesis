@@ -61,12 +61,29 @@ export function marcarModo(config) {
 
 // ---------- Catálogos ----------
 
-export const ZONAS = [
-  'Vicaría San Francisco de Paula (Panamá Oeste)',
-  'Vicaría Santa María la Antigua (Panamá Centro)',
-  'Vicaría Cristo Redentor (San Miguelito)',
-  'Vicaría Nuestra Señora del Carmen (Panamá Este)',
-];
+/** Valor del selector de parroquia cuando la parroquia no está en el catálogo. */
+export const OTRA_PARROQUIA = 'otra';
+
+let territorioPromesa = null;
+/**
+ * Catálogo zona → vicaría → parroquia (api/_lib/territorio.js). Devuelve las zonas y dos índices:
+ * parroquias (id → { ...parroquia, vicaria, zona }) y vicarias (id → { ...vicaria, zona }).
+ */
+export function cargarTerritorio() {
+  territorioPromesa ??= api('/api/territorio').then(({ zonas }) => {
+    const parroquias = new Map();
+    const vicarias = new Map();
+    for (const z of zonas) {
+      for (const v of z.vicarias) {
+        vicarias.set(v.id, { ...v, zona: z });
+        for (const p of v.parroquias) parroquias.set(p.id, { ...p, vicaria: v, zona: z });
+      }
+    }
+    return { zonas, parroquias, vicarias };
+  });
+  territorioPromesa.catch(() => { territorioPromesa = null; });
+  return territorioPromesa;
+}
 
 export const NIVELES = [
   'Iniciación cristiana de niños',
@@ -216,9 +233,14 @@ export function iniciales(nombres, apellidos) {
   return `${(nombres || '').trim()[0] || ''}${(apellidos || '').trim()[0] || ''}`.toUpperCase();
 }
 
+export const ESTADOS_TEXTO = {
+  ACTIVO: 'Aprobado', PENDIENTE_APROBACION: 'Por aprobar', PENDIENTE_DOCUMENTOS: 'Documentos pendientes', RECHAZADO: 'Rechazado', ANULADO: 'Anulado',
+  CONFIRMADA: 'Confirmada', ANULADA: 'Anulada', PENDIENTE_DOCUMENTOS_SEMANA: 'Pase pendiente',
+};
+
 export function insignaEstado(estado) {
   const e = String(estado || '').toUpperCase();
-  const tipo = e === 'ACTIVO' || e === 'CONFIRMADA' || e === 'VALIDO' ? 'ok' : e === 'ANULADO' || e === 'ANULADA' ? 'error' : 'warn';
-  const texto = { ACTIVO: 'Activo', PENDIENTE_DOCUMENTOS: 'Documentos pendientes', ANULADO: 'Anulado', CONFIRMADA: 'Confirmada', ANULADA: 'Anulada', PENDIENTE_DOCUMENTOS_SEMANA: 'Pase pendiente' }[e] || e;
+  const tipo = e === 'ACTIVO' || e === 'CONFIRMADA' || e === 'VALIDO' ? 'ok' : ['ANULADO', 'ANULADA', 'RECHAZADO'].includes(e) ? 'error' : e === 'PENDIENTE_APROBACION' ? 'info' : 'warn';
+  const texto = ESTADOS_TEXTO[e] || e;
   return `<span class="m-badge m-badge--${tipo}">${escapar(texto)}</span>`;
 }
