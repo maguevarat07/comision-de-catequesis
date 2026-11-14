@@ -48,6 +48,7 @@ Configuración: copia `.env.example` como `.env.local`. En local, la clave de la
 | `/verificar/` | Validez de carnets (`?c=`) y pases (`?t=`); con sesión de personal, datos y registro de entrada |
 | `/admin/` | Panel: cola **Por aprobar** (aprobar o rechazar con motivo), **dashboard** de catequistas por zona, vicaría y parroquia, **Parroquias** (editar vicarías, parroquias y coordinadores con actualización automática de los registros), **Cumpleaños** (saludo diario por correo), búsqueda, detalle con archivos, anular, regenerar, reenviar y CSV |
 | `/admin/escanear/` | Lector QR con la cámara (BarcodeDetector o jsQR) |
+| `/recursos/` | Recursos: videoteca de la Semana del Catequista (2026, 2025 y 2024) con destacado, filas por edición, búsqueda y reproductor. Datos en `public/assets/js/recursos/videos.js` |
 | `/privacidad/` | Aviso de privacidad (Ley 81 de 2019) — borrador para revisión |
 
 Código del módulo en `public/assets/js/modulo/` (módulos ES sin compilación) y `public/css/modulo.css`. Librerías vendorizadas con versión exacta y licencia en `public/assets/vendor/`: `signature_pad` 5.0.4 (MIT), `jsQR` 1.4.0 (Apache-2.0) y `qrcode-generator` 1.4.4 (MIT, licencia en la cabecera del archivo). El contrato de la API está en [`docs/API-CONTRATO.md`](docs/API-CONTRATO.md).
