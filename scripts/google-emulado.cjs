@@ -10,7 +10,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 const ENCABEZADOS = {
-  Catequistas: ['id', 'numero_catequista', 'estado', 'fecha_registro', 'nombres', 'apellidos', 'cedula', 'fecha_nacimiento', 'sexo', 'telefono', 'correo', 'direccion', 'parroquia', 'vicaria_zona', 'anios_servicio', 'nivel_que_imparte', 'formacion_cenafca', 'coordinador_parroquial', 'foto_file_id', 'firma_file_id', 'comprobante_file_id', 'yappy_referencia', 'comprobante_sha256', 'pdf_inscripcion_file_id', 'carnet_file_id', 'vigencia_hasta', 'correo_enviado_at', 'consentimiento_datos', 'consentimiento_imagen', 'creado_at', 'actualizado_at', 'notas_admin'],
+  Catequistas: ['id', 'numero_catequista', 'estado', 'fecha_registro', 'nombres', 'apellidos', 'cedula', 'fecha_nacimiento', 'sexo', 'telefono', 'correo', 'direccion', 'parroquia', 'vicaria_zona', 'zona_pastoral', 'anios_servicio', 'nivel_que_imparte', 'formacion_cenafca', 'coordinador_parroquial', 'foto_file_id', 'firma_file_id', 'comprobante_file_id', 'yappy_referencia', 'comprobante_sha256', 'pdf_inscripcion_file_id', 'carnet_file_id', 'vigencia_hasta', 'correo_enviado_at', 'consentimiento_datos', 'consentimiento_imagen', 'creado_at', 'actualizado_at', 'notas_admin', 'revisado_at', 'revisado_por', 'motivo_rechazo'],
   SemanaCatequista: ['id', 'numero_inscripcion_semana', 'catequista_id', 'numero_catequista', 'correo', 'edicion', 'estado', 'fecha_inscripcion', 'talla_camiseta', 'restricciones_alimentarias', 'comprobante_file_id', 'yappy_referencia', 'comprobante_sha256', 'qr_token', 'qr_file_id', 'correo_enviado_at', 'checkin_at', 'checkin_por', 'creado_at', 'actualizado_at', 'notas_admin'],
   Pagos: ['id', 'tipo', 'referencia_id', 'numero_catequista', 'monto', 'moneda', 'metodo', 'yappy_referencia', 'comprobante_file_id', 'comprobante_sha256', 'estado', 'creado_at', 'anulado_at', 'anulado_por', 'motivo_anulacion'],
   Correos: ['id', 'fecha', 'destinatario', 'asunto', 'tipo', 'referencia_id', 'estado', 'error'],
@@ -32,7 +32,11 @@ const CONFIG_PRUEBA = {
   DRIVE_PDF_INSCRIPCION: 'carpeta_pdf', DRIVE_CARNETS: 'carpeta_carnets', DRIVE_QR: 'carpeta_qr', DRIVE_RESPALDOS: 'carpeta_respaldos',
 };
 
-function crearGoogleEmulado({ config = {}, cuotaCorreo = 100 } = {}) {
+// Columnas que asegurarEsquema_ (Code.gs) agrega a un libro creado antes de la aprobación.
+const COLUMNAS_NUEVAS = ['zona_pastoral', 'revisado_at', 'revisado_por', 'motivo_rechazo'];
+
+/** esquemaAntiguo: crea Catequistas sin COLUMNAS_NUEVAS, como el libro de producción antes de migrar. */
+function crearGoogleEmulado({ config = {}, cuotaCorreo = 100, esquemaAntiguo = false } = {}) {
   const sheetId = 'libro_emulado';
   const secreto = crypto.randomBytes(32).toString('base64url');
 
@@ -41,7 +45,9 @@ function crearGoogleEmulado({ config = {}, cuotaCorreo = 100 } = {}) {
   const idsHoja = {};
   let siguienteIdHoja = 100;
   const crearHoja = (nombre, filas) => { hojas[nombre] = filas; idsHoja[nombre] = siguienteIdHoja++; };
-  for (const [n, cab] of Object.entries(ENCABEZADOS)) crearHoja(n, [cab.slice()]);
+  for (const [n, cab] of Object.entries(ENCABEZADOS)) {
+    crearHoja(n, [n === 'Catequistas' && esquemaAntiguo ? cab.filter((c) => !COLUMNAS_NUEVAS.includes(c)) : cab.slice()]);
+  }
   crearHoja('Config', [['clave', 'valor', 'descripcion'], ...Object.entries({ ...CONFIG_PRUEBA, ...config }).map(([k, v]) => [k, v, ''])]);
   crearHoja('Secuencias', [['nombre', 'prefijo', 'siguiente', 'relleno', 'descripcion'], ['CATEQUISTA', 'CAT-', 1, 5, ''], ['SEMANA_2026', 'SEM26-', 1, 4, '']]);
   crearHoja('_meta', [['version', 0], ['ultima_escritura', ''], ['version_esquema', 1]]);
@@ -69,11 +75,31 @@ function crearGoogleEmulado({ config = {}, cuotaCorreo = 100 } = {}) {
         const ancho = Math.max(...filas.map((f) => f.length));
         return filas.map((f) => Array.from({ length: ancho }, (_, i) => (f[i] === undefined || f[i] === null ? '' : f[i])));
       } }),
-      getRange: (a1) => {
-        const m = /^([A-Z])(\d+)$/.exec(a1);
-        const col = m[1].charCodeAt(0) - 65;
-        const fila = Number(m[2]) - 1;
-        return { getValue: () => (hojas[nombre][fila] || [])[col] ?? '' };
+      getLastColumn: () => Math.max(0, ...hojas[nombre].map((f) => {
+        let n = f.length;
+        while (n && (f[n - 1] === '' || f[n - 1] === null || f[n - 1] === undefined)) n--;
+        return n;
+      })),
+      getMaxColumns: () => 200,
+      insertColumnAfter: () => {},
+      // getRange('B1') o getRange(fila, columna[, filas, columnas]), base 1 como en Apps Script.
+      getRange: (a1, c1, nFilas = 1, nCols = 1) => {
+        let fila;
+        let col;
+        if (typeof a1 === 'number') {
+          fila = a1 - 1;
+          col = c1 - 1;
+        } else {
+          const m = /^([A-Z])(\d+)$/.exec(a1);
+          col = m[1].charCodeAt(0) - 65;
+          fila = Number(m[2]) - 1;
+        }
+        const celda = (f, c) => (hojas[nombre][f] || [])[c] ?? '';
+        return {
+          getValue: () => celda(fila, col),
+          getValues: () => Array.from({ length: nFilas }, (_, i) => Array.from({ length: nCols }, (__, j) => celda(fila + i, col + j))),
+          setValue: (v) => { (hojas[nombre][fila] = hojas[nombre][fila] || [])[col] = v; },
+        };
       },
     };
   }
@@ -142,12 +168,13 @@ function crearGoogleEmulado({ config = {}, cuotaCorreo = 100 } = {}) {
   const CacheService = { getScriptCache: () => ({
     get: (k) => { const e = cache.get(k); return e && e.hasta > Date.now() ? e.v : null; },
     put: (k, v, s) => { cache.set(k, { v, hasta: Date.now() + (s || 600) * 1000 }); },
+    remove: (k) => { cache.delete(k); },
   }) };
   const props = new Map([['SHEET_ID', sheetId], ['WRITER_SECRET', secreto]]);
   const contexto = {
     console,
     Date, JSON, Math, Object, String, Number, Array, Error, isFinite, encodeURIComponent,
-    SpreadsheetApp: { openById: (id) => { if (id !== sheetId) throw new Error('Libro desconocido'); return { getSheetByName: hoja, getName: () => 'Catequesis · Base de Registro (emulado)' }; } },
+    SpreadsheetApp: { openById: (id) => { if (id !== sheetId) throw new Error('Libro desconocido'); return { getSheetByName: hoja, getName: () => 'Catequesis · Base de Registro (emulado)' }; }, flush: () => {} },
     Sheets, DriveApp, MailApp, CacheService,
     LockService: { getScriptLock: () => ({ tryLock: () => true, releaseLock: () => {} }) },
     PropertiesService: { getScriptProperties: () => ({ getProperty: (k) => props.get(k) ?? null, setProperty: (k, v) => props.set(k, String(v)) }) },
@@ -191,4 +218,4 @@ function crearGoogleEmulado({ config = {}, cuotaCorreo = 100 } = {}) {
   };
 }
 
-module.exports = { crearGoogleEmulado, ENCABEZADOS };
+module.exports = { crearGoogleEmulado, ENCABEZADOS, COLUMNAS_NUEVAS };

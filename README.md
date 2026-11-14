@@ -14,12 +14,12 @@ Con Node.js 20.12 o superior, después de `npm install`:
 
 Abrir http://localhost:4173. En los dos primeros modos los datos se borran al reiniciar y no se envían correos; una franja amarilla lo indica.
 
-Cuentas de prueba (modos simulado y emulado): catequista `prueba@ejemplo.com` con número `1`; panel con `aovv.26@gmail.com` (administrador) o `verificador@ejemplo.com` (solo escanear).
+Cuentas de prueba (modos simulado y emulado): catequista `prueba@ejemplo.com` con número `1` (aprobado) y `jose@ejemplo.com` con número `2` (por aprobar); panel con `aovv.26@gmail.com` (administrador) o `verificador@ejemplo.com` (solo escanear).
 
 Variables de la API simulada: `SIM_LATENCIA_MS` (450 ms por defecto), `SIM_SIN_DATOS=1` (sin catequistas de ejemplo; también en el modo emulado) y `SIM_FALLAR_DOCUMENTOS=1` (registros en `PENDIENTE_DOCUMENTOS`).
 
 ```sh
-npm test                  # API real + escritor sobre Google emulado (68 comprobaciones)
+npm test                  # API real + escritor sobre Google emulado (117 comprobaciones)
 npm run google:verificar  # la cuenta de servicio lee la hoja real
 npm run build             # genera dist/, la carpeta pública para Vercel
 ```
@@ -42,11 +42,11 @@ Configuración: copia `.env.example` como `.env.local`. En local, la clave de la
 
 | Ruta | Qué es |
 |---|---|
-| `/registro/` | Registro en 7 pasos: datos, pastoral, foto (recorte 600×600), firma táctil, pago Yappy, consentimientos y revisión |
+| `/registro/` | Registro en 7 pasos: datos, pastoral (parroquia del catálogo → vicaría, zona y coordinador automáticos), foto (recorte 600×600), firma táctil, pago Yappy, consentimientos y revisión |
 | `/portal/` | Acceso con correo + número; carnet digital CR80, descargas y estado de la Semana |
 | `/portal/semana/` | Inscripción a la Semana del Catequista (solo catequistas `ACTIVO`) |
 | `/verificar/` | Validez de carnets (`?c=`) y pases (`?t=`); con sesión de personal, datos y registro de entrada |
-| `/admin/` | Panel: contadores, búsqueda, detalle con archivos, anular, regenerar, reenviar y CSV |
+| `/admin/` | Panel: cola **Por aprobar** (aprobar o rechazar con motivo), **dashboard** de catequistas por zona, vicaría y parroquia, búsqueda, detalle con archivos, anular, regenerar, reenviar y CSV |
 | `/admin/escanear/` | Lector QR con la cámara (BarcodeDetector o jsQR) |
 | `/privacidad/` | Aviso de privacidad (Ley 81 de 2019) — borrador para revisión |
 

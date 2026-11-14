@@ -72,6 +72,13 @@ Completa los valores **POR DEFINIR**: `YAPPY_DIRECTORIO`, `YAPPY_TELEFONO`, `SEM
 
 `ADMIN_EMAILS` y `VERIFICADORES_EMAILS` de `Config` mandan sobre las variables de entorno y se releen en cada petición. Para quitar el acceso a alguien, basta con borrarlo de la hoja.
 
+### Aprobación de registros y estructura territorial
+
+- `REQUIERE_APROBACION` (opcional, TRUE si falta): con TRUE cada registro queda **Por aprobar** hasta que un administrador lo apruebe en el panel; solo entonces se envía el carnet. Con FALSE se vuelve al comportamiento anterior (activo al registrarse).
+- La pestaña `Catequistas` necesita cuatro columnas nuevas: `zona_pastoral`, `revisado_at`, `revisado_por` y `motivo_rechazo`. **No hay que crearlas a mano**: el escritor las agrega al final de la fila de encabezados en su primera solicitud después de actualizarse (o ejecuta `migrarEsquema()` desde el editor de Apps Script). Las lecturas usan el nombre de la columna, así que el orden no importa.
+- Al publicar esta versión hay que **volver a desplegar el escritor** (`apps-script/Code.gs`): Implementar → Gestionar implementaciones → editar la existente → Nueva versión, para conservar la misma URL `/exec`.
+- El catálogo de zonas, vicarías, parroquias y coordinadores está en `api/_lib/territorio.js`. Los coordinadores salen de la sección «Equipo» de la portada: si cambian, actualiza los dos sitios.
+
 ## 5. Probar en local contra Google real
 
 ```sh

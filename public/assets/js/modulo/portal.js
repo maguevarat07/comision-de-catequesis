@@ -32,7 +32,10 @@ function pintarPanel({ catequista: c, documentos: d, semana: s }) {
   document.title = `${c.numero} · Portal del catequista`;
   $('#estado-registro').innerHTML = `Estado del registro: ${insignaEstado(c.estado)}`;
 
-  $('#carnet').innerHTML = carnetHtml(c);
+  // El carnet (en pantalla y en PDF) se entrega cuando la Comisión aprueba el registro.
+  $('#carnet').innerHTML = c.estado === 'ACTIVO'
+    ? carnetHtml(c)
+    : '<div class="m-aviso m-aviso--info"><p><strong>Tu registro está en revisión.</strong></p><p>La Comisión revisará tus datos y tu comprobante de pago. Cuando lo apruebe, tu carnet aparecerá aquí y te lo enviaremos por correo.</p></div>';
 
   const docs = [
     d.carnet && html`<li><a href="${d.carnet}" download>Carnet para imprimir (PDF) <span aria-hidden="true">↓</span></a></li>`,
@@ -41,7 +44,7 @@ function pintarPanel({ catequista: c, documentos: d, semana: s }) {
   ].filter(Boolean);
   $('#descargas').innerHTML = docs.length ? docs.join('') : '<li class="m-help">Tus documentos se están generando. Vuelve a entrar en unos minutos.</li>';
 
-  const filas = [['Número', c.numero], ['Nombre', `${c.nombres} ${c.apellidos}`], ['Correo', c.correo], ['Celular', formatearTelefono(c.telefono)], ['Parroquia', c.parroquia], ['Vicaría', c.vicaria_zona], ['Registro', fmtFecha(c.fecha_registro)], ['Vigencia', fmtFecha(c.vigencia_hasta)]];
+  const filas = [['Número', c.numero], ['Nombre', `${c.nombres} ${c.apellidos}`], ['Correo', c.correo], ['Celular', formatearTelefono(c.telefono)], ['Parroquia', c.parroquia], ['Vicaría', c.vicaria_zona], ['Zona pastoral', c.zona_pastoral || '—'], ['Registro', fmtFecha(c.fecha_registro)], ['Vigencia', fmtFecha(c.vigencia_hasta)]];
   $('#datos').innerHTML = filas.map(([k, v]) => html`<dt>${k}</dt><dd>${v}</dd>`).join('');
 
   pintarSemana(c, s);
@@ -69,7 +72,7 @@ function pintarSemana(c, s) {
     return;
   }
   if (c.estado !== 'ACTIVO') {
-    t.innerHTML = cab + info + '<div class="m-aviso m-aviso--warn"><p>Podrás inscribirte cuando tu registro esté activo.</p></div>';
+    t.innerHTML = cab + info + '<div class="m-aviso m-aviso--warn"><p>Podrás inscribirte cuando la Comisión apruebe tu registro.</p></div>';
   } else if (!s.abierta) {
     t.innerHTML = cab + info + '<div class="m-aviso m-aviso--info"><p>La inscripción aún no está abierta. Te avisaremos por los canales oficiales.</p></div>';
   } else if (!s.hayCupo) {

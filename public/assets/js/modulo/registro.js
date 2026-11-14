@@ -1,5 +1,5 @@
 import {
-  api, nuevaClave, cargarConfig, marcarModo, ZONAS, NIVELES, FORMACION_CENAFCA, $, $$, html, crudo,
+  api, nuevaClave, cargarConfig, cargarTerritorio, OTRA_PARROQUIA, marcarModo, NIVELES, FORMACION_CENAFCA, $, $$, html, crudo,
   ocupado, errorCampo, aviso, llenarSelect, cedulaValida, normalizarCedula, correoValido, telefonoValido,
   formatearTelefono, normalizarTelefono, edad, fmtFecha, fmtMonto, ApiError,
 } from './comun.js';
@@ -7,11 +7,13 @@ import { Recortador, reducir, sha256Hex, tamañoDataUrl } from './imagenes.js';
 import { abrirFirma } from './firma.js';
 
 const TOTAL = 7;
-const CLAVE_BORRADOR = 'cat-registro-borrador-v1';
+const CLAVE_BORRADOR = 'cat-registro-borrador-v2';
 const form = $('#asistente');
 const pasos = $$('.m-paso', form);
 let paso = 1;
 let config = null;
+let territorio = null;
+let coordinadorSugerido = ''; // último valor puesto automáticamente en «Coordinador(a)»
 
 const estado = {
   foto: null,        // data URL JPEG 600×600
@@ -23,18 +25,18 @@ const estado = {
 
 // ---------- Inicio ----------
 
-llenarSelect($('#vicaria_zona'), ZONAS);
 llenarSelect($('#formacion_cenafca'), FORMACION_CENAFCA);
 $('#niveles').innerHTML = NIVELES.map((n, i) => html`<label class="m-chip"><input type="checkbox" name="nivel" value="${n}" id="nivel-${i}"><span>${n}</span></label>`).join('');
 $('#fecha_nacimiento').max = new Date().toISOString().slice(0, 10);
 
 (async function iniciar() {
   try {
-    config = await cargarConfig();
+    [config, territorio] = await Promise.all([cargarConfig(), cargarTerritorio()]);
   } catch (e) {
     aviso($('#estado-global'), 'error', e.message || 'No se pudo cargar la configuración. Recarga la página.');
     return;
   }
+  pintarParroquias();
   marcarModo(config);
   if (!config.registroAbierto) {
     $('#cerrado').hidden = false;
@@ -45,13 +47,61 @@ $('#fecha_nacimiento').max = new Date().toISOString().slice(0, 10);
   $('#pago-telefono').textContent = config.yappy.telefono || '—';
   $('#pago-instrucciones').textContent = config.yappy.instrucciones || '';
   restaurarBorrador();
+  actualizarUbicacion({ completarCoordinador: false });
   form.hidden = false;
   mostrarPaso(1, false);
 })();
 
+// ---------- Parroquia → vicaría → zona y coordinador ----------
+
+/** Selector de parroquias agrupado por «Zona · Vicaría» y vicarías para «Mi parroquia no está en la lista». */
+function pintarParroquias() {
+  const grupos = territorio.zonas.flatMap((z) => z.vicarias.map((v) => html`<optgroup label="${`${v.etiqueta} · Zona ${z.nombre}`}">${crudo(v.parroquias.map((p) => html`<option value="${p.id}">${p.nombre}</option>`).join(''))}</optgroup>`));
+  $('#parroquia_id').innerHTML = `<option value="">Selecciona tu parroquia</option>${grupos.join('')}<optgroup label="Otra"><option value="${OTRA_PARROQUIA}">Mi parroquia no está en la lista</option></optgroup>`;
+  const vics = territorio.zonas.map((z) => html`<optgroup label="${`Zona ${z.nombre} (${z.area})`}">${crudo(z.vicarias.map((v) => html`<option value="${v.id}">${v.etiqueta}</option>`).join(''))}</optgroup>`);
+  $('#vicaria_id').innerHTML = `<option value="">Selecciona la vicaría</option>${vics.join('')}`;
+}
+
+/** Muestra la vicaría y la zona de la parroquia elegida y propone su coordinador(a). */
+function actualizarUbicacion({ completarCoordinador = true } = {}) {
+  const id = $('#parroquia_id').value;
+  const otra = id === OTRA_PARROQUIA;
+  $('#campo-parroquia-otra').hidden = !otra;
+  $('#campo-vicaria-otra').hidden = !otra;
+  const p = territorio.parroquias.get(id);
+  const v = p ? p.vicaria : otra ? territorio.vicarias.get($('#vicaria_id').value) : null;
+  const z = p ? p.zona : v ? v.zona : null;
+  $('#ubicacion').hidden = !v;
+  $('#ubicacion-vicaria').textContent = v ? v.etiqueta : '—';
+  $('#ubicacion-zona').textContent = z ? `${z.nombre} (${z.area})` : '—';
+
+  const sugerido = p ? p.coordinador : '';
+  const campo = $('#coordinador_parroquial');
+  // Solo se reemplaza lo que pusimos nosotros (o un campo vacío): nunca lo que escribió la persona.
+  if (completarCoordinador && (!campo.value.trim() || campo.value === coordinadorSugerido)) {
+    campo.value = sugerido;
+    if (sugerido) errorCampo(campo, '');
+  }
+  coordinadorSugerido = sugerido;
+  $('#coordinador-ayuda').textContent = sugerido
+    ? `Según la estructura de la Comisión: ${sugerido}. Corrígelo si en tu parroquia es otra persona.`
+    : 'Escribe el nombre de quien coordina la catequesis en tu parroquia.';
+}
+$('#parroquia_id').addEventListener('change', () => { actualizarUbicacion(); errorCampo($('#parroquia_id'), ''); });
+$('#vicaria_id').addEventListener('change', () => actualizarUbicacion({ completarCoordinador: false }));
+
+/** Texto legible de la parroquia elegida (revisión). */
+function lugarElegido() {
+  const id = $('#parroquia_id').value;
+  const p = territorio.parroquias.get(id);
+  if (p) return { parroquia: p.nombre, vicaria: p.vicaria.etiqueta, zona: `${p.zona.nombre} (${p.zona.area})` };
+  const v = territorio.vicarias.get($('#vicaria_id').value);
+  return { parroquia: $('#parroquia').value.trim(), vicaria: v ? v.etiqueta : '', zona: v ? `${v.zona.nombre} (${v.zona.area})` : '' };
+}
+
 // ---------- Borrador (solo campos de texto; nunca archivos) ----------
 
-const CAMPOS_TEXTO = ['nombres', 'apellidos', 'cedula', 'fecha_nacimiento', 'telefono', 'direccion', 'correo', 'correo2', 'parroquia', 'vicaria_zona', 'anios_servicio', 'formacion_cenafca', 'coordinador_parroquial', 'yappy_referencia'];
+const CAMPOS_TEXTO = ['nombres', 'apellidos', 'cedula', 'fecha_nacimiento', 'telefono', 'direccion', 'correo', 'correo2', 'parroquia_id', 'parroquia', 'vicaria_id', 'anios_servicio', 'formacion_cenafca', 'coordinador_parroquial', 'yappy_referencia'];
 
 function guardarBorrador() {
   try {
@@ -65,6 +115,7 @@ function restaurarBorrador() {
   try {
     const d = JSON.parse(sessionStorage.getItem(CLAVE_BORRADOR) || 'null');
     if (!d) return;
+    // Un <select> ignora un valor que no está entre sus opciones (p. ej. una parroquia retirada del catálogo).
     CAMPOS_TEXTO.forEach((k) => { if (d[k] != null) $('#' + k).value = d[k]; });
     if (d.sexo) { const r = form.querySelector(`input[name=sexo][value="${CSS.escape(d.sexo)}"]`); if (r) r.checked = true; }
     (d.niveles || []).forEach((v) => { const c = form.querySelector(`input[name=nivel][value="${CSS.escape(v)}"]`); if (c) c.checked = true; });
@@ -142,8 +193,14 @@ function validarPaso(n) {
   }
   if (n === 2) {
     const v = (id) => $('#' + id).value.trim();
-    chequear('parroquia', v('parroquia').length >= 3, 'Indica tu parroquia.');
-    chequear('vicaria_zona', !!v('vicaria_zona'), 'Selecciona la vicaría.');
+    chequear('parroquia_id', !!v('parroquia_id'), 'Selecciona tu parroquia.');
+    if (v('parroquia_id') === OTRA_PARROQUIA) {
+      chequear('parroquia', v('parroquia').length >= 3, 'Escribe el nombre de tu parroquia.');
+      chequear('vicaria_id', !!v('vicaria_id'), 'Selecciona la vicaría de tu parroquia.');
+    } else {
+      errorCampo($('#parroquia'), '');
+      errorCampo($('#vicaria_id'), '');
+    }
     const anios = Number(v('anios_servicio'));
     chequear('anios_servicio', v('anios_servicio') !== '' && Number.isInteger(anios) && anios >= 0 && anios <= 80, 'Indica los años (0 si estás comenzando).');
     chequear('formacion_cenafca', !!v('formacion_cenafca'), 'Selecciona una opción.');
@@ -244,10 +301,11 @@ $('#comprobante').addEventListener('change', async (e) => {
 
 function pintarRevision() {
   const v = (id) => $('#' + id).value.trim();
+  const lugar = lugarElegido();
   const filas = [
     ['Nombre', `${v('nombres')} ${v('apellidos')}`], ['Cédula', v('cedula')], ['Nacimiento', fmtFecha(v('fecha_nacimiento'))], ['Sexo', form.sexo.value],
-    ['Celular', v('telefono')], ['Correo', v('correo')], ['Dirección', v('direccion') || '—'], ['Parroquia', v('parroquia')],
-    ['Vicaría', v('vicaria_zona')], ['Años de servicio', v('anios_servicio')], ['Nivel', $$('input[name=nivel]:checked').map((x) => x.value).join(', ')],
+    ['Celular', v('telefono')], ['Correo', v('correo')], ['Dirección', v('direccion') || '—'], ['Parroquia', lugar.parroquia],
+    ['Vicaría', lugar.vicaria], ['Zona pastoral', lugar.zona], ['Años de servicio', v('anios_servicio')], ['Nivel', $$('input[name=nivel]:checked').map((x) => x.value).join(', ')],
     ['Formación CENAFCA', v('formacion_cenafca')], ['Coordinador(a)', v('coordinador_parroquial')],
     ['Pago', `${fmtMonto(config.costoRegistro, config.moneda)} · Ref. ${v('yappy_referencia')}`],
   ];
@@ -261,7 +319,7 @@ function pintarRevision() {
 
 // ---------- Envío ----------
 
-const PASO_DE_CAMPO = { nombres: 1, apellidos: 1, cedula: 1, fecha_nacimiento: 1, sexo: 1, telefono: 1, correo: 1, parroquia: 2, vicaria_zona: 2, nivel_que_imparte: 2, formacion_cenafca: 2, coordinador_parroquial: 2, anios_servicio: 2, foto: 3, firma: 4, comprobante: 5, yappy_referencia: 5, consentimiento_datos: 6, consentimiento_imagen: 6 };
+const PASO_DE_CAMPO = { nombres: 1, apellidos: 1, cedula: 1, fecha_nacimiento: 1, sexo: 1, telefono: 1, correo: 1, parroquia_id: 2, parroquia: 2, vicaria_id: 2, nivel_que_imparte: 2, formacion_cenafca: 2, coordinador_parroquial: 2, anios_servicio: 2, foto: 3, firma: 4, comprobante: 5, yappy_referencia: 5, consentimiento_datos: 6, consentimiento_imagen: 6 };
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -280,7 +338,8 @@ form.addEventListener('submit', async (e) => {
         datos: {
           nombres: v('nombres'), apellidos: v('apellidos'), cedula: normalizarCedula(v('cedula')), fecha_nacimiento: v('fecha_nacimiento'),
           sexo: form.sexo.value, telefono: normalizarTelefono(v('telefono')), correo: v('correo').toLowerCase(), direccion: v('direccion'),
-          parroquia: v('parroquia'), vicaria_zona: v('vicaria_zona'), anios_servicio: Number(v('anios_servicio')),
+          parroquia_id: v('parroquia_id'), parroquia: v('parroquia_id') === OTRA_PARROQUIA ? v('parroquia') : '', vicaria_id: v('parroquia_id') === OTRA_PARROQUIA ? v('vicaria_id') : '',
+          anios_servicio: Number(v('anios_servicio')),
           nivel_que_imparte: $$('input[name=nivel]:checked').map((x) => x.value), formacion_cenafca: v('formacion_cenafca'),
           coordinador_parroquial: v('coordinador_parroquial'), yappy_referencia: v('yappy_referencia'),
           consentimiento_datos: $('#consentimiento_datos').checked, consentimiento_imagen: $('#consentimiento_imagen').checked,
@@ -336,11 +395,18 @@ function mostrarExito(r) {
   carnet.href = r.documentos.carnet || '#';
   pdf.href = r.documentos.pdf || '#';
   const msgs = [];
-  if (r.correoEnviado) msgs.push(`Enviamos tu carnet y tu ficha de inscripción a ${r.correo}. Si no lo ves, revisa la carpeta de spam.`);
-  else msgs.push(`Tu registro quedó guardado. El correo a ${r.correo} se enviará en cuanto sea posible.`);
-  if (r.estado !== 'ACTIVO') msgs.push('Estamos terminando de generar tus documentos; estarán en tu portal en unos minutos.');
-  msgs.push('Guarda tu número: lo necesitas, junto con tu correo, para entrar al portal.');
-  aviso($('#exito-aviso'), r.correoEnviado && r.estado === 'ACTIVO' ? 'ok' : 'warn', msgs);
+  const activo = r.estado === 'ACTIVO';
+  $('#exito-titulo').textContent = activo ? '¡Bienvenido(a), catequista!' : '¡Recibimos tu registro!';
+  if (r.vicaria_zona) msgs.push(`Parroquia ${r.parroquia} · ${r.vicaria_zona}${r.zona_pastoral ? ' · ' + r.zona_pastoral : ''}.`);
+  if (activo) {
+    msgs.push(r.correoEnviado ? `Enviamos tu carnet y tu ficha de inscripción a ${r.correo}. Si no lo ves, revisa la carpeta de spam.` : `Tu registro quedó guardado. El correo a ${r.correo} se enviará en cuanto sea posible.`);
+  } else {
+    msgs.push('La Comisión revisará tus datos y tu comprobante de pago. Cuando apruebe tu registro te enviaremos el carnet por correo.');
+    msgs.push(r.correoEnviado ? `Te enviamos la confirmación y tu ficha de inscripción a ${r.correo}. Si no la ves, revisa la carpeta de spam.` : `El correo de confirmación a ${r.correo} se enviará en cuanto sea posible.`);
+    if (r.estado === 'PENDIENTE_DOCUMENTOS') msgs.push('Estamos terminando de generar tus documentos; estarán en tu portal en unos minutos.');
+  }
+  msgs.push('Guarda tu número: lo necesitas, junto con tu correo, para entrar al portal y ver el estado de tu registro.');
+  aviso($('#exito-aviso'), r.correoEnviado ? (activo ? 'ok' : 'info') : 'warn', msgs);
   document.title = `Registro completado · ${r.numero}`;
   ex.focus();
   ex.scrollIntoView({ block: 'start' });

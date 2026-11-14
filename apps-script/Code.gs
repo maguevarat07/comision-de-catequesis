@@ -65,6 +65,7 @@ function ejecutar_(accion, nombre, datos, idem, sheetId) {
   // Consulta de la API ante un posible reintento: responde solo desde la caché, sin escribir nada.
   if (datos.soloCache) return error_('SIN_CACHE', 'No hay una respuesta guardada para esta clave');
   var ss = SpreadsheetApp.openById(sheetId);
+  asegurarEsquema_(ss);
   var config = leerConfig_(ss);
   var prep = accion.antes ? accion.antes(datos, config) : {};
   var res;
@@ -122,7 +123,8 @@ var ACCIONES = {
       if (!esVerdadero_(config.REGISTRO_ABIERTO)) throw fallo_('CERRADO', 'El registro de catequistas está cerrado en este momento.');
       var c = d.campos;
       var cat = libro.tabla('Catequistas');
-      if (cat.filas.some(function (x) { return minus_(x.correo) === minus_(c.correo) || mayus_(x.cedula) === mayus_(c.cedula); })) {
+      // Un registro RECHAZADO no bloquea: la persona puede registrarse de nuevo corrigiendo lo indicado.
+      if (cat.filas.some(function (x) { return x.estado !== 'RECHAZADO' && (minus_(x.correo) === minus_(c.correo) || mayus_(x.cedula) === mayus_(c.cedula)); })) {
         throw fallo_('DUPLICADO', 'Ya existe un registro con estos datos. Si ya te registraste, puedes recuperar tu número de catequista por correo.');
       }
       comprobarPago_(libro, d.comprobante_sha256, c.yappy_referencia, false);
@@ -148,6 +150,9 @@ var ACCIONES = {
       fila.creado_at = ahora;
       fila.actualizado_at = ahora;
       fila.notas_admin = '';
+      fila.revisado_at = '';
+      fila.revisado_por = '';
+      fila.motivo_rechazo = '';
       libro.insertar('Catequistas', fila);
       libro.insertar('Pagos', pago_('REGISTRO', id, numero, config.COSTO_REGISTRO, config.MONEDA, c.yappy_referencia, fila.comprobante_file_id, d.comprobante_sha256, ahora));
       libro.auditar(c.correo, 'REGISTRO', 'Catequistas', id, numero);
@@ -159,7 +164,11 @@ var ACCIONES = {
     },
   },
 
-  /** Paso 2 del registro (y regeneración): PDF de inscripción y carnet; pasa a ACTIVO y envía el correo. */
+  /**
+   * Paso 2 del registro (y regeneración): PDF de inscripción y carnet.
+   * Si el registro ya estaba aprobado (o Config no exige aprobación) pasa a ACTIVO y el correo
+   * lleva el carnet; si no, queda PENDIENTE_APROBACION y el correo avisa de que está en revisión.
+   */
   adjuntarDocumentos: {
     antes: function (d, config) {
       return { archivos: [
@@ -167,20 +176,66 @@ var ACCIONES = {
         subir_(config.DRIVE_CARNETS, { mime: 'application/pdf', b64: d.carnet }, 'pendiente_' + d.id + '_carnet.pdf'),
       ] };
     },
-    bajoBloqueo: function (libro, d, prep) {
+    bajoBloqueo: function (libro, d, prep, config) {
       var c = libro.buscar('Catequistas', d.id);
       if (!c) throw fallo_('INEXISTENTE', 'Registro no encontrado.');
       if (c.estado === 'ANULADO') throw fallo_('ANULADO', 'No se generan documentos de un registro anulado.');
+      if (c.estado === 'RECHAZADO') throw fallo_('RECHAZADO', 'No se generan documentos de un registro rechazado.');
+      var aprobado = c.estado === 'ACTIVO' || !!c.revisado_at || !requiereAprobacion_(config);
+      var estado = aprobado ? 'ACTIVO' : 'PENDIENTE_APROBACION';
       var viejos = [c.pdf_inscripcion_file_id, c.carnet_file_id].filter(String);
-      libro.actualizar('Catequistas', c, { pdf_inscripcion_file_id: prep.archivos[0].getId(), carnet_file_id: prep.archivos[1].getId(), estado: 'ACTIVO', actualizado_at: ahora_() });
+      libro.actualizar('Catequistas', c, { pdf_inscripcion_file_id: prep.archivos[0].getId(), carnet_file_id: prep.archivos[1].getId(), estado: estado, actualizado_at: ahora_() });
       if (d.por) libro.auditar(d.por, 'REGENERAR', 'Catequistas', c.id, c.numero_catequista);
-      return { ok: true, estado: 'ACTIVO', _cat: c, _viejos: viejos };
+      return { ok: true, estado: estado, _cat: c, _viejos: viejos };
     },
     despues: function (res, d, prep, config, ss, sheetId) {
       var c = res._cat;
       renombrar_(prep.archivos, [c.numero_catequista + '_inscripcion.pdf', c.numero_catequista + '_carnet.pdf']);
       res._viejos.forEach(function (id) { try { DriveApp.getFileById(id).setTrashed(true); } catch (e) { /* ya no existe */ } });
-      if (d.enviarCorreo) res.correoEnviado = enviarRegistro_(ss, sheetId, config, c, '');
+      if (d.enviarCorreo) res.correoEnviado = res.estado === 'ACTIVO' ? enviarRegistro_(ss, sheetId, config, c, '') : enviarRecibido_(ss, sheetId, config, c, '');
+      return res;
+    },
+  },
+
+  /**
+   * Revisión del registro por un administrador.
+   *   APROBAR:  PENDIENTE_APROBACION → ACTIVO y correo con el carnet.
+   *   RECHAZAR: PENDIENTE_APROBACION o PENDIENTE_DOCUMENTOS → RECHAZADO; su pago queda RECHAZADO
+   *             y se envía el motivo. El correo y la cédula quedan libres para un registro nuevo.
+   */
+  revisar: {
+    bajoBloqueo: function (libro, d) {
+      var c = libro.buscar('Catequistas', d.id);
+      if (!c) throw fallo_('INEXISTENTE', 'Registro no encontrado.');
+      var t = ahora_();
+      if (d.decision === 'APROBAR') {
+        if (c.estado === 'ACTIVO') return { ok: true, estado: 'ACTIVO', yaRevisado: true };
+        if (c.estado === 'PENDIENTE_DOCUMENTOS') throw fallo_('SIN_DOCUMENTOS', 'Este registro aún no tiene documentos. Usa «Regenerar documentos» y vuelve a aprobarlo.');
+        if (c.estado !== 'PENDIENTE_APROBACION') throw fallo_('NO_PENDIENTE', 'Este registro no está pendiente de aprobación.');
+        libro.actualizar('Catequistas', c, { estado: 'ACTIVO', revisado_at: t, revisado_por: d.por, motivo_rechazo: '', actualizado_at: t });
+        libro.auditar(d.por, 'APROBAR', 'Catequistas', c.id, c.numero_catequista);
+        return { ok: true, estado: 'ACTIVO', _cat: c };
+      }
+      if (d.decision === 'RECHAZAR') {
+        if (c.estado === 'RECHAZADO') return { ok: true, estado: 'RECHAZADO', yaRevisado: true };
+        if (c.estado !== 'PENDIENTE_APROBACION' && c.estado !== 'PENDIENTE_DOCUMENTOS') {
+          throw fallo_('NO_PENDIENTE', 'Solo se rechazan registros pendientes de aprobación. Para retirar un registro activo, usa «Anular».');
+        }
+        libro.actualizar('Catequistas', c, {
+          estado: 'RECHAZADO', revisado_at: t, revisado_por: d.por, motivo_rechazo: d.motivo, actualizado_at: t,
+          notas_admin: (c.notas_admin ? c.notas_admin + ' | ' : '') + 'Rechazado ' + t + ': ' + d.motivo,
+        });
+        libro.tabla('Pagos').filas.filter(function (p) { return p.referencia_id === c.id && p.estado !== 'ANULADO' && p.estado !== 'RECHAZADO'; }).forEach(function (p) {
+          libro.actualizar('Pagos', p, { estado: 'RECHAZADO', anulado_at: t, anulado_por: d.por, motivo_anulacion: d.motivo });
+        });
+        libro.auditar(d.por, 'RECHAZAR', 'Catequistas', c.id, d.motivo);
+        return { ok: true, estado: 'RECHAZADO', _cat: c };
+      }
+      throw fallo_('VALIDACION', 'Decisión no válida.');
+    },
+    despues: function (res, d, prep, config, ss, sheetId) {
+      if (res.yaRevisado) return res;
+      res.correoEnviado = res.estado === 'ACTIVO' ? enviarRegistro_(ss, sheetId, config, res._cat, '') : enviarRechazo_(ss, sheetId, config, res._cat, '');
       return res;
     },
   },
@@ -295,8 +350,10 @@ var ACCIONES = {
       if (d.tipo === 'catequista') {
         var c = leerTabla_(ss, 'Catequistas').porId[d.id];
         if (!c) return error_('INEXISTENTE', 'Registro no encontrado.');
-        if (c.estado !== 'ACTIVO') return error_('NO_ACTIVO', 'Solo se reenvía el correo de registros activos.');
-        enviado = enviarRegistro_(ss, sheetId, config, c, '');
+        if (c.estado === 'ACTIVO') enviado = enviarRegistro_(ss, sheetId, config, c, '');
+        else if (c.estado === 'PENDIENTE_APROBACION') enviado = enviarRecibido_(ss, sheetId, config, c, '');
+        else if (c.estado === 'RECHAZADO') enviado = enviarRechazo_(ss, sheetId, config, c, '');
+        else return error_('NO_ACTIVO', 'Este registro no tiene un correo que reenviar.');
       } else {
         var s = leerTabla_(ss, 'SemanaCatequista').porId[d.id];
         if (!s) return error_('INEXISTENTE', 'Inscripción no encontrada.');
@@ -311,7 +368,7 @@ var ACCIONES = {
   /** Envía el número al correo si existe; la respuesta nunca revela si existe. */
   recuperarNumero: {
     despues: function (res, d, prep, config, ss, sheetId) {
-      var c = leerTabla_(ss, 'Catequistas').filas.filter(function (x) { return minus_(x.correo) === minus_(d.correo) && x.estado !== 'ANULADO'; })[0];
+      var c = leerTabla_(ss, 'Catequistas').filas.filter(function (x) { return minus_(x.correo) === minus_(d.correo) && x.estado !== 'ANULADO' && x.estado !== 'RECHAZADO'; })[0];
       if (c) enviarRecuperar_(ss, sheetId, config, c, '');
       return { ok: true };
     },
@@ -333,6 +390,8 @@ function procesarPendientes() {
     if (MailApp.getRemainingDailyQuota() <= 0) break;
     var m = correos[i];
     if (m.tipo === 'REGISTRO' && cat[m.referencia_id] && cat[m.referencia_id].estado === 'ACTIVO') enviarRegistro_(ss, sheetId, config, cat[m.referencia_id], m.id);
+    else if (m.tipo === 'RECIBIDO' && cat[m.referencia_id] && cat[m.referencia_id].estado === 'PENDIENTE_APROBACION') enviarRecibido_(ss, sheetId, config, cat[m.referencia_id], m.id);
+    else if (m.tipo === 'RECHAZO' && cat[m.referencia_id] && cat[m.referencia_id].estado === 'RECHAZADO') enviarRechazo_(ss, sheetId, config, cat[m.referencia_id], m.id);
     else if (m.tipo === 'SEMANA' && sem[m.referencia_id] && sem[m.referencia_id].estado !== 'ANULADA') enviarSemana_(ss, sheetId, config, sem[m.referencia_id], '', m.id);
     else if (m.tipo === 'RECUPERAR' && cat[m.referencia_id]) enviarRecuperar_(ss, sheetId, config, cat[m.referencia_id], m.id);
     else escribirSueltos_(ss, sheetId, function (libro) { var f = libro.buscar('Correos', m.id); if (f) libro.actualizar('Correos', f, { estado: 'DESCARTADO', error: 'El registro ya no está vigente' }); });
@@ -373,7 +432,7 @@ function enviarRegistro_(ss, sheetId, config, c, correoId) {
   var adjuntos = [c.pdf_inscripcion_file_id, c.carnet_file_id].filter(String).map(function (id) { return DriveApp.getFileById(id).getBlob(); });
   var html = plantilla_(config, 'Bienvenido(a) a la Comisión de Catequesis',
     '<p>Hola, <strong>' + esc_(c.nombres) + '</strong>:</p>' +
-    '<p>Tu registro como catequista quedó confirmado. Tu número es:</p>' +
+    '<p>Tu registro como catequista ' + (c.revisado_at ? 'fue aprobado por la Comisión' : 'quedó confirmado') + '. Tu número es:</p>' +
     '<p style="font-size:26px;font-weight:700;letter-spacing:1px;color:#0E1B3D;margin:8px 0 16px">' + esc_(c.numero_catequista) + '</p>' +
     '<p>Adjuntamos tu ficha de inscripción y tu carnet en PDF. También puedes verlos en el portal del catequista entrando con tu correo y tu número:</p>' +
     boton_(url + '/portal/', 'Entrar al portal') +
@@ -381,6 +440,38 @@ function enviarRegistro_(ss, sheetId, config, c, correoId) {
   return enviar_(ss, sheetId, config, {
     tipo: 'REGISTRO', referencia_id: c.id, para: c.correo, asunto: 'Bienvenido(a), catequista ' + c.numero_catequista,
     html: html, adjuntos: adjuntos, tabla: 'Catequistas', correoId: correoId,
+  });
+}
+
+/** Registro recibido y pendiente de aprobación: número y ficha de inscripción (sin carnet). */
+function enviarRecibido_(ss, sheetId, config, c, correoId) {
+  var url = urlSitio_(config);
+  var adjuntos = [c.pdf_inscripcion_file_id].filter(String).map(function (id) { return DriveApp.getFileById(id).getBlob(); });
+  var html = plantilla_(config, 'Recibimos tu registro',
+    '<p>Hola, <strong>' + esc_(c.nombres) + '</strong>:</p>' +
+    '<p>Recibimos tu registro como catequista. Tu número es:</p>' +
+    '<p style="font-size:26px;font-weight:700;letter-spacing:1px;color:#0E1B3D;margin:8px 0 16px">' + esc_(c.numero_catequista) + '</p>' +
+    '<p>La Comisión revisará tus datos y tu comprobante de pago. Cuando tu registro sea aprobado te enviaremos tu carnet a este correo.</p>' +
+    '<p>Adjuntamos tu ficha de inscripción. Puedes consultar el estado en el portal del catequista con tu correo y tu número:</p>' +
+    boton_(url + '/portal/', 'Ver el estado de mi registro'));
+  return enviar_(ss, sheetId, config, {
+    tipo: 'RECIBIDO', referencia_id: c.id, para: c.correo, asunto: 'Recibimos tu registro · ' + c.numero_catequista,
+    html: html, adjuntos: adjuntos, correoId: correoId,
+  });
+}
+
+/** Registro rechazado: motivo e invitación a registrarse de nuevo. */
+function enviarRechazo_(ss, sheetId, config, c, correoId) {
+  var url = urlSitio_(config);
+  var html = plantilla_(config, 'Tu registro necesita correcciones',
+    '<p>Hola, <strong>' + esc_(c.nombres) + '</strong>:</p>' +
+    '<p>La Comisión revisó tu registro <strong>' + esc_(c.numero_catequista) + '</strong> y no pudo aprobarlo por este motivo:</p>' +
+    '<p style="background:#fff4dc;border-left:4px solid #F0B544;padding:10px 14px;margin:8px 0 16px">' + esc_(c.motivo_rechazo) + '</p>' +
+    '<p>Puedes registrarte de nuevo con el mismo correo y la misma cédula, corrigiendo lo indicado. Si tienes dudas, responde a este correo.</p>' +
+    boton_(url + '/registro/', 'Registrarme de nuevo'));
+  return enviar_(ss, sheetId, config, {
+    tipo: 'RECHAZO', referencia_id: c.id, para: c.correo, asunto: 'Tu registro de catequista ' + c.numero_catequista + ' necesita correcciones',
+    html: html, correoId: correoId,
   });
 }
 
@@ -570,8 +661,52 @@ function celda_(v) {
   return { userEnteredValue: { stringValue: v === null || v === undefined ? '' : String(v) } };
 }
 
+// Columnas añadidas después de crear el libro. asegurarEsquema_ las agrega al final de la
+// fila de encabezados si faltan (las lecturas usan el nombre de la columna, no su posición).
+var COLUMNAS_NUEVAS = { Catequistas: ['zona_pastoral', 'revisado_at', 'revisado_por', 'motivo_rechazo'] };
+var VERSION_ESQUEMA = 'esquema:2';
+
+function asegurarEsquema_(ss) {
+  var cache = CacheService.getScriptCache();
+  if (cache.get(VERSION_ESQUEMA)) return;
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(ESPERA_BLOQUEO_MS)) return; // otra ejecución lo está haciendo
+  try {
+    Object.keys(COLUMNAS_NUEVAS).forEach(function (nombre) {
+      var sh = ss.getSheetByName(nombre);
+      var ancho = sh.getLastColumn();
+      var cab = sh.getRange(1, 1, 1, ancho).getValues()[0].map(String);
+      COLUMNAS_NUEVAS[nombre].forEach(function (col) {
+        if (cab.indexOf(col) >= 0) return;
+        if (ancho >= sh.getMaxColumns()) sh.insertColumnAfter(ancho);
+        ancho++;
+        sh.getRange(1, ancho).setValue(col);
+        cab.push(col);
+      });
+    });
+    SpreadsheetApp.flush();
+    cache.put(VERSION_ESQUEMA, '1', 21600);
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/** Ejecutar desde el editor si se prefiere migrar a mano (también ocurre sola en la primera solicitud). */
+function migrarEsquema() {
+  var ss = SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty('SHEET_ID'));
+  CacheService.getScriptCache().remove(VERSION_ESQUEMA);
+  asegurarEsquema_(ss);
+  console.log('Encabezados de Catequistas: ' + ss.getSheetByName('Catequistas').getRange(1, 1, 1, ss.getSheetByName('Catequistas').getLastColumn()).getValues()[0].join(', '));
+}
+
+function requiereAprobacion_(config) {
+  var v = config.REQUIERE_APROBACION;
+  return v === undefined || v === '' ? true : esVerdadero_(v);
+}
+
 function comprobarPago_(libro, sha, referencia, semana) {
-  var pagos = libro.tabla('Pagos').filas;
+  // Los pagos de registros rechazados no cuentan: quien corrige su registro puede volver a usar su comprobante.
+  var pagos = libro.tabla('Pagos').filas.filter(function (p) { return p.estado !== 'RECHAZADO'; });
   if (pagos.some(function (p) { return p.comprobante_sha256 === sha; })) {
     throw fallo_('COMPROBANTE_REPETIDO', semana ? 'Este comprobante ya fue utilizado. Adjunta el comprobante de este pago.' : 'Este comprobante ya fue utilizado en otro registro. Adjunta el comprobante de tu propio pago.');
   }

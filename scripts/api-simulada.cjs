@@ -4,7 +4,9 @@
 // Los datos se pierden al reiniciar `npm run dev`. Nunca se publica: Vercel usa api/.
 
 const crypto = require('node:crypto');
+const territorio = require('../api/_lib/territorio.js');
 
+const FUERA = ['ANULADO', 'RECHAZADO']; // estados en los que el registro ya no existe para el catequista
 const LIMITE_CUERPO = 4.5 * 1024 * 1024; // igual que Vercel
 const SECRETO = crypto.randomBytes(32); // firma de tokens y cookies de esta sesión de desarrollo
 const LATENCIA_MS = Number(process.env.SIM_LATENCIA_MS ?? 450);
@@ -22,6 +24,7 @@ const config = {
   REGISTRO_ABIERTO: 'TRUE', SEMANA_EDICION: '2026', SEMANA_SECUENCIA: 'SEMANA_2026', SEMANA_ABIERTA: 'TRUE',
   SEMANA_FECHAS: 'Del 23 al 27 de noviembre de 2026 (simulado)', SEMANA_SEDE: 'Edificio San Pablo, Arzobispado de Panamá (simulado)',
   SEMANA_CUPO: '0', SEMANA_PEDIR_TALLA: 'TRUE', SEMANA_PEDIR_RESTRICCIONES: 'TRUE', CARNET_VIGENCIA_MESES: '12',
+  REQUIERE_APROBACION: 'TRUE',
   REMITENTE_NOMBRE: 'Comisión Arquidiocesana de Catequesis', CORREO_RESPUESTA: 'aovv.26@gmail.com',
   ADMIN_EMAILS: 'aovv.26@gmail.com,admin@ejemplo.com', VERIFICADORES_EMAILS: 'verificador@ejemplo.com',
   URL_SITIO: 'http://127.0.0.1:4173',
@@ -112,7 +115,7 @@ function sesion(req, nombre, tipo) {
 function catequistaSesion(req) {
   const s = sesion(req, COOKIE_CAT, 'catequista');
   const c = s && db.Catequistas.find((x) => x.id === s.id);
-  return c && c.estado !== 'ANULADO' ? c : null;
+  return c && !FUERA.includes(c.estado) ? c : null;
 }
 function staffSesion(req) {
   const s = sesion(req, COOKIE_STAFF, 'staff');
@@ -203,8 +206,19 @@ function generarDocumentosCatequista(c) {
   const carnet = pdfSimple('Carnet de Catequista (CR80)', [`${nombreDe(c)} · ${c.numero_catequista}`, `Vigente hasta ${c.vigencia_hasta}`, urlVerificacionCarnet(c)]);
   c.pdf_inscripcion_file_id = guardarArchivo({ mime: 'application/pdf', bytes: pdf, nombre: `${c.numero_catequista}_inscripcion.pdf` });
   c.carnet_file_id = guardarArchivo({ mime: 'application/pdf', bytes: carnet, nombre: `${c.numero_catequista}_carnet.pdf` });
-  c.estado = 'ACTIVO';
+  // Igual que el escritor: ACTIVO solo si ya estaba aprobado o Config no exige aprobación.
+  c.estado = c.estado === 'ACTIVO' || c.revisado_at || !bool(config.REQUIERE_APROBACION) ? 'ACTIVO' : 'PENDIENTE_APROBACION';
   c.actualizado_at = ahora();
+}
+
+/** Correo según el estado del registro: carnet (ACTIVO), recibido (por aprobar) o rechazo. */
+function correoRegistro(c) {
+  const asunto = { ACTIVO: `Bienvenido(a), catequista ${c.numero_catequista}`, PENDIENTE_APROBACION: `Recibimos tu registro · ${c.numero_catequista}`, RECHAZADO: `Tu registro de catequista ${c.numero_catequista} necesita correcciones` }[c.estado];
+  const tipo = { ACTIVO: 'REGISTRO', PENDIENTE_APROBACION: 'RECIBIDO', RECHAZADO: 'RECHAZO' }[c.estado];
+  if (!asunto) return false;
+  const enviado = enviarCorreo(c.correo, asunto, tipo, c.id);
+  if (enviado && c.estado === 'ACTIVO') c.correo_enviado_at = ahora();
+  return enviado;
 }
 
 // ---------- Vistas públicas ----------
@@ -235,13 +249,13 @@ function vistaPortal(c) {
   return {
     catequista: {
       numero: c.numero_catequista, nombres: c.nombres, apellidos: c.apellidos, correo: c.correo, telefono: c.telefono,
-      parroquia: c.parroquia, vicaria_zona: c.vicaria_zona, estado: c.estado, fecha_registro: c.fecha_registro, vigencia_hasta: c.vigencia_hasta,
+      parroquia: c.parroquia, vicaria_zona: c.vicaria_zona, zona_pastoral: territorio.clasificar(c).zona.replace(territorio.SIN_CLASIFICAR, ''), estado: c.estado, fecha_registro: c.fecha_registro, vigencia_hasta: c.vigencia_hasta,
       fotoUrl: c.foto_file_id ? '/api/portal/archivo/foto' : '', firmaUrl: c.firma_file_id ? '/api/portal/archivo/firma' : '',
       verificacionUrl: urlVerificacionCarnet(c),
     },
     documentos: {
       pdf: c.pdf_inscripcion_file_id ? '/api/portal/archivo/pdf' : '',
-      carnet: c.carnet_file_id ? '/api/portal/archivo/carnet' : '',
+      carnet: c.carnet_file_id && c.estado === 'ACTIVO' ? '/api/portal/archivo/carnet' : '',
     },
     semana: {
       ...sp,
@@ -262,6 +276,7 @@ const ruta = (metodo, patron, fn, opciones = {}) => rutas.push({ metodo, patron,
 
 ruta('GET', /^\/api\/salud$/, () => ({ ok: true, modo: 'simulado', configLeida: true, hora: ahora() }));
 ruta('GET', /^\/api\/config-publica$/, () => ({ ok: true, config: configPublica() }));
+ruta('GET', /^\/api\/territorio$/, () => ({ ok: true, ...territorio.catalogoPublico() }));
 
 // Registro de catequista
 ruta('POST', /^\/api\/registro$/, async (req, ctx) => {
@@ -273,11 +288,14 @@ ruta('POST', /^\/api\/registro$/, async (req, ctx) => {
   const datos = {
     nombres: texto(d.nombres, 80), apellidos: texto(d.apellidos, 80), cedula: normCedula(d.cedula), fecha_nacimiento: texto(d.fecha_nacimiento, 10),
     sexo: texto(d.sexo, 20), telefono: normTel(d.telefono), correo: normCorreo(d.correo), direccion: texto(d.direccion, 200),
-    parroquia: texto(d.parroquia, 120), vicaria_zona: texto(d.vicaria_zona, 120), anios_servicio: Math.max(0, Math.min(80, Math.floor(num(d.anios_servicio)))),
+    anios_servicio: Math.max(0, Math.min(80, Math.floor(num(d.anios_servicio)))),
     nivel_que_imparte: (Array.isArray(d.nivel_que_imparte) ? d.nivel_que_imparte : [d.nivel_que_imparte]).map((x) => texto(x, 60)).filter(Boolean).slice(0, 10).join('; '),
     formacion_cenafca: texto(d.formacion_cenafca, 60), coordinador_parroquial: texto(d.coordinador_parroquial, 120),
     yappy_referencia: normRef(d.yappy_referencia),
   };
+  const lugar = territorio.resolverParroquia(d);
+  if (lugar.error) Object.assign(campos, lugar.error);
+  else Object.assign(datos, { parroquia: lugar.parroquia, vicaria_zona: lugar.vicaria_zona, zona_pastoral: lugar.zona_pastoral, coordinador_parroquial: datos.coordinador_parroquial || lugar.coordinador });
   req2('nombres', datos.nombres.length >= 2, 'Escribe tus nombres.');
   req2('apellidos', datos.apellidos.length >= 2, 'Escribe tus apellidos.');
   req2('cedula', RE_CEDULA.test(datos.cedula), 'Cédula con formato no válido.');
@@ -285,8 +303,6 @@ ruta('POST', /^\/api\/registro$/, async (req, ctx) => {
   req2('sexo', ['Femenino', 'Masculino'].includes(datos.sexo), 'Selecciona una opción.');
   req2('telefono', /^(?:6\d{7}|[2-9]\d{6})$/.test(datos.telefono), 'Teléfono no válido.');
   req2('correo', RE_CORREO.test(datos.correo), 'Correo no válido.');
-  req2('parroquia', datos.parroquia.length >= 3, 'Indica tu parroquia.');
-  req2('vicaria_zona', !!datos.vicaria_zona, 'Selecciona la vicaría.');
   req2('nivel_que_imparte', !!datos.nivel_que_imparte, 'Selecciona al menos un nivel.');
   req2('formacion_cenafca', !!datos.formacion_cenafca, 'Selecciona una opción.');
   req2('yappy_referencia', /^[A-Z0-9-]{4,40}$/.test(datos.yappy_referencia), 'Referencia de Yappy no válida.');
@@ -300,11 +316,13 @@ ruta('POST', /^\/api\/registro$/, async (req, ctx) => {
   if (b.comprobante_sha256 && b.comprobante_sha256 !== comp.sha256) fallo(400, 'VALIDACION', 'El comprobante llegó dañado. Vuelve a adjuntarlo.');
 
   // Unicidad: mensaje que no revela qué dato coincidió.
-  if (db.Catequistas.some((c) => c.correo === datos.correo || c.cedula === datos.cedula)) {
+  // Un registro rechazado (y su pago) no bloquea un registro nuevo corregido.
+  if (db.Catequistas.some((c) => c.estado !== 'RECHAZADO' && (c.correo === datos.correo || c.cedula === datos.cedula))) {
     fallo(409, 'DUPLICADO', 'Ya existe un registro con estos datos. Si ya te registraste, puedes recuperar tu número de catequista por correo.');
   }
-  if (db.Pagos.some((p) => p.comprobante_sha256 === comp.sha256)) fallo(409, 'COMPROBANTE_REPETIDO', 'Este comprobante ya fue utilizado en otro registro. Adjunta el comprobante de tu propio pago.');
-  if (db.Pagos.some((p) => p.yappy_referencia === datos.yappy_referencia)) fallo(409, 'REFERENCIA_REPETIDA', 'Esta referencia de Yappy ya fue registrada. Revisa el número de confirmación de tu pago.');
+  const pagosVigentes = db.Pagos.filter((p) => p.estado !== 'RECHAZADO');
+  if (pagosVigentes.some((p) => p.comprobante_sha256 === comp.sha256)) fallo(409, 'COMPROBANTE_REPETIDO', 'Este comprobante ya fue utilizado en otro registro. Adjunta el comprobante de tu propio pago.');
+  if (pagosVigentes.some((p) => p.yappy_referencia === datos.yappy_referencia)) fallo(409, 'REFERENCIA_REPETIDA', 'Esta referencia de Yappy ya fue registrada. Revisa el número de confirmación de tu pago.');
 
   // 1) Escritor: archivos + consecutivo + fila PENDIENTE_DOCUMENTOS
   const id = uid();
@@ -316,20 +334,25 @@ ruta('POST', /^\/api\/registro$/, async (req, ctx) => {
     comprobante_file_id: guardarArchivo({ ...comp, nombre: `${numero}_yappy.jpg` }), comprobante_sha256: comp.sha256,
     pdf_inscripcion_file_id: '', carnet_file_id: '', vigencia_hasta: vigencia(), correo_enviado_at: '',
     consentimiento_datos: t, consentimiento_imagen: t, creado_at: t, actualizado_at: t, notas_admin: '',
+    revisado_at: '', revisado_por: '', motivo_rechazo: '',
   };
   db.Catequistas.push(c);
   db.Pagos.push({ id: uid(), tipo: 'REGISTRO', referencia_id: id, numero_catequista: numero, monto: num(config.COSTO_REGISTRO), moneda: config.MONEDA, metodo: 'YAPPY', yappy_referencia: datos.yappy_referencia, comprobante_file_id: c.comprobante_file_id, comprobante_sha256: comp.sha256, estado: 'DECLARADO_AUTO', creado_at: t, anulado_at: '', anulado_por: '', motivo_anulacion: '' });
   auditar(datos.correo, 'REGISTRO', 'Catequistas', id, numero);
 
-  // 2) y 3) Documentos + estado ACTIVO + correo (en la API real pueden fallar y quedar pendientes)
+  // 2) y 3) Documentos + estado (PENDIENTE_APROBACION o ACTIVO) + correo (en la API real pueden fallar y quedar pendientes)
+  let correoEnviado = false;
   if (process.env.SIM_FALLAR_DOCUMENTOS !== '1') {
     generarDocumentosCatequista(c);
-    if (enviarCorreo(c.correo, `Bienvenido(a), catequista ${numero}`, 'REGISTRO', id)) c.correo_enviado_at = ahora();
+    correoEnviado = correoRegistro(c);
   }
 
   const sid = crearSesion({ tipo: 'catequista', id }, SESION_CAT_S);
   ctx.cookies.push(cookieSesion(COOKIE_CAT, sid, SESION_CAT_S));
-  return { ok: true, numero, estado: c.estado, correoEnviado: !!c.correo_enviado_at, correo: c.correo, documentos: { pdf: c.pdf_inscripcion_file_id ? '/api/portal/archivo/pdf' : '', carnet: c.carnet_file_id ? '/api/portal/archivo/carnet' : '' } };
+  return {
+    ok: true, numero, estado: c.estado, correoEnviado, correo: c.correo, parroquia: c.parroquia, vicaria_zona: c.vicaria_zona, zona_pastoral: c.zona_pastoral,
+    documentos: { pdf: c.pdf_inscripcion_file_id ? '/api/portal/archivo/pdf' : '', carnet: c.carnet_file_id && c.estado === 'ACTIVO' ? '/api/portal/archivo/carnet' : '' },
+  };
 }, { idempotente: true });
 
 function limitarIntentos(clave) {
@@ -347,7 +370,7 @@ ruta('POST', /^\/api\/recuperar$/, async (req, ctx) => {
   if (!RE_CORREO.test(correo)) fallo(400, 'VALIDACION', 'Escribe un correo válido.', { correo: 'Correo no válido' });
   limitarIntentos('rec:' + correo);
   registrarFallo('rec:' + correo);
-  const c = db.Catequistas.find((x) => x.correo === correo && x.estado !== 'ANULADO');
+  const c = db.Catequistas.find((x) => x.correo === correo && !FUERA.includes(x.estado));
   if (c) enviarCorreo(c.correo, `Tu número de catequista: ${c.numero_catequista}`, 'RECUPERAR', c.id);
   await new Promise((r) => setTimeout(r, 400));
   return { ok: true, mensaje: 'Si el correo está registrado, recibirás tu número de catequista en unos minutos. Revisa también la carpeta de spam.' };
@@ -359,7 +382,7 @@ ruta('POST', /^\/api\/portal\/entrar$/, async (req, ctx) => {
   const numero = normNumero(ctx.cuerpo.numero);
   const claves = ['acc:' + correo, 'ip:' + ctx.ip];
   claves.forEach(limitarIntentos);
-  const c = db.Catequistas.find((x) => x.correo === correo && x.numero_catequista === numero && x.estado !== 'ANULADO');
+  const c = db.Catequistas.find((x) => x.correo === correo && x.numero_catequista === numero && !FUERA.includes(x.estado));
   await new Promise((r) => setTimeout(r, 600)); // espera fija, con y sin acierto
   if (!c) {
     claves.forEach(registrarFallo);
@@ -385,6 +408,7 @@ ruta('GET', /^\/api\/portal\/archivo\/(foto|firma|pdf|carnet|pase)$/, (req, ctx)
   const c = catequistaSesion(req);
   if (!c) fallo(401, 'NO_AUTENTICADO', 'Tu sesión terminó. Vuelve a entrar.');
   const clave = ctx.m[1];
+  if (clave === 'carnet' && c.estado !== 'ACTIVO') fallo(404, 'INEXISTENTE', 'Tu carnet estará disponible cuando la Comisión apruebe tu registro.');
   let fileId = { foto: c.foto_file_id, firma: c.firma_file_id, pdf: c.pdf_inscripcion_file_id, carnet: c.carnet_file_id }[clave];
   if (clave === 'pase') fileId = db.SemanaCatequista.find((s) => s.catequista_id === c.id && s.edicion === config.SEMANA_EDICION && s.estado !== 'ANULADA')?.pase_file_id;
   return { archivo: fileId, descarga: clave === 'pdf' || clave === 'carnet' || clave === 'pase' };
@@ -442,7 +466,7 @@ ruta('GET', /^\/api\/verificar$/, (req, ctx) => {
     const c = db.Catequistas.find((x) => x.id === p.i);
     if (!c) return { ok: true, tipo, estado: 'INEXISTENTE', staff: !!staff };
     const vencido = c.vigencia_hasta && c.vigencia_hasta < ahora().slice(0, 10);
-    const estado = c.estado === 'ANULADO' ? 'ANULADO' : vencido ? 'VENCIDO' : c.estado === 'ACTIVO' ? 'VALIDO' : 'PENDIENTE';
+    const estado = FUERA.includes(c.estado) ? 'ANULADO' : vencido ? 'VENCIDO' : c.estado === 'ACTIVO' ? 'VALIDO' : 'PENDIENTE';
     return { ok: true, tipo, estado, staff: !!staff, publico: { numero: c.numero_catequista, vigencia_hasta: c.vigencia_hasta },
       detalle: staff ? { nombre: nombreDe(c), numero: c.numero_catequista, parroquia: c.parroquia, vicaria_zona: c.vicaria_zona, fotoUrl: `/api/admin/archivo/catequistas/${c.id}/foto` } : undefined };
   }
@@ -501,6 +525,7 @@ ruta('GET', /^\/api\/admin\/resumen$/, (req) => {
   return {
     ok: true, edicion: ed, moneda: config.MONEDA,
     registrados: cat.length, activos: cat.filter((c) => c.estado === 'ACTIVO').length,
+    porAprobar: cat.filter((c) => c.estado === 'PENDIENTE_APROBACION').length, rechazados: cat.filter((c) => c.estado === 'RECHAZADO').length,
     pendientes: cat.filter((c) => c.estado === 'PENDIENTE_DOCUMENTOS').length, anulados: cat.filter((c) => c.estado === 'ANULADO').length,
     inscritosSemana: sem.filter((s) => s.estado !== 'ANULADA').length, entradas: sem.filter((s) => s.checkin_at && s.estado !== 'ANULADA').length,
     recaudado: db.Pagos.filter((p) => p.estado === 'DECLARADO_AUTO').reduce((a, p) => a + num(p.monto), 0),
@@ -512,12 +537,47 @@ ruta('GET', /^\/api\/admin\/catequistas$/, (req, ctx) => {
   exigirAdmin(req);
   const q = (ctx.url.searchParams.get('q') || '').trim().toLowerCase();
   const estado = ctx.url.searchParams.get('estado') || '';
+  const filtro = ['zona', 'vicaria', 'parroquia'].map((k) => [k, ctx.url.searchParams.get(k) || '']).filter(([, v]) => v);
+  const orden = estado === 'PENDIENTE_APROBACION' ? 1 : -1; // la cola se atiende por orden de llegada
   const items = db.Catequistas
     .filter((c) => (!estado || c.estado === estado) && coincide(q, c.numero_catequista, c.nombres, c.apellidos, c.cedula, c.correo, c.parroquia))
-    .sort((a, b) => b.numero_catequista.localeCompare(a.numero_catequista))
-    .map((c) => ({ id: c.id, numero: c.numero_catequista, nombre: nombreDe(c), cedula: c.cedula, correo: c.correo, parroquia: c.parroquia, vicaria_zona: c.vicaria_zona, estado: c.estado, fecha_registro: c.fecha_registro }));
+    .map((c) => ({ c, k: territorio.clasificar(c) }))
+    .filter(({ k }) => filtro.every(([campo, v]) => k[campo] === v))
+    .sort((a, b) => orden * a.c.numero_catequista.localeCompare(b.c.numero_catequista))
+    .map(({ c, k }) => ({ id: c.id, numero: c.numero_catequista, nombre: nombreDe(c), cedula: c.cedula, correo: c.correo, parroquia: c.parroquia, vicaria_zona: k.vicaria, zona_pastoral: k.zona, estado: c.estado, fecha_registro: c.fecha_registro }));
   return { ok: true, items };
 });
+ruta('GET', /^\/api\/admin\/estadisticas$/, (req) => {
+  exigirAdmin(req);
+  return { ok: true, ...territorio.estadisticas(db.Catequistas), generado: ahora() };
+});
+ruta('POST', /^\/api\/admin\/(aprobar|rechazar)$/, (req, ctx) => {
+  const a = exigirAdmin(req);
+  const aprobar = ctx.m[1] === 'aprobar';
+  const motivo = texto(ctx.cuerpo.motivo, 300);
+  if (!aprobar && motivo.length < 5) fallo(400, 'VALIDACION', 'Escribe el motivo del rechazo (mínimo 5 caracteres). Se enviará al catequista.', { motivo: 'Motivo obligatorio' });
+  const c = db.Catequistas.find((x) => x.id === ctx.cuerpo.id);
+  if (!c) fallo(404, 'INEXISTENTE', 'Registro no encontrado.');
+  const t = ahora();
+  if (aprobar) {
+    if (c.estado === 'ACTIVO') return { ok: true, estado: 'ACTIVO', yaRevisado: true, correoEnviado: false, mensaje: 'Este registro ya estaba revisado.' };
+    if (c.estado === 'PENDIENTE_DOCUMENTOS') fallo(409, 'SIN_DOCUMENTOS', 'Este registro aún no tiene documentos. Usa «Regenerar documentos» y vuelve a aprobarlo.');
+    if (c.estado !== 'PENDIENTE_APROBACION') fallo(409, 'NO_PENDIENTE', 'Este registro no está pendiente de aprobación.');
+    Object.assign(c, { estado: 'ACTIVO', revisado_at: t, revisado_por: a.email, motivo_rechazo: '', actualizado_at: t });
+    auditar(a.email, 'APROBAR', 'Catequistas', c.id, c.numero_catequista);
+  } else {
+    if (c.estado === 'RECHAZADO') return { ok: true, estado: 'RECHAZADO', yaRevisado: true, correoEnviado: false, mensaje: 'Este registro ya estaba revisado.' };
+    if (!['PENDIENTE_APROBACION', 'PENDIENTE_DOCUMENTOS'].includes(c.estado)) fallo(409, 'NO_PENDIENTE', 'Solo se rechazan registros pendientes de aprobación. Para retirar un registro activo, usa «Anular».');
+    Object.assign(c, { estado: 'RECHAZADO', revisado_at: t, revisado_por: a.email, motivo_rechazo: motivo, actualizado_at: t, notas_admin: `${c.notas_admin ? c.notas_admin + ' | ' : ''}Rechazado ${t}: ${motivo}` });
+    db.Pagos.filter((p) => p.referencia_id === c.id && !['ANULADO', 'RECHAZADO'].includes(p.estado)).forEach((p) => Object.assign(p, { estado: 'RECHAZADO', anulado_at: t, anulado_por: a.email, motivo_anulacion: motivo }));
+    auditar(a.email, 'RECHAZAR', 'Catequistas', c.id, motivo);
+  }
+  const correoEnviado = correoRegistro(c);
+  const mensaje = aprobar
+    ? (correoEnviado ? 'Registro aprobado. Enviamos el carnet al catequista.' : 'Registro aprobado. El correo con el carnet quedó pendiente y se reintentará automáticamente.')
+    : (correoEnviado ? 'Registro rechazado. Enviamos el motivo al catequista.' : 'Registro rechazado. El correo quedó pendiente y se reintentará automáticamente.');
+  return { ok: true, estado: c.estado, yaRevisado: false, correoEnviado, mensaje };
+}, { idempotente: true });
 const SIN_ARCHIVOS = (o) => Object.fromEntries(Object.entries(o).filter(([k]) => !k.endsWith('_file_id') && k !== 'pase_file_id'));
 ruta('GET', /^\/api\/admin\/catequistas\/([\w-]+)$/, (req, ctx) => {
   exigirAdmin(req);
@@ -592,6 +652,7 @@ ruta('POST', /^\/api\/admin\/regenerar$/, (req, ctx) => {
   const c = db.Catequistas.find((x) => x.id === ctx.cuerpo.id);
   if (!c) fallo(404, 'INEXISTENTE', 'Registro no encontrado.');
   if (c.estado === 'ANULADO') fallo(409, 'ANULADO', 'No se regeneran documentos de un registro anulado.');
+  if (c.estado === 'RECHAZADO') fallo(409, 'RECHAZADO', 'No se regeneran documentos de un registro rechazado.');
   generarDocumentosCatequista(c);
   auditar(a.email, 'REGENERAR', 'Catequistas', c.id, c.numero_catequista);
   return { ok: true, estado: c.estado };
@@ -603,9 +664,8 @@ ruta('POST', /^\/api\/admin\/reenviar$/, (req, ctx) => {
   if (tipo === 'catequista') {
     const c = db.Catequistas.find((x) => x.id === id);
     if (!c) fallo(404, 'INEXISTENTE', 'Registro no encontrado.');
-    if (c.estado !== 'ACTIVO') fallo(409, 'NO_ACTIVO', 'Solo se reenvía el correo de registros activos.');
-    enviado = enviarCorreo(c.correo, `Bienvenido(a), catequista ${c.numero_catequista}`, 'REGISTRO', c.id);
-    if (enviado) c.correo_enviado_at = ahora();
+    if (!['ACTIVO', 'PENDIENTE_APROBACION', 'RECHAZADO'].includes(c.estado)) fallo(403, 'NO_ACTIVO', 'Este registro no tiene un correo que reenviar.');
+    enviado = correoRegistro(c);
   } else {
     const s = db.SemanaCatequista.find((x) => x.id === id);
     if (!s) fallo(404, 'INEXISTENTE', 'Inscripción no encontrada.');
@@ -627,7 +687,7 @@ ruta('GET', /^\/api\/admin\/exportar$/, (req, ctx) => {
   exigirAdmin(req);
   const tabla = ctx.url.searchParams.get('tabla');
   const fuentes = {
-    catequistas: [db.Catequistas, ['numero_catequista', 'estado', 'fecha_registro', 'nombres', 'apellidos', 'cedula', 'fecha_nacimiento', 'sexo', 'telefono', 'correo', 'direccion', 'parroquia', 'vicaria_zona', 'anios_servicio', 'nivel_que_imparte', 'formacion_cenafca', 'coordinador_parroquial', 'yappy_referencia', 'vigencia_hasta', 'correo_enviado_at']],
+    catequistas: [db.Catequistas.map((c) => { const k = territorio.clasificar(c); return { ...c, vicaria_zona: k.vicaria, zona_pastoral: k.zona }; }), ['numero_catequista', 'estado', 'fecha_registro', 'nombres', 'apellidos', 'cedula', 'fecha_nacimiento', 'sexo', 'telefono', 'correo', 'direccion', 'parroquia', 'vicaria_zona', 'zona_pastoral', 'anios_servicio', 'nivel_que_imparte', 'formacion_cenafca', 'coordinador_parroquial', 'yappy_referencia', 'vigencia_hasta', 'correo_enviado_at', 'revisado_at', 'revisado_por', 'motivo_rechazo']],
     semana: [db.SemanaCatequista.filter((s) => s.edicion === config.SEMANA_EDICION), ['numero_inscripcion_semana', 'numero_catequista', 'correo', 'edicion', 'estado', 'fecha_inscripcion', 'talla_camiseta', 'restricciones_alimentarias', 'yappy_referencia', 'checkin_at', 'checkin_por']],
     pagos: [db.Pagos, ['tipo', 'numero_catequista', 'monto', 'moneda', 'metodo', 'yappy_referencia', 'estado', 'creado_at', 'anulado_at', 'anulado_por', 'motivo_anulacion']],
   }[tabla];
@@ -639,21 +699,55 @@ ruta('GET', /^\/api\/admin\/exportar$/, (req, ctx) => {
 
 // ---------- Datos de ejemplo ----------
 
+// Dos cuentas conocidas (prueba@ejemplo.com activa y jose@ejemplo.com por aprobar) y unos 40
+// catequistas repartidos por el territorio, con estados variados, para el dashboard y la cola.
 function sembrar() {
   if (process.env.SIM_SIN_DATOS === '1') return;
-  const t = ahora();
+  const zonas = territorio.catalogoPublico().zonas;
+  const parroquias = zonas.flatMap((z) => z.vicarias.flatMap((v) => v.parroquias));
+  let semilla = 7;
+  const azar = () => { semilla = (semilla * 16807) % 2147483647; return (semilla - 1) / 2147483646; };
+  const elegir = (xs) => xs[Math.floor(azar() * xs.length)];
+  const NOMBRES = ['Ana', 'Luis', 'Carmen', 'José', 'Rosa', 'Miguel', 'Elena', 'Carlos', 'Marta', 'Jorge', 'Lucía', 'Pedro', 'Isabel', 'Raúl', 'Yaneth', 'Itzel'];
+  const APELLIDOS = ['González', 'Rodríguez', 'Pérez', 'Castillo', 'Sánchez', 'Herrera', 'Batista', 'Moreno', 'Vargas', 'Ríos', 'Quintero', 'Barría'];
   const ejemplos = [
-    { nombres: 'María Fernanda', apellidos: 'Prueba Ríos', cedula: '8-123-4567', correo: 'prueba@ejemplo.com', parroquia: 'Parroquia San José', vicaria_zona: 'Vicaría Santa María la Antigua (Panamá Centro)' },
-    { nombres: 'José Luis', apellidos: 'Ejemplo Castillo', cedula: '4-765-1234', correo: 'jose@ejemplo.com', parroquia: 'Parroquia Cristo Rey', vicaria_zona: 'Vicaría Cristo Redentor (San Miguelito)' },
+    { nombres: 'María Fernanda', apellidos: 'Prueba Ríos', cedula: '8-123-4567', correo: 'prueba@ejemplo.com', parroquia_id: 'san-jose-altar-de-oro', estado: 'ACTIVO' },
+    { nombres: 'José Luis', apellidos: 'Ejemplo Castillo', cedula: '4-765-1234', correo: 'jose@ejemplo.com', parroquia_id: 'cristo-rey', estado: 'PENDIENTE_APROBACION' },
   ];
-  for (const e of ejemplos) {
+  // Más catequistas en algunas parroquias para que el dashboard tenga contraste.
+  const preferidas = ['san-judas-tadeo', 'santisima-trinidad', 'cristo-redentor-paraiso', 'san-francisco-de-paula-la-chorrera', 'don-bosco-pedregal'];
+  for (let i = 0; i < 40; i++) {
+    const p = i < 15 ? preferidas[i % preferidas.length] : elegir(parroquias).id;
+    const r = azar();
+    ejemplos.push({
+      nombres: elegir(NOMBRES), apellidos: `${elegir(APELLIDOS)} ${elegir(APELLIDOS)}`, cedula: `${1 + (i % 9)}-${700 + i}-${2000 + i}`,
+      correo: `ejemplo${i + 1}@ejemplo.com`, parroquia_id: p, estado: r < 0.62 ? 'ACTIVO' : r < 0.86 ? 'PENDIENTE_APROBACION' : r < 0.95 ? 'RECHAZADO' : 'ANULADO',
+    });
+  }
+  // Un registro antiguo (antes del catálogo) para ver cómo se clasifica.
+  ejemplos.push({ nombres: 'Registro', apellidos: 'Antiguo', cedula: '2-111-3333', correo: 'antiguo@ejemplo.com', parroquia: 'Parroquia San José', vicaria_zona: 'Vicaría Cristo Redentor (San Miguelito)', estado: 'ACTIVO' });
+
+  ejemplos.forEach((e, i) => {
+    const t = new Date(Date.now() - (ejemplos.length - i) * 5 * 3600 * 1000).toISOString();
     const id = uid();
     const numero = siguienteNumero('CATEQUISTA');
-    const c = { id, numero_catequista: numero, estado: 'PENDIENTE_DOCUMENTOS', fecha_registro: t, ...e, fecha_nacimiento: '1985-04-12', sexo: 'Femenino', telefono: '60001234', direccion: 'Ciudad de Panamá', anios_servicio: 6, nivel_que_imparte: 'Primera Comunión', formacion_cenafca: 'En curso', coordinador_parroquial: 'Hna. Ejemplo', foto_file_id: '', firma_file_id: '', comprobante_file_id: '', yappy_referencia: 'SIM' + numero.replace(/\D/g, ''), comprobante_sha256: 'sim-' + id, pdf_inscripcion_file_id: '', carnet_file_id: '', vigencia_hasta: vigencia(), correo_enviado_at: t, consentimiento_datos: t, consentimiento_imagen: t, creado_at: t, actualizado_at: t, notas_admin: 'Dato de ejemplo (simulado)' };
+    const lugar = e.parroquia_id ? territorio.resolverParroquia({ parroquia_id: e.parroquia_id }) : { parroquia: e.parroquia, vicaria_zona: e.vicaria_zona, zona_pastoral: '', coordinador: '' };
+    const c = {
+      id, numero_catequista: numero, estado: 'PENDIENTE_DOCUMENTOS', fecha_registro: t, nombres: e.nombres, apellidos: e.apellidos, cedula: e.cedula, correo: e.correo,
+      parroquia: lugar.parroquia, vicaria_zona: lugar.vicaria_zona, zona_pastoral: lugar.zona_pastoral,
+      fecha_nacimiento: '1985-04-12', sexo: i % 3 ? 'Femenino' : 'Masculino', telefono: '60001234', direccion: 'Ciudad de Panamá', anios_servicio: 1 + (i % 15), nivel_que_imparte: elegir(['Primera Comunión', 'Confirmación', 'Perseverancia', 'Catequesis familiar']), formacion_cenafca: 'En curso',
+      coordinador_parroquial: lugar.coordinador || 'Hna. Ejemplo', foto_file_id: '', firma_file_id: '', comprobante_file_id: '', yappy_referencia: 'SIM' + numero.replace(/\D/g, ''), comprobante_sha256: 'sim-' + id,
+      pdf_inscripcion_file_id: '', carnet_file_id: '', vigencia_hasta: vigencia(), correo_enviado_at: '', consentimiento_datos: t, consentimiento_imagen: t, creado_at: t, actualizado_at: t,
+      notas_admin: 'Dato de ejemplo (simulado)', revisado_at: '', revisado_por: '', motivo_rechazo: '',
+    };
     db.Catequistas.push(c);
     db.Pagos.push({ id: uid(), tipo: 'REGISTRO', referencia_id: id, numero_catequista: numero, monto: 1, moneda: 'B/.', metodo: 'YAPPY', yappy_referencia: c.yappy_referencia, comprobante_file_id: '', comprobante_sha256: c.comprobante_sha256, estado: 'DECLARADO_AUTO', creado_at: t, anulado_at: '', anulado_por: '', motivo_anulacion: '' });
+    if (e.estado === 'ACTIVO' || e.estado === 'ANULADO') Object.assign(c, { revisado_at: t, revisado_por: 'aovv.26@gmail.com', correo_enviado_at: t });
     generarDocumentosCatequista(c);
-  }
+    if (e.estado === 'RECHAZADO') Object.assign(c, { estado: 'RECHAZADO', revisado_at: t, revisado_por: 'aovv.26@gmail.com', motivo_rechazo: 'La foto no permite identificar a la persona (ejemplo).' });
+    if (e.estado === 'ANULADO') c.estado = 'ANULADO';
+    if (e.estado === 'RECHAZADO' || e.estado === 'ANULADO') db.Pagos.at(-1).estado = e.estado;
+  });
 }
 sembrar();
 
