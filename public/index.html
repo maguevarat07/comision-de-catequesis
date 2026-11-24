@@ -2,7 +2,8 @@
 <html lang="es"><head>
 <meta charset="utf-8">
 <title>Comisión de Catequesis</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E1B3D">
 <meta name="description" content="Conoce la misión, el equipo, las actividades y la formación de catequistas de la Comisión Arquidiocesana de Catequesis de Panamá.">
 <meta name="robots" content="noindex, nofollow">
 <link rel="stylesheet" href="/css/styles.css">
@@ -16,46 +17,54 @@
 <x-dc>
 <div class="sans" style="position:relative;--gold:{{accent}};background:#0E1B3D;color:#F2F5FB;overflow-x:clip;line-height:1.6" data-canvas-width="1360" data-canvas-height="8000" data-document-role="page" data-label="Página de Catequesis">
 
+<div id="inicio" class="home-intro">
+<div class="home-intro__decoration" aria-hidden="true">
+<div class="rays" style="position:absolute;left:68%;bottom:-900px;width:1800px;height:1800px;transform:translateX(-50%);background:repeating-conic-gradient(from 0deg at 50% 50%,rgba(240,181,68,.16) 0 3deg,transparent 3deg 11deg);-webkit-mask-image:radial-gradient(circle,#000 0%,transparent 62%);mask-image:radial-gradient(circle,#000 0%,transparent 62%)"></div>
+<sc-for list="{{dots}}" as="d" hint-placeholder-count="14">
+<span class="dot" style="{{d.style}}"></span>
+</sc-for>
+</div>
+
 <!-- NAV -->
-<header class="hdr" style="position:absolute;top:0;left:0;right:0;z-index:5;display:flex;flex-wrap:wrap;gap:16px 32px;align-items:center;justify-content:space-between;padding:22px clamp(20px,5vw,56px)">
-<a href="#inicio" class="brand" style="display:flex;gap:18px;align-items:center;text-decoration:none">
-<img class="logo-com" src="/assets/images/seccion-catequesis-oficial.png" alt="Logo de la Sección de Catequesis de la Arquidiócesis de Panamá" style="width:98px;height:98px;display:block;flex:none;border-radius:50%;box-shadow:0 0 0 3px #F0B544,0 12px 32px rgba(0,0,0,.5)">
-<span class="logo-arq" style="display:block"><img src="/assets/images/arquidiocesis.png" alt="Arquidiócesis de Panamá, 100 años" style="height:52px;width:auto;display:block;max-width:100%"></span>
+<header class="hdr">
+<a href="#inicio" class="brand" aria-label="Inicio de la Comisión de Catequesis">
+<img class="logo-com" src="/assets/images/seccion-catequesis-oficial.png" alt="Logo de la Sección de Catequesis de la Arquidiócesis de Panamá">
+<span class="logo-arq"><img src="/assets/images/arquidiocesis.png" alt="Arquidiócesis de Panamá, 100 años"></span>
 </a>
-<nav class="nav" aria-label="Secciones" style="display:flex;flex-wrap:wrap;gap:6px 26px;font-size:15px;font-weight:500">
-<a href="#mision" style="text-decoration:none;padding:10px 0">Quiénes somos</a>
-<a href="/cenafca/" style="text-decoration:none;padding:10px 0">CENAFCA</a>
-<a href="/recursos/" style="text-decoration:none;padding:10px 0">Recursos</a>
-<a href="#servicios" style="text-decoration:none;padding:10px 0">Servicios</a>
-<a href="#equipo" style="text-decoration:none;padding:10px 0">Equipo</a>
-<a href="#agenda" style="text-decoration:none;padding:10px 0">Agenda</a>
-<a href="/portal/" style="text-decoration:none;padding:10px 0">Portal del catequista</a>
-<a href="#unete" class="btn" style="text-decoration:none;padding:10px 20px;border-radius:99px;background:var(--gold);color:#0E1B3D;font-weight:700">Quiero ser catequista</a>
+<button class="nav-toggle" type="button" aria-label="Menú" aria-expanded="false" aria-controls="home-nav">
+<span class="nav-toggle__icon" aria-hidden="true"></span>
+</button>
+<nav class="nav" id="home-nav" aria-label="Secciones">
+<a href="#mision">Quiénes somos</a>
+<a href="/cenafca/">CENAFCA</a>
+<a href="/recursos/">Recursos</a>
+<a href="#servicios">Servicios</a>
+<a href="#equipo">Equipo</a>
+<a href="#agenda">Agenda</a>
+<a href="/portal/">Portal del catequista</a>
+<a href="#unete" class="nav__cta">Quiero ser catequista</a>
 </nav>
 </header>
 
 <!-- HERO -->
-<section id="inicio" class="hero" style="position:relative;min-height:840px;display:flex;align-items:center;padding:210px clamp(20px,5vw,56px) 100px;background:radial-gradient(ellipse at 70% 60%,#1D3677 0%,#0E1B3D 62%)">
-<div class="rays" aria-hidden="true" style="position:absolute;left:68%;bottom:-900px;width:1800px;height:1800px;transform:translateX(-50%);background:repeating-conic-gradient(from 0deg at 50% 50%,rgba(240,181,68,.16) 0 3deg,transparent 3deg 11deg);-webkit-mask-image:radial-gradient(circle,#000 0%,transparent 62%);mask-image:radial-gradient(circle,#000 0%,transparent 62%)"></div>
-<sc-for list="{{dots}}" as="d" hint-placeholder-count="14">
-<span class="dot" aria-hidden="true" style="{{d.style}}"></span>
-</sc-for>
+<section class="hero">
 <div style="position:relative;max-width:1200px;width:100%;margin:0 auto;display:flex;flex-wrap:wrap;gap:48px;align-items:center;justify-content:space-between">
 <div style="flex:1 1 520px;min-width:0;max-width:720px">
-<p class="hv" style="margin:0 0 22px;font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)">Comisión Arquidiocesana de Catequesis · Panamá</p>
-<h1 class="disp" style="margin:0;font-size:clamp(42px,6.6vw,92px);line-height:1.02">
-<span class="hv" style="display:block;animation-delay:.15s">Alguien tiene que</span>
-<span class="hv" style="display:block;animation-delay:.3s">caminar con ellos.</span>
-<span class="hv" style="display:block;animation-delay:.5s;color:var(--gold);font-style:italic;font-weight:500">¿Y si eres tú?</span>
+<p class="hero__eyebrow" style="margin:0 0 14px;font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)">Comisión Arquidiocesana de Catequesis · Panamá</p>
+<h1 class="disp hero__title" style="margin:0">
+<span>Alguien tiene que</span>
+<span>caminar con ellos.</span>
+<span style="color:var(--gold);font-style:italic;font-weight:500">¿Y si eres tú?</span>
 </h1>
-<p class="hv" style="margin: 30px 0 0; font-size: 20px; max-width: 560px; color: #C9D3E8; animation-delay: .75s; text-align: start">Coordinamos, animamos y acompañamos la catequesis en la Arquidiócesis de Panamá. Ofrecemos formación y recursos para que las parroquias anuncien y vivan la fe.</p>
-<div class="hv" style="margin-top:38px;display:flex;flex-wrap:wrap;gap:16px;animation-delay:.95s">
+<p style="max-width:560px;color:#C9D3E8">Coordinamos, animamos y acompañamos la catequesis en la Arquidiócesis de Panamá. Ofrecemos formación y recursos para que las parroquias anuncien y vivan la fe.</p>
+<div class="hero__actions">
 <a href="#unete" class="btn cta" style="text-decoration:none;padding:16px 30px;border-radius:99px;background:var(--gold);color:#0E1B3D;font-weight:700;font-size:17px">Quiero dar el paso</a>
 <a href="#camino" class="btn" style="text-decoration:none;padding:16px 30px;border-radius:99px;border:2px solid rgba(242,245,251,.5);font-weight:700;font-size:17px">Conoce el camino</a>
 </div>
 </div>
 </div>
 </section>
+</div>
 
 <!-- MARQUEE -->
 <div class="marquee-strip" aria-hidden="true" style="background:var(--gold);color:#0E1B3D;overflow:hidden;padding:18px 0">

@@ -146,6 +146,19 @@
 /* Éxito */
 .m-exito{text-align:center}
 .m-exito__icono{width:76px;height:76px;margin:0 auto 14px;border-radius:50%;display:grid;place-items:center;background:var(--m-ok-bg);color:var(--m-ok);font-size:38px}
+#exito.m-exito:not([hidden]) > .m-exito__icono {
+  animation: registro-confirmado 200ms var(--ui-ease-out) both;
+}
+@keyframes registro-confirmado {
+  from { opacity: 0; transform: scale(.95); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #exito.m-exito:not([hidden]) > .m-exito__icono {
+    animation: registro-confirmado-fade 100ms var(--ui-ease-out) both;
+  }
+}
+@keyframes registro-confirmado-fade { from { opacity: 0; } to { opacity: 1; } }
 .m-numero{display:inline-block;font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:clamp(40px,8vw,64px);letter-spacing:.02em;padding:6px 22px;border-radius:16px;background:#fff7e3;border:2px solid var(--m-gold);margin:10px 0 16px}
 
 /* Carnet digital CR80 (85,6 × 54 mm) */

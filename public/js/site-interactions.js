@@ -1,5 +1,4 @@
 (() => {
-  const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let initialHashHandled = false;
 
   function alignInitialHash() {
@@ -12,53 +11,80 @@
     }));
   }
 
-  function enhanceRoster(details) {
-    if (details.dataset.enhanced) return;
-    const summary = details.querySelector('summary');
-    const content = details.querySelector('.team-roster__content');
-    if (!summary || !content) return;
-    details.dataset.enhanced = 'true';
+  function setupNavigation() {
+    const compact = window.matchMedia('(max-width: 960px)');
+    const openButton = () => document.querySelector('.nav-toggle[aria-expanded="true"]');
 
-    summary.addEventListener('click', (event) => {
-      if (reducedMotion()) return;
-      event.preventDefault();
-      if (details.dataset.animating) return;
+    function setOpen(button, open, { instant = false, returnFocus = false } = {}) {
+      const header = button.closest('.hdr');
+      const nav = document.getElementById(button.getAttribute('aria-controls'));
+      header.toggleAttribute('data-menu-instant', instant);
+      button.setAttribute('aria-expanded', String(open));
+      if (returnFocus) button.focus({ preventScroll: true });
+      nav.inert = compact.matches && !open;
+    }
 
-      const start = details.getBoundingClientRect().height;
-      const opening = !details.open;
-      if (opening) details.open = true;
-      const end = opening
-        ? summary.getBoundingClientRect().height + content.scrollHeight + 2
-        : summary.getBoundingClientRect().height + 2;
+    // The template runtime can replace the header when it refreshes its markup.
+    document.addEventListener('click', (event) => {
+      const toggle = event.target.closest('.nav-toggle');
+      const button = openButton();
+      const instant = event.detail === 0;
+      if (toggle) {
+        setOpen(toggle, toggle !== button, { instant });
+        return;
+      }
+      if (!button) return;
 
-      details.dataset.animating = 'true';
-      details.style.height = `${start}px`;
-      const animation = details.animate(
-        [{ height: `${start}px` }, { height: `${end}px` }],
-        { duration: 420, easing: 'cubic-bezier(.2,.75,.25,1)' }
-      );
-      animation.onfinish = () => {
-        if (!opening) details.open = false;
-        details.style.removeProperty('height');
-        delete details.dataset.animating;
-      };
-      animation.oncancel = () => {
-        details.style.removeProperty('height');
-        delete details.dataset.animating;
-      };
+      const link = event.target.closest('#home-nav a');
+      if (link) {
+        const href = link.getAttribute('href');
+        const target = href.startsWith('#') && document.getElementById(href.slice(1));
+        if (target) {
+          target.setAttribute('tabindex', '-1');
+          target.focus({ preventScroll: true });
+        }
+        setOpen(button, false, { instant });
+      } else if (!button.closest('.hdr').contains(event.target)) {
+        setOpen(button, false, { returnFocus: document.getElementById('home-nav').contains(document.activeElement) });
+      }
     });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      const button = openButton();
+      if (!button) return;
+      event.preventDefault();
+      setOpen(button, false, { instant: true, returnFocus: true });
+    });
+
+    document.addEventListener('focusout', (event) => {
+      const button = openButton();
+      if (!button || !event.relatedTarget) return;
+      const header = button.closest('.hdr');
+      if (header.contains(event.target) && !header.contains(event.relatedTarget)) {
+        setOpen(button, false, { instant: true });
+      }
+    });
+
+    compact.addEventListener('change', () => {
+      const button = document.querySelector('.nav-toggle');
+      const nav = document.getElementById('home-nav');
+      if (!button || !nav) return;
+      setOpen(button, false, { instant: true, returnFocus: compact.matches && nav.contains(document.activeElement) });
+    });
+
+    document.documentElement.setAttribute('data-menu-ready', '');
   }
 
-  function findRoster() {
-    document.querySelectorAll('details.team-roster').forEach(enhanceRoster);
+  setupNavigation();
+  if (window.location.hash) {
+    const observer = new MutationObserver(() => {
+      alignInitialHash();
+      if (initialHashHandled) observer.disconnect();
+    });
     alignInitialHash();
+    if (!initialHashHandled) {
+      observer.observe(document.documentElement, { childList: true, subtree: true });
+    }
   }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', findRoster, { once: true });
-  } else {
-    findRoster();
-  }
-  new MutationObserver(findRoster).observe(document.documentElement, { childList: true, subtree: true });
-  window.addEventListener('load', alignInitialHash, { once: true });
 })();
